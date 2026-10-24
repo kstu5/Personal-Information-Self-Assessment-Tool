@@ -1,0 +1,114 @@
+{
+  "version": "1.16.0",
+  "scope": "Masking API only. Explicitly supplied synthetic labels and spans; not detection quality. No application/library modifications.",
+  "cases": [
+    {
+      "label": "PHONE",
+      "original": "010-1234-5678",
+      "partial": "010-****-5678",
+      "labelStyle": "[전화번호]",
+      "black": "█████████████",
+      "fixedBlackArgument": "***"
+    },
+    {
+      "label": "PERSON",
+      "original": "홍길동",
+      "partial": "홍OO",
+      "labelStyle": "[성명]",
+      "black": "███",
+      "fixedBlackArgument": "***"
+    },
+    {
+      "label": "PERSON",
+      "original": "남궁민수",
+      "partial": "남궁OO",
+      "labelStyle": "[성명]",
+      "black": "████",
+      "fixedBlackArgument": "***"
+    },
+    {
+      "label": "EMAIL",
+      "original": "tester@example.com",
+      "partial": "t*****@example.com",
+      "labelStyle": "[이메일]",
+      "black": "██████████████████",
+      "fixedBlackArgument": "***"
+    },
+    {
+      "label": "ADDRESS",
+      "original": "서울특별시 강남구 예시로 12, 302호",
+      "partial": "서울특별시 강남구 ***",
+      "labelStyle": "[주소]",
+      "black": "██████████████████████",
+      "fixedBlackArgument": "***"
+    },
+    {
+      "label": "DT_BIRTH",
+      "original": "1996년 4월 12일",
+      "partial": "1996년 **월 **일",
+      "labelStyle": "[생년월일]",
+      "black": "████████████",
+      "fixedBlackArgument": "***"
+    },
+    {
+      "label": "DT_BIRTH",
+      "original": "88년생",
+      "partial": "88년생",
+      "labelStyle": "[생년월일]",
+      "black": "████",
+      "fixedBlackArgument": "***"
+    },
+    {
+      "label": "AGE",
+      "original": "32세",
+      "partial": "30대",
+      "labelStyle": "[나이]",
+      "black": "███",
+      "fixedBlackArgument": "***"
+    },
+    {
+      "label": "AGE",
+      "original": "12개월",
+      "partial": "10대",
+      "labelStyle": "[나이]",
+      "black": "████",
+      "fixedBlackArgument": "***"
+    },
+    {
+      "label": "HEIGHT",
+      "original": "172cm",
+      "partial": "170-175cm",
+      "labelStyle": "[신장]",
+      "black": "█████",
+      "fixedBlackArgument": "***"
+    },
+    {
+      "label": "WEIGHT",
+      "original": "70kg",
+      "partial": "70-75kg",
+      "labelStyle": "[체중]",
+      "black": "████",
+      "fixedBlackArgument": "***"
+    },
+    {
+      "label": "POSITION",
+      "original": "과장",
+      "partial": "과장",
+      "labelStyle": "[직책]",
+      "black": "██",
+      "fixedBlackArgument": "***"
+    },
+    {
+      "label": "ACCOUNT",
+      "original": "12345678",
+      "partial": "12345678",
+      "labelStyle": "[계좌번호]",
+      "black": "████████",
+      "fixedBlackArgument": "***"
+    }
+  ],
+  "selectedOccurrenceOnly": {
+    "source": "첫 번호: 010-1234-5678 / 둘째 번호: 010-1234-5678",
+    "result": "첫 번호: █████████████ / 둘째 번호: 010-1234-5678"
+  }
+}

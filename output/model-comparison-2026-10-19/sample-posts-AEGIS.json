@@ -1,0 +1,2352 @@
+{
+  "model": "AEGIS",
+  "processStartToFirstResultSeconds": 3.2900891001336277,
+  "networkAttempts": 0,
+  "results": [
+    {
+      "file": "독서 모임 안내_예시.piipost",
+      "fileSha256": "e28b29cc9eb0d0fc8749ab38b1184537cec1bb0c40ab401a6b4a0834798923d0",
+      "field": "title",
+      "characters": 8,
+      "mode": "window",
+      "medianSeconds": 0.004175400361418724,
+      "times": [
+        0.006427300162613392,
+        0.004175400361418724,
+        0.004077500198036432
+      ],
+      "raw": [],
+      "mapped": [],
+      "adapted": [],
+      "windows": 1
+    },
+    {
+      "file": "독서 모임 안내_예시.piipost",
+      "fileSha256": "e28b29cc9eb0d0fc8749ab38b1184537cec1bb0c40ab401a6b4a0834798923d0",
+      "field": "title",
+      "characters": 8,
+      "mode": "sentence",
+      "medianSeconds": 0.005610599648207426,
+      "times": [
+        0.005610599648207426
+      ],
+      "raw": [],
+      "mapped": [],
+      "adapted": [],
+      "windows": 1
+    },
+    {
+      "file": "독서 모임 안내_예시.piipost",
+      "fileSha256": "e28b29cc9eb0d0fc8749ab38b1184537cec1bb0c40ab401a6b4a0834798923d0",
+      "field": "title",
+      "characters": 8,
+      "mode": "neighbors",
+      "medianSeconds": 0.004365099593997002,
+      "times": [
+        0.004365099593997002
+      ],
+      "raw": [],
+      "mapped": [],
+      "adapted": [],
+      "windows": 1
+    },
+    {
+      "file": "독서 모임 안내_예시.piipost",
+      "fileSha256": "e28b29cc9eb0d0fc8749ab38b1184537cec1bb0c40ab401a6b4a0834798923d0",
+      "field": "body",
+      "characters": 115,
+      "mode": "window",
+      "medianSeconds": 0.019248899538069963,
+      "times": [
+        0.0194628001190722,
+        0.01743059977889061,
+        0.019248899538069963
+      ],
+      "raw": [
+        {
+          "start": 19,
+          "end": 20,
+          "raw_label": "SURNAME",
+          "score": 0.9998977184295654,
+          "text": "김",
+          "utf16_start": 19,
+          "utf16_end": 20
+        },
+        {
+          "start": 20,
+          "end": 22,
+          "raw_label": "GIVENNAME",
+          "score": 0.9998025596141815,
+          "text": "하늘",
+          "utf16_start": 20,
+          "utf16_end": 22
+        },
+        {
+          "start": 64,
+          "end": 82,
+          "raw_label": "EMAIL",
+          "score": 0.9998815059661865,
+          "text": "reader@example.com",
+          "utf16_start": 64,
+          "utf16_end": 82
+        }
+      ],
+      "mapped": [
+        {
+          "start": 19,
+          "end": 20,
+          "raw_label": "SURNAME",
+          "score": 0.9998977184295654,
+          "text": "김",
+          "label": "PERSON",
+          "utf16_start": 19,
+          "utf16_end": 20
+        },
+        {
+          "start": 20,
+          "end": 22,
+          "raw_label": "GIVENNAME",
+          "score": 0.9998025596141815,
+          "text": "하늘",
+          "label": "PERSON",
+          "utf16_start": 20,
+          "utf16_end": 22
+        }
+      ],
+      "adapted": [
+        {
+          "start": 19,
+          "end": 22,
+          "raw_label": "SURNAME",
+          "score": 0.9998025596141815,
+          "text": "김하늘",
+          "label": "PERSON",
+          "parts": [
+            "SURNAME",
+            "GIVENNAME"
+          ],
+          "utf16_start": 19,
+          "utf16_end": 22
+        }
+      ],
+      "windows": 1
+    },
+    {
+      "file": "독서 모임 안내_예시.piipost",
+      "fileSha256": "e28b29cc9eb0d0fc8749ab38b1184537cec1bb0c40ab401a6b4a0834798923d0",
+      "field": "body",
+      "characters": 115,
+      "mode": "sentence",
+      "medianSeconds": 0.03718349989503622,
+      "times": [
+        0.03718349989503622
+      ],
+      "raw": [
+        {
+          "start": 19,
+          "end": 20,
+          "raw_label": "SURNAME",
+          "score": 0.9989244341850281,
+          "text": "김",
+          "utf16_start": 19,
+          "utf16_end": 20
+        },
+        {
+          "start": 20,
+          "end": 22,
+          "raw_label": "GIVENNAME",
+          "score": 0.9987519681453705,
+          "text": "하늘",
+          "utf16_start": 20,
+          "utf16_end": 22
+        },
+        {
+          "start": 64,
+          "end": 82,
+          "raw_label": "EMAIL",
+          "score": 0.9999547481536866,
+          "text": "reader@example.com",
+          "utf16_start": 64,
+          "utf16_end": 82
+        }
+      ],
+      "mapped": [
+        {
+          "start": 19,
+          "end": 20,
+          "raw_label": "SURNAME",
+          "score": 0.9989244341850281,
+          "text": "김",
+          "label": "PERSON",
+          "utf16_start": 19,
+          "utf16_end": 20
+        },
+        {
+          "start": 20,
+          "end": 22,
+          "raw_label": "GIVENNAME",
+          "score": 0.9987519681453705,
+          "text": "하늘",
+          "label": "PERSON",
+          "utf16_start": 20,
+          "utf16_end": 22
+        }
+      ],
+      "adapted": [
+        {
+          "start": 19,
+          "end": 22,
+          "raw_label": "SURNAME",
+          "score": 0.9987519681453705,
+          "text": "김하늘",
+          "label": "PERSON",
+          "parts": [
+            "SURNAME",
+            "GIVENNAME"
+          ],
+          "utf16_start": 19,
+          "utf16_end": 22
+        }
+      ],
+      "windows": 6
+    },
+    {
+      "file": "독서 모임 안내_예시.piipost",
+      "fileSha256": "e28b29cc9eb0d0fc8749ab38b1184537cec1bb0c40ab401a6b4a0834798923d0",
+      "field": "body",
+      "characters": 115,
+      "mode": "neighbors",
+      "medianSeconds": 0.06824620021507144,
+      "times": [
+        0.06824620021507144
+      ],
+      "raw": [
+        {
+          "start": 19,
+          "end": 20,
+          "raw_label": "SURNAME",
+          "score": 0.9998353719711304,
+          "text": "김",
+          "utf16_start": 19,
+          "utf16_end": 20
+        },
+        {
+          "start": 20,
+          "end": 22,
+          "raw_label": "GIVENNAME",
+          "score": 0.9996104538440704,
+          "text": "하늘",
+          "utf16_start": 20,
+          "utf16_end": 22
+        },
+        {
+          "start": 64,
+          "end": 82,
+          "raw_label": "EMAIL",
+          "score": 0.9999510049819946,
+          "text": "reader@example.com",
+          "utf16_start": 64,
+          "utf16_end": 82
+        }
+      ],
+      "mapped": [
+        {
+          "start": 19,
+          "end": 20,
+          "raw_label": "SURNAME",
+          "score": 0.9998353719711304,
+          "text": "김",
+          "label": "PERSON",
+          "utf16_start": 19,
+          "utf16_end": 20
+        },
+        {
+          "start": 20,
+          "end": 22,
+          "raw_label": "GIVENNAME",
+          "score": 0.9996104538440704,
+          "text": "하늘",
+          "label": "PERSON",
+          "utf16_start": 20,
+          "utf16_end": 22
+        }
+      ],
+      "adapted": [
+        {
+          "start": 19,
+          "end": 22,
+          "raw_label": "SURNAME",
+          "score": 0.9996104538440704,
+          "text": "김하늘",
+          "label": "PERSON",
+          "parts": [
+            "SURNAME",
+            "GIVENNAME"
+          ],
+          "utf16_start": 19,
+          "utf16_end": 22
+        }
+      ],
+      "windows": 6
+    },
+    {
+      "file": "동네 커뮤니티_주말 보드게임 모임.piipost",
+      "fileSha256": "363849b34be1d29e381fb970d7a16df521a9431f4cc130f848457bd6833dc36d",
+      "field": "title",
+      "characters": 34,
+      "mode": "window",
+      "medianSeconds": 0.008183400146663189,
+      "times": [
+        0.008780800271779299,
+        0.008183400146663189,
+        0.0079025998711586
+      ],
+      "raw": [],
+      "mapped": [],
+      "adapted": [],
+      "windows": 1
+    },
+    {
+      "file": "동네 커뮤니티_주말 보드게임 모임.piipost",
+      "fileSha256": "363849b34be1d29e381fb970d7a16df521a9431f4cc130f848457bd6833dc36d",
+      "field": "title",
+      "characters": 34,
+      "mode": "sentence",
+      "medianSeconds": 0.010525000281631947,
+      "times": [
+        0.010525000281631947
+      ],
+      "raw": [],
+      "mapped": [],
+      "adapted": [],
+      "windows": 1
+    },
+    {
+      "file": "동네 커뮤니티_주말 보드게임 모임.piipost",
+      "fileSha256": "363849b34be1d29e381fb970d7a16df521a9431f4cc130f848457bd6833dc36d",
+      "field": "title",
+      "characters": 34,
+      "mode": "neighbors",
+      "medianSeconds": 0.00827899994328618,
+      "times": [
+        0.00827899994328618
+      ],
+      "raw": [],
+      "mapped": [],
+      "adapted": [],
+      "windows": 1
+    },
+    {
+      "file": "동네 커뮤니티_주말 보드게임 모임.piipost",
+      "fileSha256": "363849b34be1d29e381fb970d7a16df521a9431f4cc130f848457bd6833dc36d",
+      "field": "body",
+      "characters": 789,
+      "mode": "window",
+      "medianSeconds": 0.10971730016171932,
+      "times": [
+        0.11470609996467829,
+        0.10971730016171932,
+        0.10823210002854466
+      ],
+      "raw": [
+        {
+          "start": 90,
+          "end": 91,
+          "raw_label": "SURNAME",
+          "score": 0.9941328167915344,
+          "text": "김",
+          "utf16_start": 90,
+          "utf16_end": 91
+        },
+        {
+          "start": 91,
+          "end": 93,
+          "raw_label": "GIVENNAME",
+          "score": 0.9909588694572449,
+          "text": "하늘",
+          "utf16_start": 91,
+          "utf16_end": 93
+        },
+        {
+          "start": 108,
+          "end": 109,
+          "raw_label": "SURNAME",
+          "score": 0.9957616925239563,
+          "text": "박",
+          "utf16_start": 108,
+          "utf16_end": 109
+        },
+        {
+          "start": 109,
+          "end": 111,
+          "raw_label": "GIVENNAME",
+          "score": 0.991414874792099,
+          "text": "서윤",
+          "utf16_start": 109,
+          "utf16_end": 111
+        },
+        {
+          "start": 153,
+          "end": 171,
+          "raw_label": "STREET",
+          "score": 0.9964012324810028,
+          "text": "서울특별시 마포구 가상마을로 24",
+          "utf16_start": 153,
+          "utf16_end": 171
+        },
+        {
+          "start": 174,
+          "end": 176,
+          "raw_label": "STREET",
+          "score": 0.545983612537384,
+          "text": "시커",
+          "utf16_start": 174,
+          "utf16_end": 176
+        },
+        {
+          "start": 178,
+          "end": 189,
+          "raw_label": "STREET",
+          "score": 0.8343036941119603,
+          "text": "티센터 2층 203호",
+          "utf16_start": 178,
+          "utf16_end": 189
+        },
+        {
+          "start": 453,
+          "end": 466,
+          "raw_label": "TELEPHONENUM",
+          "score": 0.999420988559723,
+          "text": "010-0000-0000",
+          "utf16_start": 453,
+          "utf16_end": 466
+        },
+        {
+          "start": 494,
+          "end": 515,
+          "raw_label": "EMAIL",
+          "score": 0.998986174662908,
+          "text": "boardgame@example.com",
+          "utf16_start": 494,
+          "utf16_end": 515
+        },
+        {
+          "start": 546,
+          "end": 559,
+          "raw_label": "TELEPHONENUM",
+          "score": 0.9993690967559814,
+          "text": "010-0000-0001",
+          "utf16_start": 546,
+          "utf16_end": 559
+        }
+      ],
+      "mapped": [
+        {
+          "start": 90,
+          "end": 91,
+          "raw_label": "SURNAME",
+          "score": 0.9941328167915344,
+          "text": "김",
+          "label": "PERSON",
+          "utf16_start": 90,
+          "utf16_end": 91
+        },
+        {
+          "start": 91,
+          "end": 93,
+          "raw_label": "GIVENNAME",
+          "score": 0.9909588694572449,
+          "text": "하늘",
+          "label": "PERSON",
+          "utf16_start": 91,
+          "utf16_end": 93
+        },
+        {
+          "start": 108,
+          "end": 109,
+          "raw_label": "SURNAME",
+          "score": 0.9957616925239563,
+          "text": "박",
+          "label": "PERSON",
+          "utf16_start": 108,
+          "utf16_end": 109
+        },
+        {
+          "start": 109,
+          "end": 111,
+          "raw_label": "GIVENNAME",
+          "score": 0.991414874792099,
+          "text": "서윤",
+          "label": "PERSON",
+          "utf16_start": 109,
+          "utf16_end": 111
+        },
+        {
+          "start": 153,
+          "end": 171,
+          "raw_label": "STREET",
+          "score": 0.9964012324810028,
+          "text": "서울특별시 마포구 가상마을로 24",
+          "label": "ADDRESS",
+          "utf16_start": 153,
+          "utf16_end": 171
+        },
+        {
+          "start": 174,
+          "end": 176,
+          "raw_label": "STREET",
+          "score": 0.545983612537384,
+          "text": "시커",
+          "label": "ADDRESS",
+          "utf16_start": 174,
+          "utf16_end": 176
+        },
+        {
+          "start": 178,
+          "end": 189,
+          "raw_label": "STREET",
+          "score": 0.8343036941119603,
+          "text": "티센터 2층 203호",
+          "label": "ADDRESS",
+          "utf16_start": 178,
+          "utf16_end": 189
+        }
+      ],
+      "adapted": [
+        {
+          "start": 90,
+          "end": 93,
+          "raw_label": "SURNAME",
+          "score": 0.9909588694572449,
+          "text": "김하늘",
+          "label": "PERSON",
+          "parts": [
+            "SURNAME",
+            "GIVENNAME"
+          ],
+          "utf16_start": 90,
+          "utf16_end": 93
+        },
+        {
+          "start": 108,
+          "end": 111,
+          "raw_label": "SURNAME",
+          "score": 0.991414874792099,
+          "text": "박서윤",
+          "label": "PERSON",
+          "parts": [
+            "SURNAME",
+            "GIVENNAME"
+          ],
+          "utf16_start": 108,
+          "utf16_end": 111
+        },
+        {
+          "start": 153,
+          "end": 171,
+          "raw_label": "STREET",
+          "score": 0.9964012324810028,
+          "text": "서울특별시 마포구 가상마을로 24",
+          "label": "ADDRESS",
+          "parts": [
+            "STREET"
+          ],
+          "utf16_start": 153,
+          "utf16_end": 171
+        },
+        {
+          "start": 174,
+          "end": 176,
+          "raw_label": "STREET",
+          "score": 0.545983612537384,
+          "text": "시커",
+          "label": "ADDRESS",
+          "parts": [
+            "STREET"
+          ],
+          "utf16_start": 174,
+          "utf16_end": 176
+        },
+        {
+          "start": 178,
+          "end": 189,
+          "raw_label": "STREET",
+          "score": 0.8343036941119603,
+          "text": "티센터 2층 203호",
+          "label": "ADDRESS",
+          "parts": [
+            "STREET"
+          ],
+          "utf16_start": 178,
+          "utf16_end": 189
+        }
+      ],
+      "windows": 1
+    },
+    {
+      "file": "동네 커뮤니티_주말 보드게임 모임.piipost",
+      "fileSha256": "363849b34be1d29e381fb970d7a16df521a9431f4cc130f848457bd6833dc36d",
+      "field": "body",
+      "characters": 789,
+      "mode": "sentence",
+      "medianSeconds": 0.21167099988088012,
+      "times": [
+        0.21167099988088012
+      ],
+      "raw": [
+        {
+          "start": 90,
+          "end": 91,
+          "raw_label": "SURNAME",
+          "score": 0.9997596144676208,
+          "text": "김",
+          "utf16_start": 90,
+          "utf16_end": 91
+        },
+        {
+          "start": 91,
+          "end": 93,
+          "raw_label": "GIVENNAME",
+          "score": 0.9993643164634705,
+          "text": "하늘",
+          "utf16_start": 91,
+          "utf16_end": 93
+        },
+        {
+          "start": 108,
+          "end": 109,
+          "raw_label": "SURNAME",
+          "score": 0.9997339844703674,
+          "text": "박",
+          "utf16_start": 108,
+          "utf16_end": 109
+        },
+        {
+          "start": 109,
+          "end": 111,
+          "raw_label": "GIVENNAME",
+          "score": 0.9996281266212463,
+          "text": "서윤",
+          "utf16_start": 109,
+          "utf16_end": 111
+        },
+        {
+          "start": 153,
+          "end": 189,
+          "raw_label": "STREET",
+          "score": 0.9998169308123381,
+          "text": "서울특별시 마포구 가상마을로 24, 예시커뮤니티센터 2층 203호",
+          "utf16_start": 153,
+          "utf16_end": 189
+        },
+        {
+          "start": 447,
+          "end": 448,
+          "raw_label": "SURNAME",
+          "score": 0.9995936751365662,
+          "text": "김",
+          "utf16_start": 447,
+          "utf16_end": 448
+        },
+        {
+          "start": 448,
+          "end": 450,
+          "raw_label": "GIVENNAME",
+          "score": 0.9994959831237793,
+          "text": "하늘",
+          "utf16_start": 448,
+          "utf16_end": 450
+        },
+        {
+          "start": 453,
+          "end": 466,
+          "raw_label": "TELEPHONENUM",
+          "score": 0.9999416828155517,
+          "text": "010-0000-0000",
+          "utf16_start": 453,
+          "utf16_end": 466
+        },
+        {
+          "start": 494,
+          "end": 515,
+          "raw_label": "EMAIL",
+          "score": 0.9999526143074036,
+          "text": "boardgame@example.com",
+          "utf16_start": 494,
+          "utf16_end": 515
+        },
+        {
+          "start": 540,
+          "end": 541,
+          "raw_label": "SURNAME",
+          "score": 0.9997616410255432,
+          "text": "박",
+          "utf16_start": 540,
+          "utf16_end": 541
+        },
+        {
+          "start": 541,
+          "end": 543,
+          "raw_label": "GIVENNAME",
+          "score": 0.999720960855484,
+          "text": "서윤",
+          "utf16_start": 541,
+          "utf16_end": 543
+        },
+        {
+          "start": 546,
+          "end": 559,
+          "raw_label": "TELEPHONENUM",
+          "score": 0.9999588966369629,
+          "text": "010-0000-0001",
+          "utf16_start": 546,
+          "utf16_end": 559
+        }
+      ],
+      "mapped": [
+        {
+          "start": 90,
+          "end": 91,
+          "raw_label": "SURNAME",
+          "score": 0.9997596144676208,
+          "text": "김",
+          "label": "PERSON",
+          "utf16_start": 90,
+          "utf16_end": 91
+        },
+        {
+          "start": 91,
+          "end": 93,
+          "raw_label": "GIVENNAME",
+          "score": 0.9993643164634705,
+          "text": "하늘",
+          "label": "PERSON",
+          "utf16_start": 91,
+          "utf16_end": 93
+        },
+        {
+          "start": 108,
+          "end": 109,
+          "raw_label": "SURNAME",
+          "score": 0.9997339844703674,
+          "text": "박",
+          "label": "PERSON",
+          "utf16_start": 108,
+          "utf16_end": 109
+        },
+        {
+          "start": 109,
+          "end": 111,
+          "raw_label": "GIVENNAME",
+          "score": 0.9996281266212463,
+          "text": "서윤",
+          "label": "PERSON",
+          "utf16_start": 109,
+          "utf16_end": 111
+        },
+        {
+          "start": 153,
+          "end": 189,
+          "raw_label": "STREET",
+          "score": 0.9998169308123381,
+          "text": "서울특별시 마포구 가상마을로 24, 예시커뮤니티센터 2층 203호",
+          "label": "ADDRESS",
+          "utf16_start": 153,
+          "utf16_end": 189
+        },
+        {
+          "start": 447,
+          "end": 448,
+          "raw_label": "SURNAME",
+          "score": 0.9995936751365662,
+          "text": "김",
+          "label": "PERSON",
+          "utf16_start": 447,
+          "utf16_end": 448
+        },
+        {
+          "start": 448,
+          "end": 450,
+          "raw_label": "GIVENNAME",
+          "score": 0.9994959831237793,
+          "text": "하늘",
+          "label": "PERSON",
+          "utf16_start": 448,
+          "utf16_end": 450
+        },
+        {
+          "start": 540,
+          "end": 541,
+          "raw_label": "SURNAME",
+          "score": 0.9997616410255432,
+          "text": "박",
+          "label": "PERSON",
+          "utf16_start": 540,
+          "utf16_end": 541
+        },
+        {
+          "start": 541,
+          "end": 543,
+          "raw_label": "GIVENNAME",
+          "score": 0.999720960855484,
+          "text": "서윤",
+          "label": "PERSON",
+          "utf16_start": 541,
+          "utf16_end": 543
+        }
+      ],
+      "adapted": [
+        {
+          "start": 90,
+          "end": 93,
+          "raw_label": "SURNAME",
+          "score": 0.9993643164634705,
+          "text": "김하늘",
+          "label": "PERSON",
+          "parts": [
+            "SURNAME",
+            "GIVENNAME"
+          ],
+          "utf16_start": 90,
+          "utf16_end": 93
+        },
+        {
+          "start": 108,
+          "end": 111,
+          "raw_label": "SURNAME",
+          "score": 0.9996281266212463,
+          "text": "박서윤",
+          "label": "PERSON",
+          "parts": [
+            "SURNAME",
+            "GIVENNAME"
+          ],
+          "utf16_start": 108,
+          "utf16_end": 111
+        },
+        {
+          "start": 153,
+          "end": 189,
+          "raw_label": "STREET",
+          "score": 0.9998169308123381,
+          "text": "서울특별시 마포구 가상마을로 24, 예시커뮤니티센터 2층 203호",
+          "label": "ADDRESS",
+          "parts": [
+            "STREET"
+          ],
+          "utf16_start": 153,
+          "utf16_end": 189
+        },
+        {
+          "start": 447,
+          "end": 450,
+          "raw_label": "SURNAME",
+          "score": 0.9994959831237793,
+          "text": "김하늘",
+          "label": "PERSON",
+          "parts": [
+            "SURNAME",
+            "GIVENNAME"
+          ],
+          "utf16_start": 447,
+          "utf16_end": 450
+        },
+        {
+          "start": 540,
+          "end": 543,
+          "raw_label": "SURNAME",
+          "score": 0.999720960855484,
+          "text": "박서윤",
+          "label": "PERSON",
+          "parts": [
+            "SURNAME",
+            "GIVENNAME"
+          ],
+          "utf16_start": 540,
+          "utf16_end": 543
+        }
+      ],
+      "windows": 23
+    },
+    {
+      "file": "동네 커뮤니티_주말 보드게임 모임.piipost",
+      "fileSha256": "363849b34be1d29e381fb970d7a16df521a9431f4cc130f848457bd6833dc36d",
+      "field": "body",
+      "characters": 789,
+      "mode": "neighbors",
+      "medianSeconds": 0.3938045999966562,
+      "times": [
+        0.3938045999966562
+      ],
+      "raw": [
+        {
+          "start": 90,
+          "end": 91,
+          "raw_label": "SURNAME",
+          "score": 0.9998413324356079,
+          "text": "김",
+          "utf16_start": 90,
+          "utf16_end": 91
+        },
+        {
+          "start": 91,
+          "end": 93,
+          "raw_label": "GIVENNAME",
+          "score": 0.9996516406536102,
+          "text": "하늘",
+          "utf16_start": 91,
+          "utf16_end": 93
+        },
+        {
+          "start": 108,
+          "end": 109,
+          "raw_label": "SURNAME",
+          "score": 0.9998489618301392,
+          "text": "박",
+          "utf16_start": 108,
+          "utf16_end": 109
+        },
+        {
+          "start": 109,
+          "end": 111,
+          "raw_label": "GIVENNAME",
+          "score": 0.999747097492218,
+          "text": "서윤",
+          "utf16_start": 109,
+          "utf16_end": 111
+        },
+        {
+          "start": 153,
+          "end": 189,
+          "raw_label": "STREET",
+          "score": 0.9996509059615757,
+          "text": "서울특별시 마포구 가상마을로 24, 예시커뮤니티센터 2층 203호",
+          "utf16_start": 153,
+          "utf16_end": 189
+        },
+        {
+          "start": 447,
+          "end": 448,
+          "raw_label": "SURNAME",
+          "score": 0.9999041557312012,
+          "text": "김",
+          "utf16_start": 447,
+          "utf16_end": 448
+        },
+        {
+          "start": 448,
+          "end": 450,
+          "raw_label": "GIVENNAME",
+          "score": 0.9998372495174408,
+          "text": "하늘",
+          "utf16_start": 448,
+          "utf16_end": 450
+        },
+        {
+          "start": 453,
+          "end": 466,
+          "raw_label": "TELEPHONENUM",
+          "score": 0.9999358177185058,
+          "text": "010-0000-0000",
+          "utf16_start": 453,
+          "utf16_end": 466
+        },
+        {
+          "start": 494,
+          "end": 515,
+          "raw_label": "EMAIL",
+          "score": 0.9998990098635355,
+          "text": "boardgame@example.com",
+          "utf16_start": 494,
+          "utf16_end": 515
+        },
+        {
+          "start": 540,
+          "end": 541,
+          "raw_label": "SURNAME",
+          "score": 0.9998489618301392,
+          "text": "박",
+          "utf16_start": 540,
+          "utf16_end": 541
+        },
+        {
+          "start": 541,
+          "end": 543,
+          "raw_label": "GIVENNAME",
+          "score": 0.9997476935386658,
+          "text": "서윤",
+          "utf16_start": 541,
+          "utf16_end": 543
+        },
+        {
+          "start": 546,
+          "end": 559,
+          "raw_label": "TELEPHONENUM",
+          "score": 0.9999404191970825,
+          "text": "010-0000-0001",
+          "utf16_start": 546,
+          "utf16_end": 559
+        }
+      ],
+      "mapped": [
+        {
+          "start": 90,
+          "end": 91,
+          "raw_label": "SURNAME",
+          "score": 0.9998413324356079,
+          "text": "김",
+          "label": "PERSON",
+          "utf16_start": 90,
+          "utf16_end": 91
+        },
+        {
+          "start": 91,
+          "end": 93,
+          "raw_label": "GIVENNAME",
+          "score": 0.9996516406536102,
+          "text": "하늘",
+          "label": "PERSON",
+          "utf16_start": 91,
+          "utf16_end": 93
+        },
+        {
+          "start": 108,
+          "end": 109,
+          "raw_label": "SURNAME",
+          "score": 0.9998489618301392,
+          "text": "박",
+          "label": "PERSON",
+          "utf16_start": 108,
+          "utf16_end": 109
+        },
+        {
+          "start": 109,
+          "end": 111,
+          "raw_label": "GIVENNAME",
+          "score": 0.999747097492218,
+          "text": "서윤",
+          "label": "PERSON",
+          "utf16_start": 109,
+          "utf16_end": 111
+        },
+        {
+          "start": 153,
+          "end": 189,
+          "raw_label": "STREET",
+          "score": 0.9996509059615757,
+          "text": "서울특별시 마포구 가상마을로 24, 예시커뮤니티센터 2층 203호",
+          "label": "ADDRESS",
+          "utf16_start": 153,
+          "utf16_end": 189
+        },
+        {
+          "start": 447,
+          "end": 448,
+          "raw_label": "SURNAME",
+          "score": 0.9999041557312012,
+          "text": "김",
+          "label": "PERSON",
+          "utf16_start": 447,
+          "utf16_end": 448
+        },
+        {
+          "start": 448,
+          "end": 450,
+          "raw_label": "GIVENNAME",
+          "score": 0.9998372495174408,
+          "text": "하늘",
+          "label": "PERSON",
+          "utf16_start": 448,
+          "utf16_end": 450
+        },
+        {
+          "start": 540,
+          "end": 541,
+          "raw_label": "SURNAME",
+          "score": 0.9998489618301392,
+          "text": "박",
+          "label": "PERSON",
+          "utf16_start": 540,
+          "utf16_end": 541
+        },
+        {
+          "start": 541,
+          "end": 543,
+          "raw_label": "GIVENNAME",
+          "score": 0.9997476935386658,
+          "text": "서윤",
+          "label": "PERSON",
+          "utf16_start": 541,
+          "utf16_end": 543
+        }
+      ],
+      "adapted": [
+        {
+          "start": 90,
+          "end": 93,
+          "raw_label": "SURNAME",
+          "score": 0.9996516406536102,
+          "text": "김하늘",
+          "label": "PERSON",
+          "parts": [
+            "SURNAME",
+            "GIVENNAME"
+          ],
+          "utf16_start": 90,
+          "utf16_end": 93
+        },
+        {
+          "start": 108,
+          "end": 111,
+          "raw_label": "SURNAME",
+          "score": 0.999747097492218,
+          "text": "박서윤",
+          "label": "PERSON",
+          "parts": [
+            "SURNAME",
+            "GIVENNAME"
+          ],
+          "utf16_start": 108,
+          "utf16_end": 111
+        },
+        {
+          "start": 153,
+          "end": 189,
+          "raw_label": "STREET",
+          "score": 0.9996509059615757,
+          "text": "서울특별시 마포구 가상마을로 24, 예시커뮤니티센터 2층 203호",
+          "label": "ADDRESS",
+          "parts": [
+            "STREET"
+          ],
+          "utf16_start": 153,
+          "utf16_end": 189
+        },
+        {
+          "start": 447,
+          "end": 450,
+          "raw_label": "SURNAME",
+          "score": 0.9998372495174408,
+          "text": "김하늘",
+          "label": "PERSON",
+          "parts": [
+            "SURNAME",
+            "GIVENNAME"
+          ],
+          "utf16_start": 447,
+          "utf16_end": 450
+        },
+        {
+          "start": 540,
+          "end": 543,
+          "raw_label": "SURNAME",
+          "score": 0.9997476935386658,
+          "text": "박서윤",
+          "label": "PERSON",
+          "parts": [
+            "SURNAME",
+            "GIVENNAME"
+          ],
+          "utf16_start": 540,
+          "utf16_end": 543
+        }
+      ],
+      "windows": 23
+    },
+    {
+      "file": "행사 공지_가을 책나눔 행사.piipost",
+      "fileSha256": "80797edc8aac2a9940f4ed954c637805079c21bcbd0b7130b875ea1ee9542ec4",
+      "field": "title",
+      "characters": 38,
+      "mode": "window",
+      "medianSeconds": 0.008157499600201845,
+      "times": [
+        0.009099300019443035,
+        0.008157499600201845,
+        0.007608700077980757
+      ],
+      "raw": [],
+      "mapped": [],
+      "adapted": [],
+      "windows": 1
+    },
+    {
+      "file": "행사 공지_가을 책나눔 행사.piipost",
+      "fileSha256": "80797edc8aac2a9940f4ed954c637805079c21bcbd0b7130b875ea1ee9542ec4",
+      "field": "title",
+      "characters": 38,
+      "mode": "sentence",
+      "medianSeconds": 0.009256900288164616,
+      "times": [
+        0.009256900288164616
+      ],
+      "raw": [],
+      "mapped": [],
+      "adapted": [],
+      "windows": 1
+    },
+    {
+      "file": "행사 공지_가을 책나눔 행사.piipost",
+      "fileSha256": "80797edc8aac2a9940f4ed954c637805079c21bcbd0b7130b875ea1ee9542ec4",
+      "field": "title",
+      "characters": 38,
+      "mode": "neighbors",
+      "medianSeconds": 0.007807400077581406,
+      "times": [
+        0.007807400077581406
+      ],
+      "raw": [],
+      "mapped": [],
+      "adapted": [],
+      "windows": 1
+    },
+    {
+      "file": "행사 공지_가을 책나눔 행사.piipost",
+      "fileSha256": "80797edc8aac2a9940f4ed954c637805079c21bcbd0b7130b875ea1ee9542ec4",
+      "field": "body",
+      "characters": 1086,
+      "mode": "window",
+      "medianSeconds": 0.15381819987669587,
+      "times": [
+        0.15044499980285764,
+        0.1554586999118328,
+        0.15381819987669587
+      ],
+      "raw": [
+        {
+          "start": 7,
+          "end": 8,
+          "raw_label": "SURNAME",
+          "score": 0.5860905647277832,
+          "text": "예",
+          "utf16_start": 7,
+          "utf16_end": 8
+        },
+        {
+          "start": 8,
+          "end": 10,
+          "raw_label": "GIVENNAME",
+          "score": 0.563295304775238,
+          "text": "시마",
+          "utf16_start": 8,
+          "utf16_end": 10
+        },
+        {
+          "start": 160,
+          "end": 167,
+          "raw_label": "STREET",
+          "score": 0.8099381923675537,
+          "text": "경기도 수원시",
+          "utf16_start": 160,
+          "utf16_end": 167
+        },
+        {
+          "start": 169,
+          "end": 171,
+          "raw_label": "STREET",
+          "score": 0.6693965494632721,
+          "text": "통구",
+          "utf16_start": 169,
+          "utf16_end": 171
+        },
+        {
+          "start": 173,
+          "end": 174,
+          "raw_label": "STREET",
+          "score": 0.8401602506637573,
+          "text": "시",
+          "utf16_start": 173,
+          "utf16_end": 174
+        },
+        {
+          "start": 175,
+          "end": 180,
+          "raw_label": "STREET",
+          "score": 0.628061572710673,
+          "text": "화로 18",
+          "utf16_start": 175,
+          "utf16_end": 180
+        },
+        {
+          "start": 452,
+          "end": 454,
+          "raw_label": "GIVENNAME",
+          "score": 0.7950363755226135,
+          "text": "동식",
+          "utf16_start": 452,
+          "utf16_end": 454
+        },
+        {
+          "start": 578,
+          "end": 579,
+          "raw_label": "SURNAME",
+          "score": 0.9940710663795471,
+          "text": "이",
+          "utf16_start": 578,
+          "utf16_end": 579
+        },
+        {
+          "start": 579,
+          "end": 581,
+          "raw_label": "GIVENNAME",
+          "score": 0.9368295967578888,
+          "text": "도윤",
+          "utf16_start": 579,
+          "utf16_end": 581
+        },
+        {
+          "start": 617,
+          "end": 618,
+          "raw_label": "SURNAME",
+          "score": 0.8704920411109924,
+          "text": "이",
+          "utf16_start": 617,
+          "utf16_end": 618
+        },
+        {
+          "start": 618,
+          "end": 620,
+          "raw_label": "GIVENNAME",
+          "score": 0.8313669562339783,
+          "text": "도윤",
+          "utf16_start": 618,
+          "utf16_end": 620
+        },
+        {
+          "start": 641,
+          "end": 654,
+          "raw_label": "TELEPHONENUM",
+          "score": 0.9997719724973043,
+          "text": "010-0000-0002",
+          "utf16_start": 641,
+          "utf16_end": 654
+        },
+        {
+          "start": 663,
+          "end": 683,
+          "raw_label": "EMAIL",
+          "score": 0.999375581741333,
+          "text": "festival@example.com",
+          "utf16_start": 663,
+          "utf16_end": 683
+        },
+        {
+          "start": 694,
+          "end": 695,
+          "raw_label": "SURNAME",
+          "score": 0.997912585735321,
+          "text": "정",
+          "utf16_start": 694,
+          "utf16_end": 695
+        },
+        {
+          "start": 695,
+          "end": 697,
+          "raw_label": "GIVENNAME",
+          "score": 0.9857721924781799,
+          "text": "유진",
+          "utf16_start": 695,
+          "utf16_end": 697
+        },
+        {
+          "start": 699,
+          "end": 712,
+          "raw_label": "TELEPHONENUM",
+          "score": 0.9985781610012054,
+          "text": "010-0000-0003",
+          "utf16_start": 699,
+          "utf16_end": 712
+        },
+        {
+          "start": 787,
+          "end": 823,
+          "raw_label": "STREET",
+          "score": 0.9976379772027334,
+          "text": "경기도 수원시 영통구 예시문화로 18, 가상문화센터 2층 205호",
+          "utf16_start": 787,
+          "utf16_end": 823
+        }
+      ],
+      "mapped": [
+        {
+          "start": 7,
+          "end": 8,
+          "raw_label": "SURNAME",
+          "score": 0.5860905647277832,
+          "text": "예",
+          "label": "PERSON",
+          "utf16_start": 7,
+          "utf16_end": 8
+        },
+        {
+          "start": 8,
+          "end": 10,
+          "raw_label": "GIVENNAME",
+          "score": 0.563295304775238,
+          "text": "시마",
+          "label": "PERSON",
+          "utf16_start": 8,
+          "utf16_end": 10
+        },
+        {
+          "start": 160,
+          "end": 167,
+          "raw_label": "STREET",
+          "score": 0.8099381923675537,
+          "text": "경기도 수원시",
+          "label": "ADDRESS",
+          "utf16_start": 160,
+          "utf16_end": 167
+        },
+        {
+          "start": 169,
+          "end": 171,
+          "raw_label": "STREET",
+          "score": 0.6693965494632721,
+          "text": "통구",
+          "label": "ADDRESS",
+          "utf16_start": 169,
+          "utf16_end": 171
+        },
+        {
+          "start": 173,
+          "end": 174,
+          "raw_label": "STREET",
+          "score": 0.8401602506637573,
+          "text": "시",
+          "label": "ADDRESS",
+          "utf16_start": 173,
+          "utf16_end": 174
+        },
+        {
+          "start": 175,
+          "end": 180,
+          "raw_label": "STREET",
+          "score": 0.628061572710673,
+          "text": "화로 18",
+          "label": "ADDRESS",
+          "utf16_start": 175,
+          "utf16_end": 180
+        },
+        {
+          "start": 452,
+          "end": 454,
+          "raw_label": "GIVENNAME",
+          "score": 0.7950363755226135,
+          "text": "동식",
+          "label": "PERSON",
+          "utf16_start": 452,
+          "utf16_end": 454
+        },
+        {
+          "start": 578,
+          "end": 579,
+          "raw_label": "SURNAME",
+          "score": 0.9940710663795471,
+          "text": "이",
+          "label": "PERSON",
+          "utf16_start": 578,
+          "utf16_end": 579
+        },
+        {
+          "start": 579,
+          "end": 581,
+          "raw_label": "GIVENNAME",
+          "score": 0.9368295967578888,
+          "text": "도윤",
+          "label": "PERSON",
+          "utf16_start": 579,
+          "utf16_end": 581
+        },
+        {
+          "start": 617,
+          "end": 618,
+          "raw_label": "SURNAME",
+          "score": 0.8704920411109924,
+          "text": "이",
+          "label": "PERSON",
+          "utf16_start": 617,
+          "utf16_end": 618
+        },
+        {
+          "start": 618,
+          "end": 620,
+          "raw_label": "GIVENNAME",
+          "score": 0.8313669562339783,
+          "text": "도윤",
+          "label": "PERSON",
+          "utf16_start": 618,
+          "utf16_end": 620
+        },
+        {
+          "start": 694,
+          "end": 695,
+          "raw_label": "SURNAME",
+          "score": 0.997912585735321,
+          "text": "정",
+          "label": "PERSON",
+          "utf16_start": 694,
+          "utf16_end": 695
+        },
+        {
+          "start": 695,
+          "end": 697,
+          "raw_label": "GIVENNAME",
+          "score": 0.9857721924781799,
+          "text": "유진",
+          "label": "PERSON",
+          "utf16_start": 695,
+          "utf16_end": 697
+        },
+        {
+          "start": 787,
+          "end": 823,
+          "raw_label": "STREET",
+          "score": 0.9976379772027334,
+          "text": "경기도 수원시 영통구 예시문화로 18, 가상문화센터 2층 205호",
+          "label": "ADDRESS",
+          "utf16_start": 787,
+          "utf16_end": 823
+        }
+      ],
+      "adapted": [
+        {
+          "start": 7,
+          "end": 10,
+          "raw_label": "SURNAME",
+          "score": 0.563295304775238,
+          "text": "예시마",
+          "label": "PERSON",
+          "parts": [
+            "SURNAME",
+            "GIVENNAME"
+          ],
+          "utf16_start": 7,
+          "utf16_end": 10
+        },
+        {
+          "start": 160,
+          "end": 167,
+          "raw_label": "STREET",
+          "score": 0.8099381923675537,
+          "text": "경기도 수원시",
+          "label": "ADDRESS",
+          "parts": [
+            "STREET"
+          ],
+          "utf16_start": 160,
+          "utf16_end": 167
+        },
+        {
+          "start": 169,
+          "end": 171,
+          "raw_label": "STREET",
+          "score": 0.6693965494632721,
+          "text": "통구",
+          "label": "ADDRESS",
+          "parts": [
+            "STREET"
+          ],
+          "utf16_start": 169,
+          "utf16_end": 171
+        },
+        {
+          "start": 173,
+          "end": 174,
+          "raw_label": "STREET",
+          "score": 0.8401602506637573,
+          "text": "시",
+          "label": "ADDRESS",
+          "parts": [
+            "STREET"
+          ],
+          "utf16_start": 173,
+          "utf16_end": 174
+        },
+        {
+          "start": 175,
+          "end": 180,
+          "raw_label": "STREET",
+          "score": 0.628061572710673,
+          "text": "화로 18",
+          "label": "ADDRESS",
+          "parts": [
+            "STREET"
+          ],
+          "utf16_start": 175,
+          "utf16_end": 180
+        },
+        {
+          "start": 452,
+          "end": 454,
+          "raw_label": "GIVENNAME",
+          "score": 0.7950363755226135,
+          "text": "동식",
+          "label": "PERSON",
+          "parts": [
+            "GIVENNAME"
+          ],
+          "utf16_start": 452,
+          "utf16_end": 454
+        },
+        {
+          "start": 578,
+          "end": 581,
+          "raw_label": "SURNAME",
+          "score": 0.9368295967578888,
+          "text": "이도윤",
+          "label": "PERSON",
+          "parts": [
+            "SURNAME",
+            "GIVENNAME"
+          ],
+          "utf16_start": 578,
+          "utf16_end": 581
+        },
+        {
+          "start": 617,
+          "end": 620,
+          "raw_label": "SURNAME",
+          "score": 0.8313669562339783,
+          "text": "이도윤",
+          "label": "PERSON",
+          "parts": [
+            "SURNAME",
+            "GIVENNAME"
+          ],
+          "utf16_start": 617,
+          "utf16_end": 620
+        },
+        {
+          "start": 694,
+          "end": 697,
+          "raw_label": "SURNAME",
+          "score": 0.9857721924781799,
+          "text": "정유진",
+          "label": "PERSON",
+          "parts": [
+            "SURNAME",
+            "GIVENNAME"
+          ],
+          "utf16_start": 694,
+          "utf16_end": 697
+        },
+        {
+          "start": 787,
+          "end": 823,
+          "raw_label": "STREET",
+          "score": 0.9976379772027334,
+          "text": "경기도 수원시 영통구 예시문화로 18, 가상문화센터 2층 205호",
+          "label": "ADDRESS",
+          "parts": [
+            "STREET"
+          ],
+          "utf16_start": 787,
+          "utf16_end": 823
+        }
+      ],
+      "windows": 2
+    },
+    {
+      "file": "행사 공지_가을 책나눔 행사.piipost",
+      "fileSha256": "80797edc8aac2a9940f4ed954c637805079c21bcbd0b7130b875ea1ee9542ec4",
+      "field": "body",
+      "characters": 1086,
+      "mode": "sentence",
+      "medianSeconds": 0.28514260007068515,
+      "times": [
+        0.28514260007068515
+      ],
+      "raw": [
+        {
+          "start": 125,
+          "end": 128,
+          "raw_label": "DATEOFBIRTH",
+          "score": 0.9653438329696655,
+          "text": "202",
+          "utf16_start": 125,
+          "utf16_end": 128
+        },
+        {
+          "start": 128,
+          "end": 129,
+          "raw_label": "ZIPCODE",
+          "score": 0.40993067622184753,
+          "text": "6",
+          "utf16_start": 128,
+          "utf16_end": 129
+        },
+        {
+          "start": 129,
+          "end": 137,
+          "raw_label": "DATEOFBIRTH",
+          "score": 0.9964734514554342,
+          "text": "년 11월 7일",
+          "utf16_start": 129,
+          "utf16_end": 137
+        },
+        {
+          "start": 141,
+          "end": 147,
+          "raw_label": "TIME",
+          "score": 0.9929243624210358,
+          "text": "오전 10시",
+          "utf16_start": 141,
+          "utf16_end": 147
+        },
+        {
+          "start": 150,
+          "end": 155,
+          "raw_label": "TIME",
+          "score": 0.9859845489263535,
+          "text": "오후 4시",
+          "utf16_start": 150,
+          "utf16_end": 155
+        },
+        {
+          "start": 160,
+          "end": 195,
+          "raw_label": "STREET",
+          "score": 0.9968627572059632,
+          "text": "경기도 수원시 영통구 예시문화로 18, 가상문화센터 1층 다목적",
+          "utf16_start": 160,
+          "utf16_end": 195
+        },
+        {
+          "start": 578,
+          "end": 579,
+          "raw_label": "SURNAME",
+          "score": 0.9997321963310242,
+          "text": "이",
+          "utf16_start": 578,
+          "utf16_end": 579
+        },
+        {
+          "start": 579,
+          "end": 581,
+          "raw_label": "GIVENNAME",
+          "score": 0.9982219636440277,
+          "text": "도윤",
+          "utf16_start": 579,
+          "utf16_end": 581
+        },
+        {
+          "start": 617,
+          "end": 618,
+          "raw_label": "SURNAME",
+          "score": 0.9998975992202759,
+          "text": "이",
+          "utf16_start": 617,
+          "utf16_end": 618
+        },
+        {
+          "start": 618,
+          "end": 620,
+          "raw_label": "GIVENNAME",
+          "score": 0.9998312890529633,
+          "text": "도윤",
+          "utf16_start": 618,
+          "utf16_end": 620
+        },
+        {
+          "start": 641,
+          "end": 654,
+          "raw_label": "TELEPHONENUM",
+          "score": 0.9999600847562155,
+          "text": "010-0000-0002",
+          "utf16_start": 641,
+          "utf16_end": 654
+        },
+        {
+          "start": 663,
+          "end": 683,
+          "raw_label": "EMAIL",
+          "score": 0.999964427947998,
+          "text": "festival@example.com",
+          "utf16_start": 663,
+          "utf16_end": 683
+        },
+        {
+          "start": 694,
+          "end": 695,
+          "raw_label": "SURNAME",
+          "score": 0.9999170303344727,
+          "text": "정",
+          "utf16_start": 694,
+          "utf16_end": 695
+        },
+        {
+          "start": 695,
+          "end": 697,
+          "raw_label": "GIVENNAME",
+          "score": 0.9999088644981384,
+          "text": "유진",
+          "utf16_start": 695,
+          "utf16_end": 697
+        },
+        {
+          "start": 699,
+          "end": 712,
+          "raw_label": "TELEPHONENUM",
+          "score": 0.9999604821205139,
+          "text": "010-0000-0003",
+          "utf16_start": 699,
+          "utf16_end": 712
+        },
+        {
+          "start": 726,
+          "end": 732,
+          "raw_label": "TIME",
+          "score": 0.8316098153591156,
+          "text": "오전 10시",
+          "utf16_start": 726,
+          "utf16_end": 732
+        },
+        {
+          "start": 735,
+          "end": 740,
+          "raw_label": "TIME",
+          "score": 0.8453184515237808,
+          "text": "오후 5시",
+          "utf16_start": 735,
+          "utf16_end": 740
+        },
+        {
+          "start": 787,
+          "end": 823,
+          "raw_label": "STREET",
+          "score": 0.9998537475864092,
+          "text": "경기도 수원시 영통구 예시문화로 18, 가상문화센터 2층 205호",
+          "utf16_start": 787,
+          "utf16_end": 823
+        }
+      ],
+      "mapped": [
+        {
+          "start": 128,
+          "end": 129,
+          "raw_label": "ZIPCODE",
+          "score": 0.40993067622184753,
+          "text": "6",
+          "label": "ADDRESS",
+          "utf16_start": 128,
+          "utf16_end": 129
+        },
+        {
+          "start": 160,
+          "end": 195,
+          "raw_label": "STREET",
+          "score": 0.9968627572059632,
+          "text": "경기도 수원시 영통구 예시문화로 18, 가상문화센터 1층 다목적",
+          "label": "ADDRESS",
+          "utf16_start": 160,
+          "utf16_end": 195
+        },
+        {
+          "start": 578,
+          "end": 579,
+          "raw_label": "SURNAME",
+          "score": 0.9997321963310242,
+          "text": "이",
+          "label": "PERSON",
+          "utf16_start": 578,
+          "utf16_end": 579
+        },
+        {
+          "start": 579,
+          "end": 581,
+          "raw_label": "GIVENNAME",
+          "score": 0.9982219636440277,
+          "text": "도윤",
+          "label": "PERSON",
+          "utf16_start": 579,
+          "utf16_end": 581
+        },
+        {
+          "start": 617,
+          "end": 618,
+          "raw_label": "SURNAME",
+          "score": 0.9998975992202759,
+          "text": "이",
+          "label": "PERSON",
+          "utf16_start": 617,
+          "utf16_end": 618
+        },
+        {
+          "start": 618,
+          "end": 620,
+          "raw_label": "GIVENNAME",
+          "score": 0.9998312890529633,
+          "text": "도윤",
+          "label": "PERSON",
+          "utf16_start": 618,
+          "utf16_end": 620
+        },
+        {
+          "start": 694,
+          "end": 695,
+          "raw_label": "SURNAME",
+          "score": 0.9999170303344727,
+          "text": "정",
+          "label": "PERSON",
+          "utf16_start": 694,
+          "utf16_end": 695
+        },
+        {
+          "start": 695,
+          "end": 697,
+          "raw_label": "GIVENNAME",
+          "score": 0.9999088644981384,
+          "text": "유진",
+          "label": "PERSON",
+          "utf16_start": 695,
+          "utf16_end": 697
+        },
+        {
+          "start": 787,
+          "end": 823,
+          "raw_label": "STREET",
+          "score": 0.9998537475864092,
+          "text": "경기도 수원시 영통구 예시문화로 18, 가상문화센터 2층 205호",
+          "label": "ADDRESS",
+          "utf16_start": 787,
+          "utf16_end": 823
+        }
+      ],
+      "adapted": [
+        {
+          "start": 128,
+          "end": 129,
+          "raw_label": "ZIPCODE",
+          "score": 0.40993067622184753,
+          "text": "6",
+          "label": "ADDRESS",
+          "parts": [
+            "ZIPCODE"
+          ],
+          "utf16_start": 128,
+          "utf16_end": 129
+        },
+        {
+          "start": 160,
+          "end": 195,
+          "raw_label": "STREET",
+          "score": 0.9968627572059632,
+          "text": "경기도 수원시 영통구 예시문화로 18, 가상문화센터 1층 다목적",
+          "label": "ADDRESS",
+          "parts": [
+            "STREET"
+          ],
+          "utf16_start": 160,
+          "utf16_end": 195
+        },
+        {
+          "start": 578,
+          "end": 581,
+          "raw_label": "SURNAME",
+          "score": 0.9982219636440277,
+          "text": "이도윤",
+          "label": "PERSON",
+          "parts": [
+            "SURNAME",
+            "GIVENNAME"
+          ],
+          "utf16_start": 578,
+          "utf16_end": 581
+        },
+        {
+          "start": 617,
+          "end": 620,
+          "raw_label": "SURNAME",
+          "score": 0.9998312890529633,
+          "text": "이도윤",
+          "label": "PERSON",
+          "parts": [
+            "SURNAME",
+            "GIVENNAME"
+          ],
+          "utf16_start": 617,
+          "utf16_end": 620
+        },
+        {
+          "start": 694,
+          "end": 697,
+          "raw_label": "SURNAME",
+          "score": 0.9999088644981384,
+          "text": "정유진",
+          "label": "PERSON",
+          "parts": [
+            "SURNAME",
+            "GIVENNAME"
+          ],
+          "utf16_start": 694,
+          "utf16_end": 697
+        },
+        {
+          "start": 787,
+          "end": 823,
+          "raw_label": "STREET",
+          "score": 0.9998537475864092,
+          "text": "경기도 수원시 영통구 예시문화로 18, 가상문화센터 2층 205호",
+          "label": "ADDRESS",
+          "parts": [
+            "STREET"
+          ],
+          "utf16_start": 787,
+          "utf16_end": 823
+        }
+      ],
+      "windows": 37
+    },
+    {
+      "file": "행사 공지_가을 책나눔 행사.piipost",
+      "fileSha256": "80797edc8aac2a9940f4ed954c637805079c21bcbd0b7130b875ea1ee9542ec4",
+      "field": "body",
+      "characters": 1086,
+      "mode": "neighbors",
+      "medianSeconds": 0.559226700104773,
+      "times": [
+        0.559226700104773
+      ],
+      "raw": [
+        {
+          "start": 142,
+          "end": 143,
+          "raw_label": "STREET",
+          "score": 0.7200977206230164,
+          "text": "전",
+          "utf16_start": 142,
+          "utf16_end": 143
+        },
+        {
+          "start": 160,
+          "end": 191,
+          "raw_label": "STREET",
+          "score": 0.9996226131916046,
+          "text": "경기도 수원시 영통구 예시문화로 18, 가상문화센터 1층",
+          "utf16_start": 160,
+          "utf16_end": 191
+        },
+        {
+          "start": 578,
+          "end": 579,
+          "raw_label": "SURNAME",
+          "score": 0.9986621141433716,
+          "text": "이",
+          "utf16_start": 578,
+          "utf16_end": 579
+        },
+        {
+          "start": 579,
+          "end": 581,
+          "raw_label": "GIVENNAME",
+          "score": 0.9932418167591095,
+          "text": "도윤",
+          "utf16_start": 579,
+          "utf16_end": 581
+        },
+        {
+          "start": 617,
+          "end": 618,
+          "raw_label": "SURNAME",
+          "score": 0.9951370358467102,
+          "text": "이",
+          "utf16_start": 617,
+          "utf16_end": 618
+        },
+        {
+          "start": 618,
+          "end": 620,
+          "raw_label": "GIVENNAME",
+          "score": 0.9934478402137756,
+          "text": "도윤",
+          "utf16_start": 618,
+          "utf16_end": 620
+        },
+        {
+          "start": 623,
+          "end": 624,
+          "raw_label": "SURNAME",
+          "score": 0.724897563457489,
+          "text": "예",
+          "utf16_start": 623,
+          "utf16_end": 624
+        },
+        {
+          "start": 624,
+          "end": 626,
+          "raw_label": "GIVENNAME",
+          "score": 0.8473294377326965,
+          "text": "시마",
+          "utf16_start": 624,
+          "utf16_end": 626
+        },
+        {
+          "start": 641,
+          "end": 654,
+          "raw_label": "TELEPHONENUM",
+          "score": 0.9999606211980184,
+          "text": "010-0000-0002",
+          "utf16_start": 641,
+          "utf16_end": 654
+        },
+        {
+          "start": 663,
+          "end": 683,
+          "raw_label": "EMAIL",
+          "score": 0.999964714050293,
+          "text": "festival@example.com",
+          "utf16_start": 663,
+          "utf16_end": 683
+        },
+        {
+          "start": 694,
+          "end": 695,
+          "raw_label": "SURNAME",
+          "score": 0.9999154806137085,
+          "text": "정",
+          "utf16_start": 694,
+          "utf16_end": 695
+        },
+        {
+          "start": 695,
+          "end": 697,
+          "raw_label": "GIVENNAME",
+          "score": 0.9999040961265564,
+          "text": "유진",
+          "utf16_start": 695,
+          "utf16_end": 697
+        },
+        {
+          "start": 699,
+          "end": 712,
+          "raw_label": "TELEPHONENUM",
+          "score": 0.9999555746714274,
+          "text": "010-0000-0003",
+          "utf16_start": 699,
+          "utf16_end": 712
+        },
+        {
+          "start": 787,
+          "end": 823,
+          "raw_label": "STREET",
+          "score": 0.9998845408360163,
+          "text": "경기도 수원시 영통구 예시문화로 18, 가상문화센터 2층 205호",
+          "utf16_start": 787,
+          "utf16_end": 823
+        }
+      ],
+      "mapped": [
+        {
+          "start": 142,
+          "end": 143,
+          "raw_label": "STREET",
+          "score": 0.7200977206230164,
+          "text": "전",
+          "label": "ADDRESS",
+          "utf16_start": 142,
+          "utf16_end": 143
+        },
+        {
+          "start": 160,
+          "end": 191,
+          "raw_label": "STREET",
+          "score": 0.9996226131916046,
+          "text": "경기도 수원시 영통구 예시문화로 18, 가상문화센터 1층",
+          "label": "ADDRESS",
+          "utf16_start": 160,
+          "utf16_end": 191
+        },
+        {
+          "start": 578,
+          "end": 579,
+          "raw_label": "SURNAME",
+          "score": 0.9986621141433716,
+          "text": "이",
+          "label": "PERSON",
+          "utf16_start": 578,
+          "utf16_end": 579
+        },
+        {
+          "start": 579,
+          "end": 581,
+          "raw_label": "GIVENNAME",
+          "score": 0.9932418167591095,
+          "text": "도윤",
+          "label": "PERSON",
+          "utf16_start": 579,
+          "utf16_end": 581
+        },
+        {
+          "start": 617,
+          "end": 618,
+          "raw_label": "SURNAME",
+          "score": 0.9951370358467102,
+          "text": "이",
+          "label": "PERSON",
+          "utf16_start": 617,
+          "utf16_end": 618
+        },
+        {
+          "start": 618,
+          "end": 620,
+          "raw_label": "GIVENNAME",
+          "score": 0.9934478402137756,
+          "text": "도윤",
+          "label": "PERSON",
+          "utf16_start": 618,
+          "utf16_end": 620
+        },
+        {
+          "start": 623,
+          "end": 624,
+          "raw_label": "SURNAME",
+          "score": 0.724897563457489,
+          "text": "예",
+          "label": "PERSON",
+          "utf16_start": 623,
+          "utf16_end": 624
+        },
+        {
+          "start": 624,
+          "end": 626,
+          "raw_label": "GIVENNAME",
+          "score": 0.8473294377326965,
+          "text": "시마",
+          "label": "PERSON",
+          "utf16_start": 624,
+          "utf16_end": 626
+        },
+        {
+          "start": 694,
+          "end": 695,
+          "raw_label": "SURNAME",
+          "score": 0.9999154806137085,
+          "text": "정",
+          "label": "PERSON",
+          "utf16_start": 694,
+          "utf16_end": 695
+        },
+        {
+          "start": 695,
+          "end": 697,
+          "raw_label": "GIVENNAME",
+          "score": 0.9999040961265564,
+          "text": "유진",
+          "label": "PERSON",
+          "utf16_start": 695,
+          "utf16_end": 697
+        },
+        {
+          "start": 787,
+          "end": 823,
+          "raw_label": "STREET",
+          "score": 0.9998845408360163,
+          "text": "경기도 수원시 영통구 예시문화로 18, 가상문화센터 2층 205호",
+          "label": "ADDRESS",
+          "utf16_start": 787,
+          "utf16_end": 823
+        }
+      ],
+      "adapted": [
+        {
+          "start": 142,
+          "end": 143,
+          "raw_label": "STREET",
+          "score": 0.7200977206230164,
+          "text": "전",
+          "label": "ADDRESS",
+          "parts": [
+            "STREET"
+          ],
+          "utf16_start": 142,
+          "utf16_end": 143
+        },
+        {
+          "start": 160,
+          "end": 191,
+          "raw_label": "STREET",
+          "score": 0.9996226131916046,
+          "text": "경기도 수원시 영통구 예시문화로 18, 가상문화센터 1층",
+          "label": "ADDRESS",
+          "parts": [
+            "STREET"
+          ],
+          "utf16_start": 160,
+          "utf16_end": 191
+        },
+        {
+          "start": 578,
+          "end": 581,
+          "raw_label": "SURNAME",
+          "score": 0.9932418167591095,
+          "text": "이도윤",
+          "label": "PERSON",
+          "parts": [
+            "SURNAME",
+            "GIVENNAME"
+          ],
+          "utf16_start": 578,
+          "utf16_end": 581
+        },
+        {
+          "start": 617,
+          "end": 620,
+          "raw_label": "SURNAME",
+          "score": 0.9934478402137756,
+          "text": "이도윤",
+          "label": "PERSON",
+          "parts": [
+            "SURNAME",
+            "GIVENNAME"
+          ],
+          "utf16_start": 617,
+          "utf16_end": 620
+        },
+        {
+          "start": 623,
+          "end": 626,
+          "raw_label": "SURNAME",
+          "score": 0.724897563457489,
+          "text": "예시마",
+          "label": "PERSON",
+          "parts": [
+            "SURNAME",
+            "GIVENNAME"
+          ],
+          "utf16_start": 623,
+          "utf16_end": 626
+        },
+        {
+          "start": 694,
+          "end": 697,
+          "raw_label": "SURNAME",
+          "score": 0.9999040961265564,
+          "text": "정유진",
+          "label": "PERSON",
+          "parts": [
+            "SURNAME",
+            "GIVENNAME"
+          ],
+          "utf16_start": 694,
+          "utf16_end": 697
+        },
+        {
+          "start": 787,
+          "end": 823,
+          "raw_label": "STREET",
+          "score": 0.9998845408360163,
+          "text": "경기도 수원시 영통구 예시문화로 18, 가상문화센터 2층 205호",
+          "label": "ADDRESS",
+          "parts": [
+            "STREET"
+          ],
+          "utf16_start": 787,
+          "utf16_end": 823
+        }
+      ],
+      "windows": 37
+    }
+  ],
+  "scope": "Descriptive check of existing synthetic saved posts. Not mixed into the frozen 75-case quality scores. Public event venue addresses are policy-dependent."
+}

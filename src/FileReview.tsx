@@ -1,0 +1,181 @@
+import { useEffect, useRef, useState } from 'react';
+import type { PointerEvent, ReactNode } from 'react';
+import { api, boot } from './api';
+import { MODE_NAMES, RISKS, partialMask, replacement as textReplacement } from './masking';
+import type { MaskChoice, MaskMode } from './masking';
+import type { Box, DocumentJob, FileAsset, FileCandidate, FilePart, FileSelection, Region } from './documentTypes';
+import { EMPTY_SELECTION } from './documentTypes';
+import './file-review.css';
+
+const ACTIVE=new Set(['queued','reading','checking','exporting']);
+const accept='.hwp,.hwpx,.docx,.xlsx,.pptx,.pdf,.csv,.tsv,.txt,.png,.jpg,.jpeg';
+const riskName=(risk:string)=>RISKS.find(r=>r.key===risk)?.name||risk;
+const message=(e:unknown)=>e instanceof Error?e.message:'파일 작업을 완료하지 못했습니다.';
+const replacement=(candidate:FileCandidate,choice?:MaskChoice)=>choice?.mode==='partial'?(candidate.partialText||partialMask(candidate)):textReplacement(candidate,choice);
+async function binary(path:string,options:RequestInit={}) {
+  const r=await fetch(`/api/documents/${path}`,{...options,cache:'no-store',headers:{'X-App-Token':boot.token,...options.headers}});
+  if(!r.ok){let m='파일을 읽지 못했습니다.';try{m=(await r.json()).message||m;}catch{/* no source data in error */}throw new Error(m);}
+  return r;
+}
+
+function ImageReview({job,asset,regions,onRegion,output,selectedBoxes,locked}:{job:DocumentJob;asset:FileAsset;regions:Region[];onRegion:(box:Box)=>void;output:boolean;selectedBoxes:Box[];locked:boolean}) {
+  const [url,setUrl]=useState(''),[error,setError]=useState(''),[drag,setDrag]=useState<Box|null>(null);
+  const start=useRef<[number,number]|null>(null);
+  useEffect(()=>{let stop=false,local='';setUrl('');setError('');
+    void binary(`${job.id}/assets/${asset.id}?output=${output}`).then(r=>r.blob()).then(b=>{local=URL.createObjectURL(b);if(!stop)setUrl(local);else URL.revokeObjectURL(local);}).catch(e=>{if(!stop)setError(message(e));});
+    return()=>{stop=true;if(local)URL.revokeObjectURL(local);};
+  },[job.id,asset.id,output,job.exportResult?.sha256]);
+  function point(e:PointerEvent<HTMLDivElement>):[number,number]{const r=e.currentTarget.getBoundingClientRect();return [Math.max(0,Math.min(asset.width,(e.clientX-r.left)*asset.width/r.width)),Math.max(0,Math.min(asset.height,(e.clientY-r.top)*asset.height/r.height))];}
+  function rectangle(b:Box,key:string,kind:string){return <span key={key} className={`region-box ${kind}`} style={{left:`${b[0]/asset.width*100}%`,top:`${b[1]/asset.height*100}%`,width:`${(b[2]-b[0])/asset.width*100}%`,height:`${(b[3]-b[1])/asset.height*100}%`}}/>;}
+  return <div className="image-review">
+    <p>{output?'저장할 사본의 실제 이미지입니다.':'검은 상자로 가릴 곳을 드래그하세요. 일부만 드래그하면 그 부분만 가려집니다.'}</p>
+    {error&&<p role="alert">{error}</p>}
+    {!url&&!error&&<p role="status">미리보기 준비 중…</p>}
+    {url&&<div className={`image-canvas ${output?'readonly':''}`} style={{aspectRatio:`${asset.width}/${asset.height}`}}
+      onPointerDown={e=>{if(output||locked)return;e.preventDefault();e.currentTarget.setPointerCapture(e.pointerId);start.current=point(e);setDrag([...start.current,...start.current]);}}
+      onPointerMove={e=>{if(!start.current)return;const p=point(e),s=start.current;setDrag([Math.min(s[0],p[0]),Math.min(s[1],p[1]),Math.max(s[0],p[0]),Math.max(s[1],p[1])]);}}
+      onPointerUp={e=>{if(!start.current)return;const p=point(e),s=start.current;const b:Box=[Math.min(s[0],p[0]),Math.min(s[1],p[1]),Math.max(s[0],p[0]),Math.max(s[1],p[1])];start.current=null;setDrag(null);if(b[2]-b[0]>2&&b[3]-b[1]>2)onRegion(b);}}
+      onPointerCancel={()=>{start.current=null;setDrag(null);}}>
+      <img src={url} alt={`${asset.location} ${output?'수정 사본':'원본 사본'}`} draggable={false}/>
+      {!output&&selectedBoxes.map((b,i)=>rectangle(b,`candidate-${i}`,'suggested'))}
+      {!output&&regions.filter(r=>r.asset===asset.id).map((r,i)=>rectangle(r.box,`manual-${i}`,'opaque'))}
+      {drag&&rectangle(drag,'drag','drawing')}
+    </div>}
+  </div>;
+}
+
+function Highlight({part,candidates,selection,onSelect,output=false}:{part:FilePart;candidates:FileCandidate[];selection:FileSelection;onSelect:(c:FileCandidate)=>void;output?:boolean}) {
+  const chunks:ReactNode[]=[];let pos=0;
+  for(const c of candidates.filter(c=>c.part===part.id).sort((a,b)=>a.start-b.start)){
+    chunks.push(part.text.slice(pos,c.start));
+    chunks.push(<button key={c.id} className={`file-highlight risk-${c.risk} ${selection.focus===c.id?'focused':''}`} title={`${riskName(c.risk)} · ${c.labelName} · ${c.location}`} onClick={()=>onSelect(c)}>
+      {output?c.text:replacement(c,selection.choices[c.id])}<span className="sr-only"> · {c.labelName} · 위험도 {riskName(c.risk)}</span>
+    </button>);pos=c.end;
+  }
+  chunks.push(part.text.slice(pos));return <div className="file-part-text">{chunks}</div>;
+}
+
+function SheetReview({parts,candidates,selection,onChange,onSelect,onEdit,output,locked}:{parts:FilePart[];candidates:FileCandidate[];selection:FileSelection;onChange:(p:Partial<FileSelection>)=>void;onSelect:(c:FileCandidate)=>void;onEdit:(p:FilePart)=>void;output:boolean;locked:boolean}) {
+  const sheets=Array.from(new Set(parts.filter(p=>p.sheet).map(p=>p.sheet!)));
+  const sheet=sheets.includes(selection.sheet)?selection.sheet:sheets[0];
+  const cells=parts.filter(p=>p.sheet===sheet&&p.row&&p.column);
+  const rows=Math.max(1,...cells.map(p=>p.row!)),columns=Math.max(1,...cells.map(p=>p.column!));
+  const rowPage=Math.min(selection.gridRow,Math.floor((rows-1)/30)),colPage=Math.min(selection.gridColumn,Math.floor((columns-1)/10));
+  const byCell=new Map(cells.map(p=>[`${p.row}:${p.column}`,p]));
+  const letter=(n:number)=>{let v='';while(n>0){n--;v=String.fromCharCode(65+n%26)+v;n=Math.floor(n/26);}return v;};
+  return <section className="document-preview"><label className="asset-picker">시트 선택<select value={sheet||''} onChange={e=>onChange({sheet:e.target.value,gridRow:0,gridColumn:0})}>{sheets.map(sh=><option key={sh}>{sh}</option>)}</select></label><p className="sheet-note">계산 결과와 셀 위치를 보여줍니다. 숨김 셀도 표시하며, 메모·작성자·문서 속성은 텍스트 · 위치 탭에서 확인하세요.</p><div className="sheet-grid"><table><thead><tr><th aria-label="행 번호"/>{Array.from({length:Math.min(10,columns-colPage*10)},(_,i)=><th key={i}>{letter(colPage*10+i+1)}</th>)}</tr></thead><tbody>{Array.from({length:Math.min(30,rows-rowPage*30)},(_,i)=>{const row=rowPage*30+i+1;return <tr key={row}><th>{row}</th>{Array.from({length:Math.min(10,columns-colPage*10)},(_,j)=>{const column=colPage*10+j+1,p=byCell.get(`${row}:${column}`);return <td key={column} className={p?.hidden?'hidden-cell':''}>{p&&<><span className="cell-address">{p.cell}{p.hidden?' · 숨김':''}</span><Highlight part={!output&&p.id in selection.textEdits?{...p,text:selection.textEdits[p.id]}:p} candidates={!output&&p.id in selection.textEdits?[]:candidates} selection={selection} output={output} onSelect={onSelect}/>{!output&&<button disabled={locked} className="cell-edit" onClick={()=>onEdit(p)} aria-label={`${p.cell} 직접 수정`}>수정</button>}</>}</td>;})}</tr>;})}</tbody></table></div><div className="preview-pagination"><button disabled={!rowPage} onClick={()=>onChange({gridRow:rowPage-1})}>이전 행</button><span>{rowPage*30+1}–{Math.min(rows,(rowPage+1)*30)}행</span><button disabled={(rowPage+1)*30>=rows} onClick={()=>onChange({gridRow:rowPage+1})}>다음 행</button><button disabled={!colPage} onClick={()=>onChange({gridColumn:colPage-1})}>이전 열</button><button disabled={(colPage+1)*10>=columns} onClick={()=>onChange({gridColumn:colPage+1})}>다음 열</button></div></section>;
+}
+
+export function FileReview({active,onWorkChange}:{active:boolean;onWorkChange:(work:boolean)=>void}) {
+  const [jobs,setJobs]=useState<DocumentJob[]>([]),[id,setId]=useState(''),[states,setStates]=useState<Record<string,FileSelection>>({});
+  const [error,setError]=useState(''),[notice,setNotice]=useState(''),[uploading,setUploading]=useState(false),[removeId,setRemoveId]=useState('');
+  const [partEdit,setPartEdit]=useState<{id:string;text:string}|null>(null);
+  const input=useRef<HTMLInputElement>(null),polling=useRef(false),jobsRef=useRef(jobs);jobsRef.current=jobs;
+  const job=jobs.find(j=>j.id===id),s=states[id]||EMPTY_SELECTION;
+  const working=!!job&&ACTIVE.has(job.state),locked=working||!job||job.state!=='ready';
+  function selectState(patch:Partial<FileSelection>){setStates(old=>({...old,[id]:{...(old[id]||EMPTY_SELECTION),...patch}}));}
+  function changed(patch:Partial<FileSelection>){selectState({...patch,verified:false,exportDirty:true,showOutput:false,saved:false});}
+  const hasWork=jobs.some(j=>ACTIVE.has(j.state)||!(states[j.id]?.saved));
+  useEffect(()=>{
+    let stop=false;
+    void api<{files:DocumentJob[]}>('documents/list',{}).then(result=>{
+      if(stop||!result.files.length)return;
+      setJobs(old=>[...old,...result.files.filter(j=>!old.some(v=>v.id===j.id))]);
+      setId(old=>old||result.files[0].id);
+      setStates(old=>{const next={...old};for(const j of result.files)if(!next[j.id])next[j.id]={...EMPTY_SELECTION,showOutput:!!j.exportResult,view:j.manifest?.kind==='.xlsx'?'sheet':'text'};return next;});
+      setNotice('현재 앱에 열려 있던 파일을 다시 연결했습니다. 화면을 새로 열기 전의 저장하지 않은 가림 선택은 복원되지 않으므로 확인해 주세요.');
+    }).catch(e=>{if(!stop)setError(message(e));});
+    return()=>{stop=true;};
+  },[]);
+  useEffect(()=>{onWorkChange(hasWork);},[hasWork,onWorkChange]);
+  useEffect(()=>{if(active&&s.focus&&!s.showOutput)document.getElementById('file-choice-editor')?.scrollIntoView({block:'nearest',behavior:'smooth'});},[active,s.focus,s.showOutput]);
+  useEffect(()=>{const before=(e:BeforeUnloadEvent)=>{if(hasWork&&!boot.desktop){e.preventDefault();e.returnValue='';}};window.addEventListener('beforeunload',before);return()=>window.removeEventListener('beforeunload',before);},[hasWork]);
+  useEffect(()=>{
+    let stop=false;
+    async function poll(){if(polling.current)return;polling.current=true;
+      try{for(const j of jobsRef.current.filter(j=>ACTIVE.has(j.state))){
+        const next=await api<DocumentJob>('documents/status',{id:j.id});
+        if(stop)return;
+        if(!jobsRef.current.some(v=>v.id===j.id))continue;
+        setJobs(old=>old.map(v=>v.id===j.id?next:v));
+        if(next.state==='ready'&&j.state==='checking'&&next.manifest?.kind==='.xlsx')setStates(old=>({...old,[j.id]:{...(old[j.id]||EMPTY_SELECTION),view:'sheet'}}));
+        if(next.state==='ready'&&j.state==='exporting'&&next.exportResult)setStates(old=>({...old,[j.id]:{...(old[j.id]||EMPTY_SELECTION),showOutput:true,exportDirty:false,verified:false}}));
+      }}catch(e){if(!stop)setError(message(e));}finally{polling.current=false;}}
+    const timer=setInterval(()=>void poll(),1000);return()=>{stop=true;clearInterval(timer);};
+  },[]);
+  async function addFiles(files?:FileList|null){setError('');setNotice('');setUploading(true);
+    try{
+      const added:DocumentJob[]=[];
+      if(boot.desktop&&!files){const result=await api<{files:DocumentJob[]}>('documents/open',{});for(const j of result.files){if(j.state==='rejected')setError(`${j.name}: ${j.error}`);else added.push(j);}}
+      else if(files){for(const f of Array.from(files)){
+        if(jobsRef.current.length+added.length>=8){setError('파일 8개까지 열 수 있습니다. 일부 파일을 제거하고 추가해 주세요.');break;}
+        if(f.size>20*1024*1024){setError(`${f.name}: 20MB를 넘는 파일입니다.`);continue;}
+        try{const r=await binary(`upload?filename=${encodeURIComponent(f.name)}`,{method:'POST',headers:{'Content-Type':'application/octet-stream'},body:f});added.push(await r.json());}catch(e){setError(`${f.name}: ${message(e)}`);}
+      }}
+      if(added.length){setJobs(old=>[...old,...added]);setId(added[0].id);}
+    }catch(e){setError(message(e));}finally{setUploading(false);if(input.current)input.current.value='';}
+  }
+  async function remove(){if(!removeId)return;try{await api('documents/remove',{id:removeId});setJobs(old=>old.filter(j=>j.id!==removeId));if(id===removeId)setId(jobs.find(j=>j.id!==removeId)?.id||'');setStates(old=>{const n={...old};delete n[removeId];return n;});}catch(e){setError(message(e));}finally{setRemoveId('');}}
+  function choose(c:FileCandidate){const part=job?.manifest?.parts.find(p=>p.id===c.part);selectState({focus:c.id,showOutput:false,view:c.asset?'images':part?.sheet?'sheet':'text',asset:c.asset||s.asset,sheet:part?.sheet||s.sheet,gridRow:Math.floor(((part?.row||1)-1)/30),gridColumn:Math.floor(((part?.column||1)-1)/10),page:Math.floor((job?.manifest?.parts.findIndex(p=>p.id===c.part)||0)/25)});}
+  function apply(mode:MaskMode,ids:string[]){if(!job||locked)return;const next={...s.choices};for(const key of ids){const c=job.candidates.find(c=>c.id===key);if(c)next[key]=mode==='custom'?{mode,text:replacement(c,next[key])}:{mode} as MaskChoice;}changed({choices:next});}
+  async function generate(){if(!job)return;setError('');setNotice('');try{const next=await api<DocumentJob>('documents/export',{id:job.id,revision:job.revision,choices:s.choices,regions:s.regions,textEdits:s.textEdits});setJobs(old=>old.map(j=>j.id===id?next:j));selectState({showOutput:false,verified:false,exportDirty:false,saved:false});}catch(e){setError(message(e));}}
+  async function save(){if(!job?.exportResult||!s.verified||s.exportDirty)return;setError('');try{
+    if(boot.desktop){const r=await api<{saved?:boolean;cancelled?:boolean;name?:string}>('documents/save',{id});if(r.cancelled)return;setNotice(`${r.name} 사본을 저장했어요.`);}
+    else {const r=await binary(`${id}/download`),b=await r.blob(),url=URL.createObjectURL(b);const a=document.createElement('a');a.href=url;a.download=job.exportResult.filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),30000);setNotice('수정 사본 다운로드를 요청했어요. 브라우저 다운로드 목록에서 확인해 주세요.');}
+    selectState({saved:true});
+  }catch(e){setError(message(e));}}
+  const all=job?.candidates||[],m=job?.manifest,focus=all.find(c=>c.id===s.focus),exported=job?.exportResult;
+  const filtered=all.filter(c=>(s.filter==='all'||c.risk===s.filter)&&(!s.search||`${c.text} ${c.labelName} ${c.location}`.includes(s.search)));
+  const shownParts=s.showOutput&&exported?exported.parts:m?.parts||[];
+  const shownCandidates=s.showOutput&&exported?exported.candidates:all;
+  const shownAssets=s.showOutput&&exported?exported.assets:m?.assets||[];
+  const asset=shownAssets.find(a=>a.id===s.asset)||shownAssets[0];
+  const totalPages=Math.max(1,Math.ceil(shownParts.length/25)),page=Math.min(s.page,totalPages-1);
+  const applied=all.filter(c=>s.choices[c.id]&&s.choices[c.id].mode!=='keep').length;
+  const changingBoxes:Box[]=[];
+  if(asset)for(const c of all.filter(c=>c.asset===asset.id)){
+    const mode=s.choices[c.id]?.mode;if(mode!=='partial'&&mode!=='full')continue;
+    if(c.maskBoxes)changingBoxes.push(...c.maskBoxes[mode]);
+    else {const masked=Array.from(c.partialText||partialMask(c)),original=Array.from(c.text);(c.boxes||[]).forEach((b,i)=>{if(mode==='full'||masked[i]!==original[i])changingBoxes.push(b);});}
+  }
+  return <main className="file-review" hidden={!active}>
+    <div className="page-heading"><div><span className="eyebrow">파일 개인정보 검토</span><h1>원본은 그대로, 배포는 사본으로.</h1><p>문서와 이미지를 오가며 확인하고, 수정 사본을 다시 검사해 저장하세요.</p></div><button className="primary" disabled={uploading||jobs.length>=8} onClick={()=>boot.desktop?void addFiles():input.current?.click()}>{uploading?'파일 추가 중…':'+ 파일 추가'}</button><input ref={input} type="file" multiple accept={accept} hidden onChange={e=>void addFiles(e.target.files)}/></div>
+    {error&&<div className="error" role="alert">{error}<button onClick={()=>setError('')} aria-label="오류 닫기">×</button></div>}
+    {notice&&<div className="notice" role="status">{notice}</div>}
+    {!jobs.length?<section className="file-empty"><div className="file-empty-icon">▤</div><h2>검사할 파일을 추가해 주세요</h2><p>DOCX · HWPX · XLSX · PPTX · PDF · CSV · TXT<br/>PNG · JPG 이미지와 HWP 본문 검사도 지원해요.</p><div className="file-flow"><span>1. 사본에서 검사</span><b>→</b><span>2. 위치별 가림 선택</span><b>→</b><span>3. 재검사 후 저장</span></div><p className="muted">파일당 20MB · 최대 8개 · PDF 최대 40쪽 · 내장 이미지 최대 40개<br/>수식이 있는 엑셀은 지원 수식을 재계산한 값 전용 사본으로 제공합니다.</p></section>:
+    <div className="document-layout"><aside className="document-rail" aria-label="열린 파일"><h2>열린 파일 <span>{jobs.length}/8</span></h2>{jobs.map(j=><div key={j.id} className={`document-tab ${j.id===id?'active':''}`}><button onClick={()=>setId(j.id)} aria-pressed={id===j.id}><span className="doc-extension">{j.name.split('.').pop()?.toUpperCase()}</span><strong>{j.name}</strong><small>{ACTIVE.has(j.state)?j.progress:j.state==='error'?'읽기 확인 필요':j.state==='cancelled'?'취소됨':`${j.candidates.length}개 후보 · ${states[j.id]?.saved?'사본 저장 요청 완료':'검토 중'}`}</small></button><button className="doc-remove" aria-label={`${j.name} 제거`} onClick={()=>setRemoveId(j.id)}>×</button></div>)}<p>파일을 전환해도 선택한 가림과 위치가 유지됩니다. 작업 목록은 앱 종료 시 정리됩니다.</p></aside>
+    <section className="document-workspace" aria-label="선택한 파일 검토">
+      {job&&<><div className="document-title"><div><span className="eyebrow">{m?.kind==='.xlsx'?'값 전용 배포 사본':'내 PC에서만 처리'}</span><h2>{job.name}</h2></div><span className="source-badge">원본 보존</span></div>
+      {working&&<div className="notice" role="status"><span className="spinner"/>{job.progress}<button className="secondary" onClick={async()=>{try{await api('documents/cancel',{id});setJobs(old=>old.map(j=>j.id===id?{...j,state:'cancelled'}:j));}catch(e){setError(message(e));}}}>작업 취소</button></div>}
+      {job.error&&<div className="error" role="alert">{job.error}</div>}
+      {job.state==='cancelled'&&<div className="notice">취소한 작업의 임시 사본을 정리합니다. 다시 검사하려면 파일을 새로 추가해 주세요.</div>}
+      {m&&<><details className="file-coverage" open={!!m.blockers.length}><summary>검사한 영역과 지원 범위 <span>{m.blockers.length?'저장 제한 있음':'반드시 확인'}</span></summary><ul>{m.coverage.map(v=><li key={v}>검사 범위 · {v}</li>)}</ul>{m.blockers.map(v=><p className="file-blocker" key={v}>{v}</p>)}{m.warnings.map(v=><p key={v}>{v}</p>)}{m.calculation&&<p><strong>{m.calculation.count}개 수식의 계산 결과를 확인했습니다.</strong><br/>{m.calculation.at} · {m.calculation.method}<br/>사본의 값은 이후에 다시 계산되지 않습니다.</p>}</details>
+      <div className="file-summary"><div><strong>{all.length}</strong><span>개 개인정보 후보</span></div><div className="file-risk-counts">{RISKS.map(r=><button key={r.key} className={`risk-${r.key}`} aria-pressed={s.filter===r.key} onClick={()=>selectState({filter:s.filter===r.key?'all':r.key})}>{r.name} <b>{all.filter(c=>c.risk===r.key).length}</b></button>)}</div><small>{applied}개 처리 선택 · 직접 지정 {s.regions.length}곳</small></div>
+      <div className="document-preview-head"><h3>{s.showOutput?'수정 사본 확인':'내용 미리보기'}</h3><div className="segmented">{m.kind==='.xlsx'&&<button aria-pressed={s.view==='sheet'} onClick={()=>selectState({view:'sheet'})}>시트 · 셀</button>}<button aria-pressed={s.view==='text'} onClick={()=>selectState({view:'text'})}>텍스트 · 위치</button><button aria-pressed={s.view==='images'} disabled={!shownAssets.length} onClick={()=>selectState({view:'images'})}>이미지 · 페이지 {shownAssets.length}</button></div></div>
+      {s.showOutput&&<div className="output-banner">재검사에서 {exported?.candidates.length}개 후보가 남았습니다. 유지한 정보·부분 가림·오탐이 포함될 수 있어요.<button onClick={()=>selectState({showOutput:false})}>가림 선택으로 돌아가기</button></div>}
+      {s.view==='sheet'?<SheetReview parts={shownParts} candidates={shownCandidates} selection={s} onChange={selectState} onSelect={c=>{if(!s.showOutput)choose(c);}} onEdit={p=>setPartEdit({id:p.id,text:s.textEdits[p.id]??p.text})} output={s.showOutput} locked={locked||!!m.blockers.length}/>:s.view==='text'?<section className="document-preview" aria-label={s.showOutput?'수정 사본 텍스트':'문서 텍스트'}>
+        {!shownParts.length?<p>읽을 수 있는 텍스트가 없습니다. 이미지·페이지 탭에서 직접 확인하세요.</p>:shownParts.slice(page*25,(page+1)*25).map(p=><article key={p.id}><h4>{p.location}{!s.showOutput&&!p.asset&&<button disabled={locked||!!m.blockers.length} onClick={()=>setPartEdit({id:p.id,text:s.textEdits[p.id]??p.text})}>이 영역 직접 수정</button>}{!s.showOutput&&p.id in s.textEdits&&<button disabled={locked} onClick={()=>{const next={...s.textEdits};delete next[p.id];changed({textEdits:next});}}>직접 수정 취소</button>}{p.asset&&<button onClick={()=>selectState({view:'images',asset:p.asset!})}>이미지에서 보기 ↗</button>}</h4><Highlight part={!s.showOutput&&p.id in s.textEdits?{...p,text:s.textEdits[p.id]}:p} candidates={!s.showOutput&&p.id in s.textEdits?[]:shownCandidates} selection={s} output={s.showOutput} onSelect={c=>{if(!s.showOutput)choose(c);}}/></article>)}
+        <div className="preview-pagination"><button disabled={page===0} onClick={()=>selectState({page:page-1})}>이전</button><span>{page+1} / {totalPages} · 전체 {shownParts.length}개 영역</span><button disabled={page+1>=totalPages} onClick={()=>selectState({page:page+1})}>다음</button></div>
+      </section>:<section className="document-preview"><label className="asset-picker">확인할 페이지·이미지<select value={asset?.id||''} onChange={e=>selectState({asset:e.target.value})}>{shownAssets.map(a=><option key={a.id} value={a.id}>{a.location}</option>)}</select></label>{asset&&<ImageReview key={`${id}-${asset.id}-${s.showOutput}`} job={job} asset={asset} regions={s.regions} selectedBoxes={changingBoxes} locked={locked} output={s.showOutput} onRegion={box=>changed({regions:[...s.regions,{asset:asset.id,box}]})}/>}
+      {!s.showOutput&&s.regions.length>0&&<div className="manual-regions"><strong>직접 지정한 영역</strong>{s.regions.map((r,i)=><span key={i}>{m.assets.find(a=>a.id===r.asset)?.location} · {i+1}번<button disabled={locked} onClick={()=>changed({regions:s.regions.filter((_,n)=>n!==i)})} aria-label={`직접 지정 ${i+1}번 취소`}>취소</button></span>)}</div>}</section>}
+      {!s.showOutput&&focus&&<section className="file-choice-editor" id="file-choice-editor">
+        <div><span className={`risk-${focus.risk}`}>{riskName(focus.risk)} · {focus.labelName}</span><small>{focus.location}</small><button aria-label="선택 편집 닫기" onClick={()=>selectState({focus:null})}>×</button></div><strong>{focus.text}</strong>
+        {focus.ocrConfidence!==undefined&&<p className="ocr-reading-note">{focus.ocrConfidence<80?'글자 인식이 불확실합니다.':'이미지에서 읽은 글자입니다.'} 원문과 다르게 읽혔거나 개인정보가 아니면 ‘가리지 않음’을 선택하세요.</p>}
+        <div className="file-choice-buttons">{(['partial','full','keep','custom'] as MaskMode[]).map(mode=><button key={mode} disabled={locked||!!focus.asset&&mode==='custom'} aria-pressed={(s.choices[focus.id]?.mode||'keep')===mode} onClick={()=>apply(mode,[focus.id])}>{MODE_NAMES[mode]}</button>)}</div>
+        {s.choices[focus.id]?.mode==='custom'&&<label>바꿀 내용<input maxLength={2000} value={(s.choices[focus.id] as {text:string}).text} disabled={locked} onChange={e=>changed({choices:{...s.choices,[focus.id]:{mode:'custom',text:e.target.value}}})}/></label>}
+        <p>{focus.asset?'PDF·이미지는 선택한 글자의 픽셀과 글자층을 삭제해 검게 가립니다. 부분 가림도 별표 대신 일부 영역만 검게 지웁니다.':'미리보기 → '+replacement(focus,s.choices[focus.id])}</p>
+        {focus.asset&&<button className="secondary" disabled={locked} onClick={()=>{changed({choices:{...s.choices,[focus.id]:{mode:'keep'}},focus:null});setNotice('이 항목의 자동 가림을 해제했습니다. 이미지에서 원하는 범위를 드래그해 다시 지정하세요.');document.querySelector('.image-canvas')?.scrollIntoView({block:'center',behavior:'smooth'});}}>가림 범위 직접 다시 지정</button>}
+      </section>}
+      <section className="file-candidate-panel"><div className="candidate-toolbar"><h3>검출 목록</h3><input aria-label="검출 목록 검색" value={s.search} onChange={e=>selectState({search:e.target.value})} placeholder="내용·유형·위치 검색"/><button onClick={()=>selectState({filter:'all',search:''})}>필터 초기화</button></div><div className="bulk-toolbar"><label><input type="checkbox" disabled={locked} checked={filtered.length>0&&filtered.every(c=>s.selected.includes(c.id))} onChange={e=>selectState({selected:e.target.checked?Array.from(new Set([...s.selected,...filtered.map(c=>c.id)])):s.selected.filter(k=>!filtered.some(c=>c.id===k))})}/>현재 목록 전체 선택</label><span>{s.selected.length}개 선택</span><button disabled={locked||!s.selected.length} onClick={()=>apply('partial',s.selected)}>부분 가림</button><button disabled={locked||!s.selected.length} onClick={()=>apply('full',s.selected)}>전체 가림</button><button disabled={locked||!s.selected.length} onClick={()=>apply('keep',s.selected)}>가림 취소</button></div>
+      <div className="file-candidates">{filtered.map(c=><div className="file-candidate" key={c.id}><input type="checkbox" aria-label={`${c.location} ${c.text} 선택`} disabled={locked} checked={s.selected.includes(c.id)} onChange={e=>selectState({selected:e.target.checked?[...s.selected,c.id]:s.selected.filter(k=>k!==c.id)})}/><button className="candidate-location" onClick={()=>choose(c)}><small className={`risk-${c.risk}`}>{riskName(c.risk)} · {c.labelName} · {c.location}</small><strong>{c.text}</strong></button><select aria-label={`${c.text} 가림 방법`} disabled={locked} value={s.choices[c.id]?.mode||'keep'} onChange={e=>{apply(e.target.value as MaskMode,[c.id]);if(e.target.value==='custom')choose(c);}}>{(['keep','partial','full','custom'] as MaskMode[]).map(mode=><option key={mode} value={mode} disabled={!!c.asset&&mode==='custom'}>{MODE_NAMES[mode]}</option>)}</select><button disabled={locked||!!c.asset} onClick={()=>{choose(c);apply('custom',[c.id]);}}>편집</button></div>)}{!filtered.length&&<p>이 목록에 표시할 후보가 없습니다. 미검토 영역과 이미지도 직접 확인해 주세요.</p>}</div></section>
+      <div className="file-applied-columns">{(['partial','full'] as const).map(mode=><section key={mode}><h3>{MODE_NAMES[mode]} 적용 목록 <small>{all.filter(c=>s.choices[c.id]?.mode===mode).length}곳</small></h3><div>{all.filter(c=>s.choices[c.id]?.mode===mode).map(c=><article key={c.id}><button onClick={()=>choose(c)}><small>{c.labelName} · {c.location}</small><span>{c.text} → {c.asset?'영역 가림':replacement(c,s.choices[c.id])}</span></button><select aria-label={`${c.text} 적용 변경`} disabled={locked} value={mode} onChange={e=>apply(e.target.value as MaskMode,[c.id])}><option value="partial">부분</option><option value="full">전체</option></select><button disabled={locked||!!c.asset} onClick={()=>{choose(c);apply('custom',[c.id]);}}>편집</button><button disabled={locked} onClick={()=>apply('keep',[c.id])}>취소</button></article>)}</div></section>)}</div>
+      <section className="file-export"><div><h3>수정 사본 만들기</h3><p>선택한 위치를 처리한 뒤 새 파일을 다시 열어 검사합니다.<br/>원본에는 덮어쓰지 않으며, 선택하지 않은 정보는 그대로 남습니다.</p></div><button className="primary" disabled={locked||!!m.blockers.length} onClick={()=>void generate()}>{job.state==='exporting'?'사본 처리 중…':'사본 생성 · 재검사'}</button>
+      {exported&&!s.exportDirty&&<div className="file-export-result"><strong>재검사 완료 · 남은 후보 {exported.candidates.length}개</strong><p>{exported.filename}</p>{exported.candidates.length>0&&<details className="residual-list"><summary>남은 후보 {exported.candidates.length}개 보기</summary>{exported.candidates.map(c=><button key={c.id} onClick={()=>selectState({showOutput:true,view:c.asset?'images':'text',asset:c.asset||s.asset,page:Math.floor(exported.parts.findIndex(p=>p.id===c.part)/25)})}><span className={`risk-${c.risk}`}>{c.labelName}</span> {c.text} <small>{c.location}</small></button>)}</details>}<button className="secondary" onClick={()=>selectState({showOutput:true,page:0})}>실제 사본 확인</button><label><input type="checkbox" checked={s.verified} onChange={e=>selectState({verified:e.target.checked})}/>남은 후보, 이미지 가림 범위, 지원 제한을 확인했습니다.</label><button className="primary" disabled={!s.verified||working} onClick={()=>void save()}>{boot.desktop?'새 파일로 사본 저장':'사본 다운로드'}</button></div>}
+      </section><p className="file-footer-note">자동 검사는 오탐과 누락이 있을 수 있습니다. OCR 재검사 0건도 이미지에 개인정보가 없다는 뜻은 아닙니다. 부분 가림은 일부 개인정보를 남깁니다. 사본을 원래 문서 프로그램에서 열어 배치와 내용도 확인해 주세요.</p>
+      </>}
+      </>}
+    </section></div>}
+    {partEdit&&<div className="file-dialog-shade"><section role="dialog" aria-modal="true" aria-labelledby="edit-part-title"><h2 id="edit-part-title">영역 직접 수정</h2><p>이 영역의 원문을 직접 바꿉니다. 이 영역에서 선택한 개별 가림보다 직접 수정 내용이 우선합니다.</p><textarea aria-label="영역 수정 내용" maxLength={12000} value={partEdit.text} onChange={e=>setPartEdit({...partEdit,text:e.target.value})}/><div><button className="secondary" onClick={()=>setPartEdit(null)}>취소</button><button className="primary" onClick={()=>{const next={...s.choices};for(const c of all.filter(c=>c.part===partEdit.id))delete next[c.id];changed({textEdits:{...s.textEdits,[partEdit.id]:partEdit.text},choices:next});setPartEdit(null);}}>수정 적용</button></div></section></div>}
+    {removeId&&<div className="file-dialog-shade"><section role="dialog" aria-modal="true" aria-labelledby="remove-file-title"><h2 id="remove-file-title">작업 목록에서 제거할까요?</h2><p>진행 중인 검사를 취소하고 임시 사본과 가림 선택을 정리합니다. 원본과 이미 저장한 사본은 유지됩니다.</p><div><button className="secondary" onClick={()=>setRemoveId('')}>계속 검토</button><button className="primary" onClick={()=>void remove()}>제거</button></div></section></div>}
+  </main>;
+}

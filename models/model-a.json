@@ -1,0 +1,31 @@
+{
+  "repo": "atonlee/koelectra-ko-pii-ner",
+  "revision": "1e75c01e707232401883cf364151bbe2e560c708",
+  "files": [
+    {
+      "file": "README.md",
+      "bytes": 7904,
+      "sha256": "fdf555f378262369d4f6477e3f2f7a07d4b4404bcbbc65e88c73031c92f21597"
+    },
+    {
+      "file": "config.json",
+      "bytes": 3515,
+      "sha256": "65b1c2e17c4eb6d4f5be29e4374784a03c7b886229af948757e55f3b79444a23"
+    },
+    {
+      "file": "model.safetensors",
+      "bytes": 56309164,
+      "sha256": "e3ed229e2bc4299c98624f0a5bfc9c15e2d9942295dc2eba8a67105e628e92dc"
+    },
+    {
+      "file": "tokenizer.json",
+      "bytes": 814948,
+      "sha256": "9bc85a2412ae3694bffac69cb152a9aafd59fd0357e540a343fa9daa62099c38"
+    },
+    {
+      "file": "tokenizer_config.json",
+      "bytes": 352,
+      "sha256": "9cd988573a9588a6085cd353eeefa09b803dba75b03f58d0c1d302aad3078193"
+    }
+  ]
+}

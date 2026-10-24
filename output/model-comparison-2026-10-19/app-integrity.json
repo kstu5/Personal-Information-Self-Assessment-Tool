@@ -1,0 +1,9 @@
+{
+  "unchanged": true,
+  "checkedFiles": 50,
+  "scope": "Root source/config files, backend, src, scripts, tests, models config, dist. Installed runtime packages excluded.",
+  "snapshotNote": "Full runtime hash scan was interrupted after the frozen cases were saved; a smaller source/config/build snapshot was taken during this research turn. No product edits were made.",
+  "changed": [],
+  "added": [],
+  "missing": []
+}

@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-16",
+  "purpose": "인수인계 문서 작성 시 현재 파일과 기존 실행 기준 재확인",
+  "productCodeChanged": false,
+  "build": {
+    "command": "pnpm run build",
+    "result": "passed",
+    "scope": "TypeScript 검사 및 Vite 배포 화면 빌드",
+    "viteVersion": "8.3.4"
+  },
+  "backendTests": {
+    "command": "python scripts/test_backend.py",
+    "result": "passed",
+    "passed": 22,
+    "warnings": 1,
+    "warning": "Starlette TestClient의 httpx 사용 중단 예고; 제품 실행 오류 아님"
+  },
+  "executionNote": "제한 실행 환경에서 빌드의 EPERM 및 응답 없는 시험 실행을 확인했다. 멈춘 실행을 종료하고 허용된 실행 환경에서 재실행하여 위 결과를 얻었다.",
+  "previousEvidenceOnly": [
+    "화면 통합 12개 흐름",
+    "Windows 전용 창 및 VBS 실행 경로",
+    "합성 커뮤니티 3종의 실제 API와 화면 검증",
+    "시험 브라우저의 외부 요청 없음",
+    "실제 프로세스의 127.0.0.1 바인딩"
+  ],
+  "notPerformedInThisHandoff": [
+    "OS 파일 선택 및 덮어쓰기 창 직접 조작",
+    "PC 재부팅 후 작업 파일 복원",
+    "다른 Windows PC 설치",
+    "다른 LAN 기기 접속 시험",
+    "OS 전체 통신 감시",
+    "학습 모델 설치 또는 학습",
+    "탐지 개선 성능 측정"
+  ],
+  "git": {"hasCommits": false, "note": "인수 시점 소스가 미추적 파일 상태. Git 기록 복원을 전제하지 않음"}
+}

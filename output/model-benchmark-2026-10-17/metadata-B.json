@@ -1,0 +1,132 @@
+{
+  "_id": "6a94d692b357a35ac1d7ba3e",
+  "id": "seongyeon1/ko-pii-ner-roberta-base",
+  "private": false,
+  "pipeline_tag": "token-classification",
+  "library_name": "transformers",
+  "tags": [
+    "transformers",
+    "safetensors",
+    "roberta",
+    "token-classification",
+    "korean",
+    "pii",
+    "ner",
+    "privacy",
+    "de-identification",
+    "ko",
+    "dataset:seongyeon1/ko-pii-ner-100k",
+    "arxiv:2105.09680",
+    "base_model:klue/roberta-base",
+    "base_model:finetune:klue/roberta-base",
+    "license:cc-by-sa-4.0",
+    "endpoints_compatible",
+    "region:us"
+  ],
+  "downloads": 81,
+  "likes": 0,
+  "modelId": "seongyeon1/ko-pii-ner-roberta-base",
+  "author": "seongyeon1",
+  "sha": "95a3af685dccf4bb3f7fff6fc81146fed71500bb",
+  "lastModified": "2026-08-31T04:01:32.000Z",
+  "gated": false,
+  "disabled": false,
+  "mask_token": "[MASK]",
+  "widgetData": [
+    {
+      "text": "홍길동 고객님, 주민등록번호 900101-1234567 확인되었습니다. 환불 계좌 110-123-456789로 입금됩니다."
+    },
+    {
+      "text": "접수번호 20260831-001234 건은 담당 부서로 이관되었습니다. 문의는 1588-1588입니다."
+    }
+  ],
+  "model-index": null,
+  "config": {
+    "architectures": [
+      "RobertaForTokenClassification"
+    ],
+    "model_type": "roberta",
+    "tokenizer_config": {
+      "bos_token": "[CLS]",
+      "cls_token": "[CLS]",
+      "eos_token": "[SEP]",
+      "mask_token": "[MASK]",
+      "pad_token": "[PAD]",
+      "sep_token": "[SEP]",
+      "unk_token": "[UNK]"
+    }
+  },
+  "cardData": {
+    "language": [
+      "ko"
+    ],
+    "license": "cc-by-sa-4.0",
+    "library_name": "transformers",
+    "pipeline_tag": "token-classification",
+    "tags": [
+      "korean",
+      "pii",
+      "ner",
+      "token-classification",
+      "privacy",
+      "de-identification"
+    ],
+    "base_model": "klue/roberta-base",
+    "datasets": [
+      "seongyeon1/ko-pii-ner-100k"
+    ],
+    "metrics": [
+      "f1",
+      "precision",
+      "recall"
+    ],
+    "widget": [
+      {
+        "text": "홍길동 고객님, 주민등록번호 900101-1234567 확인되었습니다. 환불 계좌 110-123-456789로 입금됩니다."
+      },
+      {
+        "text": "접수번호 20260831-001234 건은 담당 부서로 이관되었습니다. 문의는 1588-1588입니다."
+      }
+    ]
+  },
+  "transformersInfo": {
+    "auto_model": "AutoModelForTokenClassification",
+    "pipeline_tag": "token-classification",
+    "processor": "AutoTokenizer"
+  },
+  "siblings": [
+    {
+      "rfilename": ".gitattributes"
+    },
+    {
+      "rfilename": "README.md"
+    },
+    {
+      "rfilename": "config.json"
+    },
+    {
+      "rfilename": "model.safetensors"
+    },
+    {
+      "rfilename": "special_tokens_map.json"
+    },
+    {
+      "rfilename": "tokenizer.json"
+    },
+    {
+      "rfilename": "tokenizer_config.json"
+    },
+    {
+      "rfilename": "vocab.txt"
+    }
+  ],
+  "spaces": [],
+  "createdAt": "2026-08-31T01:19:14.000Z",
+  "safetensors": {
+    "parameters": {
+      "F32": 110059049
+    },
+    "total": 110059049
+  },
+  "usedStorage": 880520264
+}

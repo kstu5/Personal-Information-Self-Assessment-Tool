@@ -1,0 +1,481 @@
+{
+  "createdAt": "2026-10-16T06:42:44.722413+00:00",
+  "purpose": "Source and documentation handoff; not an executable installer",
+  "excluded": [
+    ".git",
+    ".runtime",
+    ".venv",
+    "node_modules",
+    "dist",
+    "runtime.local.json",
+    "general tmp",
+    "user-created drafts"
+  ],
+  "files": [
+    {
+      "path": "00_먼저읽기.md",
+      "bytes": 3713,
+      "sha256": "510b13e80a4c83d722d640a2944161b7f1d023e2d6aa93afbee0c7028966a2a4"
+    },
+    {
+      "path": "01_상세인수인계.md",
+      "bytes": 54325,
+      "sha256": "7e38b528baaa2f2d88acc858ceed4de0fda70ee169891d26eac5c31f88f9c44b"
+    },
+    {
+      "path": "02_상세인수인계.pdf",
+      "bytes": 285643,
+      "sha256": "b8c7e8b2f1ac1791b2eee9cc7d251ad6848b7fb31d971e817cc1dffc4acb5138"
+    },
+    {
+      "path": "project/.gitignore",
+      "bytes": 106,
+      "sha256": "1fde1613b93ef60deea7b37e22372f98f7038208ac35734a13699bf581199f15"
+    },
+    {
+      "path": "project/README.md",
+      "bytes": 8166,
+      "sha256": "e1be7a10025daf5438fa9a5a8d01b1aab3f002cab28df6e5a43e1d175283e90c"
+    },
+    {
+      "path": "project/backend/__init__.py",
+      "bytes": 45,
+      "sha256": "3296b676ef60d217c63594f6b13ac588d249d4aec597de7139de60e3a54c9609"
+    },
+    {
+      "path": "project/backend/app.py",
+      "bytes": 6458,
+      "sha256": "46587477eb418f057bd2f13d7057dbb30b961b8a3e6a3721f866f6bc356adc36"
+    },
+    {
+      "path": "project/backend/desktop.py",
+      "bytes": 1863,
+      "sha256": "3aa42a07f55e0dec9e7bf3eddf4e34b8b48e65843c05a1c7f8a30652afce12c8"
+    },
+    {
+      "path": "project/backend/detection.py",
+      "bytes": 3458,
+      "sha256": "c132a71d05de4bf8958969cbdbf3b451a060487b03f4741d595d6cda9e13473d"
+    },
+    {
+      "path": "project/backend/documents.py",
+      "bytes": 6181,
+      "sha256": "454fc4d58f17a71a5d0ba8d8bd16ebd95f2cd75ab36d177f6759977267ac6963"
+    },
+    {
+      "path": "project/docs/DEPENDENCIES.md",
+      "bytes": 1458,
+      "sha256": "b9d346d3902738d3a0437eaffd1477ddcc5e23497704e62e46c45d420fe93e76"
+    },
+    {
+      "path": "project/docs/HANDOFF.md",
+      "bytes": 54325,
+      "sha256": "7e38b528baaa2f2d88acc858ceed4de0fda70ee169891d26eac5c31f88f9c44b"
+    },
+    {
+      "path": "project/docs/detection-evaluation.json",
+      "bytes": 4953,
+      "sha256": "e36fa84783ccd215e10e95b52b41632a50ef49673f093575673214c6c7d9f47c"
+    },
+    {
+      "path": "project/docs/verification.md",
+      "bytes": 6843,
+      "sha256": "39cc695f4065319f48ded124f6e7532471b47cbe443fa6ca222c8ed94c7bd31f"
+    },
+    {
+      "path": "project/index.html",
+      "bytes": 389,
+      "sha256": "278c6174605099a824af2e1a46fcd6a586eee1521d331be89c241a09fd3a2dbd"
+    },
+    {
+      "path": "project/output/community-review/C01_독서_모임_모집.piipost",
+      "bytes": 1057,
+      "sha256": "1271214d550badfee229baecf529d1d965642a8795c9598d32bf23c015c7f156"
+    },
+    {
+      "path": "project/output/community-review/C02_중고거래와_나눔.piipost",
+      "bytes": 1045,
+      "sha256": "120a81f11a3f11003165b3a2e34e6f557cc2350636692030ba1a163924c6bfb9"
+    },
+    {
+      "path": "project/output/community-review/C03_취미_커뮤니티_후기.piipost",
+      "bytes": 1088,
+      "sha256": "830f880b9b16ad986d745030b011cde11c4d8a8ddb2cceb75633fe240f71aa9a"
+    },
+    {
+      "path": "project/output/community-review/community-evaluation.json",
+      "bytes": 29201,
+      "sha256": "d8dae146f934004ea88c22655c687964bb71f65df73d2fbe5a58ac08b88703f1"
+    },
+    {
+      "path": "project/output/community-review/ui-verification.json",
+      "bytes": 1317,
+      "sha256": "d16afce7a725ae282abc4eb6345b454d05bb1d2183a0eae997e615b68f214cd7"
+    },
+    {
+      "path": "project/output/community-review/사용안내.txt",
+      "bytes": 765,
+      "sha256": "52f1ce9d002bac955564a43ebd39486ad992d931ff7062d8302be442b5864498"
+    },
+    {
+      "path": "project/output/community-review/점검기록.md",
+      "bytes": 16008,
+      "sha256": "7e18ca07b41450e17bf85972bd12e7af4415e7ac6edbd13ac277e385cb3052cf"
+    },
+    {
+      "path": "project/output/docx/게시전_개인정보_자가진단_도구_종합보고서_v1.docx",
+      "bytes": 228444,
+      "sha256": "bd3fe52101510ddf7691c541e9c5a55dccecaf3ffa8fbba9e1701770026d5656"
+    },
+    {
+      "path": "project/output/pdf/ko_pii_프로젝트_활용_안내서.pdf",
+      "bytes": 179187,
+      "sha256": "3496e8a3545041706b5bdcd32e11fa43066cfb5cb225446504d2b5f0c79c0a1f"
+    },
+    {
+      "path": "project/output/pdf/게시전_개인정보_자가진단_도구_종합보고서_v1.pdf",
+      "bytes": 369324,
+      "sha256": "f30e2d57544ab23ce93327d74f3448358db06b214d51c63175023282462786a8"
+    },
+    {
+      "path": "project/output/pdf/커뮤니티_게시글_3종_개인정보_탐지_점검보고서_v1.pdf",
+      "bytes": 174818,
+      "sha256": "88c64e8cd2f7687b8abc632d1e0666a396f4e83edcfba6a7e23ae1fc9ef52ea2"
+    },
+    {
+      "path": "project/package.json",
+      "bytes": 473,
+      "sha256": "0687f314afc291a2d06a8fd017d7ae763451116fcd261fe99343ab1de57d9137"
+    },
+    {
+      "path": "project/pnpm-lock.yaml",
+      "bytes": 23462,
+      "sha256": "3e7908da6e6b2334422b7a2d843923cf1aa2cd9fb5559d4eef31955b95c30e36"
+    },
+    {
+      "path": "project/requirements.lock.txt",
+      "bytes": 635,
+      "sha256": "5253833876c32df20fd590cd38943fd5d1cc9e12dcbb914f1120b8162e3c1079"
+    },
+    {
+      "path": "project/research/build_ko_pii_guide.py",
+      "bytes": 19509,
+      "sha256": "2d728cc85ff2d48df0890fabf12440419957fc51e3df35b34ebbd2f4a0eef0a4"
+    },
+    {
+      "path": "project/research/build_project_report.py",
+      "bytes": 36182,
+      "sha256": "62f7c7952e95c4c39ed21c296bf40f9b98e7b6eaa4cc687886f71c1028a7d4bf"
+    },
+    {
+      "path": "project/research/check-post-design.cjs",
+      "bytes": 7711,
+      "sha256": "5862d73916cc6f4c17aec9fe1b50db9c1e849b6d86dcd52e6e5ed40010a151a7"
+    },
+    {
+      "path": "project/research/check-post-file-design.cjs",
+      "bytes": 11087,
+      "sha256": "12db71dc50954d8d240191223f2f62ab58e8bf7c43faa57dbfa5f36adf95fcb8"
+    },
+    {
+      "path": "project/research/check_design_detection.py",
+      "bytes": 2522,
+      "sha256": "00e50e4ea8a83f2f14e64bfd439c09eac9bd78e0960492112bd9f5c2439da7a9"
+    },
+    {
+      "path": "project/research/community_cases_v1.json",
+      "bytes": 7982,
+      "sha256": "da1c44a80bc1e47a491e4ee698294fa331b872f2b99e93e486c371801f12ac9f"
+    },
+    {
+      "path": "project/research/detection_context_probes_v1.json",
+      "bytes": 12072,
+      "sha256": "1006cb936719368eb86fb140614c352237b39b44939017a7deda1a115f7cb0cb"
+    },
+    {
+      "path": "project/research/ko_pii_design_sample_check.json",
+      "bytes": 8684,
+      "sha256": "8142d587337d862511f4863db3011c34d5d35a4549fc11c0a224efdb6c8962e6"
+    },
+    {
+      "path": "project/research/ko_pii_probe.py",
+      "bytes": 6548,
+      "sha256": "fc775feb3eea065b15ce9bb623e77f146781cb242e93d023f2699cfdb6a3fa59"
+    },
+    {
+      "path": "project/research/ko_pii_probe_results.json",
+      "bytes": 21067,
+      "sha256": "3cae7703b0c23050668bd13bfca765c752b195f8f6f28bfa888b5ccf21ce8b30"
+    },
+    {
+      "path": "project/research/post-file-design-qa.json",
+      "bytes": 3388,
+      "sha256": "794b8ad807084ad76bfe194130f31ee2888aeaf970be023504453cf175df9046"
+    },
+    {
+      "path": "project/research/privacy-marker-directions-preview.html",
+      "bytes": 88317,
+      "sha256": "873bbffda0a1288985d687f6753ee48dfc54c7ca6f0d50b4202811541b223dec"
+    },
+    {
+      "path": "project/research/privacy-post-preview.html",
+      "bytes": 149229,
+      "sha256": "6a746b3bb88a723521b3bf407577a6815699ebed7d45d94ede784d65ead03028"
+    },
+    {
+      "path": "project/research/privacy-post-test-preview.html",
+      "bytes": 149395,
+      "sha256": "e832025c4272a2cee355f53502ec236876481049235a608761af46550b6e2e83"
+    },
+    {
+      "path": "project/research/privacy-review-preview.html",
+      "bytes": 95367,
+      "sha256": "3b9bb05c2464a4671589e2df17aad20a690a911c735026a63ec7791ac3053f8c"
+    },
+    {
+      "path": "project/research/privacy-workspace-preview.html",
+      "bytes": 107371,
+      "sha256": "bf63316944e78959b00fd1c4e0c389a4c058adf3aa4b8197cdfaec5c69fe4865"
+    },
+    {
+      "path": "project/research/구현_착수전_기술선정과_로컬보안_검토.md",
+      "bytes": 20443,
+      "sha256": "7d499c7ef5320e032e10dd3c6433df58cd48db4df33337f78e32055336fcf944"
+    },
+    {
+      "path": "project/research/구현_확정사항과_검증기준.md",
+      "bytes": 14883,
+      "sha256": "0c3fb2e0b4ff7595db2674abb5339685a4e992f891457c70c2d0fc9015003500"
+    },
+    {
+      "path": "project/research/구현전_결정사항과_ko_pii_검토.md",
+      "bytes": 27714,
+      "sha256": "3c49f772676b06e6b2252850b24c1f527f15bd199a59552b60fc21dd7687d1c4"
+    },
+    {
+      "path": "project/research/논문기반_오탐과_미탐_개선방안.md",
+      "bytes": 20769,
+      "sha256": "ca0438e477d1c764304784c8303739183e10913b2d2c85e02ee41ad1bc1e8422"
+    },
+    {
+      "path": "project/research/저장_불러오기와_실행방식_게시글유형_조사.md",
+      "bytes": 21499,
+      "sha256": "75cd611ccdfdee292865cc6863e95822c6ac1d7fe0e428e1e943827dbce0fba0"
+    },
+    {
+      "path": "project/research/제품_방향과_보류_아이디어.md",
+      "bytes": 12869,
+      "sha256": "e62c24d92f43da1ee0bb62eb63374b9868955628d83e506f1f05ba00a0dcdcea"
+    },
+    {
+      "path": "project/run.py",
+      "bytes": 4143,
+      "sha256": "ba3b4afc3bfc2f119b8481e66209d80c019611c50f45695f32383961cdb0e5a3"
+    },
+    {
+      "path": "project/scripts/build_community_report.py",
+      "bytes": 23588,
+      "sha256": "d6092c156b53e02f8bb9945621f6b7cd70c499ec3d9bd9c8788f8dfba1354596"
+    },
+    {
+      "path": "project/scripts/build_handoff.py",
+      "bytes": 11319,
+      "sha256": "290dd37817500697d9f8a312da4a8f034d8fb21c6f7bf3a02071bd776818e220"
+    },
+    {
+      "path": "project/scripts/check_community_ui.cjs",
+      "bytes": 4372,
+      "sha256": "0de7fe6482db2619575f8060429e9dc37689f45828379cb1e8df967f3c477661"
+    },
+    {
+      "path": "project/scripts/check_desktop.py",
+      "bytes": 4318,
+      "sha256": "6c969191a9d6ab3482c7ae1ccc3d19824d3adc6789d3a770164184c04e5987bb"
+    },
+    {
+      "path": "project/scripts/check_running_app.py",
+      "bytes": 835,
+      "sha256": "31ebf219297f06f9581deb4fdf5c213a98123f4597b1f37ab2c5adbd99fda8ce"
+    },
+    {
+      "path": "project/scripts/check_ui.cjs",
+      "bytes": 11515,
+      "sha256": "85f745089abbfa510e12ac9e6c81fd7ac9749ec386a3f92fdde39097ed611452"
+    },
+    {
+      "path": "project/scripts/evaluate_community_cases.py",
+      "bytes": 5243,
+      "sha256": "bbedb32f51f6979c315436ae502edbde5e0cb254e8ea8568c15c348a037bbded"
+    },
+    {
+      "path": "project/scripts/evaluate_detection.py",
+      "bytes": 3524,
+      "sha256": "60915b6e2ccf79568b06fbe239320567d0f18c7f157b7d3455a6e42b66809786"
+    },
+    {
+      "path": "project/scripts/probe_detection_context.py",
+      "bytes": 3033,
+      "sha256": "7341f62632d4cba467af3972cf1c8a7ab0203537bf355c047fe24b8ae538037f"
+    },
+    {
+      "path": "project/scripts/record_environment.py",
+      "bytes": 2000,
+      "sha256": "cbfec69c4f1ed45396b84509d796e39360f9aa40b512529ff335ed5aef797b67"
+    },
+    {
+      "path": "project/scripts/setup.ps1",
+      "bytes": 931,
+      "sha256": "cfb80264ce12cd422a8608d4dc4cb6438f78fb06c9be5747221995347cec35f3"
+    },
+    {
+      "path": "project/scripts/start.ps1",
+      "bytes": 1242,
+      "sha256": "6dc9dfd3e71b433549a3ed0b602a6e5bbdef4ba232c9b1468e7a9a879715f908"
+    },
+    {
+      "path": "project/scripts/test_backend.py",
+      "bytes": 359,
+      "sha256": "ba4e259a763e9444916d10e5d1b19501d83c48d25a751bbe07517b6276813022"
+    },
+    {
+      "path": "project/src/App.tsx",
+      "bytes": 20674,
+      "sha256": "c0596d60e2d66496df3cfd1aab83e93a941f2296f154bf467b048c1bed18a6e0"
+    },
+    {
+      "path": "project/src/api.ts",
+      "bytes": 1102,
+      "sha256": "c25da84cb8a650cb9fdcf8ccf1898a9e1dc1f248eb92783f16925ca3bf63bdbd"
+    },
+    {
+      "path": "project/src/files.ts",
+      "bytes": 5004,
+      "sha256": "1a18c8e6e0f2cd9e9d2e261cf5d9fd131c3884cb28bf6ef886dc0a4acfe48979"
+    },
+    {
+      "path": "project/src/main.tsx",
+      "bytes": 226,
+      "sha256": "e36696dc893cc8fd22b45b742883950fbdce917a7c75a59a1e57309db05f95de"
+    },
+    {
+      "path": "project/src/styles.css",
+      "bytes": 14812,
+      "sha256": "a8bc51c930c14247252a801138043eb203731a20b253992247734d3b8f6ad0ac"
+    },
+    {
+      "path": "project/src/types.ts",
+      "bytes": 1007,
+      "sha256": "e1ba0281e5bd7011770acc599458f5f911ffafb4906803284fb1e5200fb80364"
+    },
+    {
+      "path": "project/src/vite-env.d.ts",
+      "bytes": 38,
+      "sha256": "65996936fbb042915f7b74a200fcdde7e410f32a669b1ab9597cfaa4b0faddb5"
+    },
+    {
+      "path": "project/tests/conftest.py",
+      "bytes": 160,
+      "sha256": "58ee0a6ced0dc1efb8b346762d2f4b4f68ff6ca7b2dc9b1accabbb16bce4970f"
+    },
+    {
+      "path": "project/tests/test_api.py",
+      "bytes": 3965,
+      "sha256": "2c826e504211acb5b8e89f7e6a6e77d3066014f2876cf35e477a3ff086f3773c"
+    },
+    {
+      "path": "project/tests/test_documents.py",
+      "bytes": 3545,
+      "sha256": "6339ad060c484de594300dfbb02165a41ec489481978b03a2814029dc2a392df"
+    },
+    {
+      "path": "project/tsconfig.json",
+      "bytes": 395,
+      "sha256": "a43018a3d12a3ca3ceede98496f1c27cfd1697372e2cae258b64a6bebe36d29a"
+    },
+    {
+      "path": "project/vite.config.ts",
+      "bytes": 154,
+      "sha256": "6763e37030c6785e830462c42f134b496f29be417d736d75248dbbacbe3ad588"
+    },
+    {
+      "path": "project/게시전 실행.vbs",
+      "bytes": 646,
+      "sha256": "8465f9e74a1e70dd733767ef94d4ee049f9e35baea731aaef404c82d932ceab3"
+    },
+    {
+      "path": "reference/design/privacy-marker-directions.html",
+      "bytes": 8881,
+      "sha256": "ce56432c1da5d9d24cfd6449fd7f22efd3f3d28c69b3edf8c4768f845581683f"
+    },
+    {
+      "path": "reference/design/privacy-post-design.html",
+      "bytes": 61764,
+      "sha256": "4b4ceb78999e8d38a3cdbd024c59cda3cd5857ca5f871d269ca792cb83be11dd"
+    },
+    {
+      "path": "reference/design/privacy-review-markers.html",
+      "bytes": 14772,
+      "sha256": "de338497997e9c0a7788f8715bc34f080949e8f35924212a60d73bd28ff67c58"
+    },
+    {
+      "path": "reference/design/privacy-workspace-design.html",
+      "bytes": 25228,
+      "sha256": "0a960d3ec01a776e49b52db12bf001d27196f6899d6e74f7e8c62932212ac12b"
+    },
+    {
+      "path": "reference/previous-community-ui/C01.png",
+      "bytes": 92294,
+      "sha256": "1557540c2c5ffed264b23a7737a1fce4737370838fb2d7dd96dbee2e55b4f74b"
+    },
+    {
+      "path": "reference/previous-community-ui/C02.png",
+      "bytes": 93651,
+      "sha256": "b50181ff18ad1634eb242ef3232eb86978562ba8db56e47d8bdaa85bd187836c"
+    },
+    {
+      "path": "reference/previous-community-ui/C03.png",
+      "bytes": 86469,
+      "sha256": "04a447d30183b42861ddeb1b1c9eecfd711a259143a8c915e7ac7e23d4a74f4c"
+    },
+    {
+      "path": "reference/previous-ui-check/report.json",
+      "bytes": 776,
+      "sha256": "3ec2a442960212e887419be2ba7271c90f94b35c55ee574f63fbf26b1a453c8f"
+    },
+    {
+      "path": "reference/previous-ui-check/results.png",
+      "bytes": 106516,
+      "sha256": "b2762855cce04be02bbe9fd155fd227d88f08fed59488a4ea7a333227827d6fa"
+    },
+    {
+      "path": "reference/previous-ui-check/save.png",
+      "bytes": 173133,
+      "sha256": "d470fa72083273a1475112440f30ae2af2ca506d2884576abb26a45940ddfcfc"
+    },
+    {
+      "path": "reference/previous-ui-check/start.png",
+      "bytes": 34466,
+      "sha256": "1f057e2880587c179383898178bbb5c95b837c1a1c1fe76b5fe320bc1d26bda4"
+    },
+    {
+      "path": "reference/previous-ui-check/write.png",
+      "bytes": 70090,
+      "sha256": "80395af4f330a631cb29803f5be49c785c914551750e44ef53d2a6bd26318884"
+    },
+    {
+      "path": "reference/게시전_개인정보_노출_자가진단_도구_프로젝트계획서_v2.docx",
+      "bytes": 350669,
+      "sha256": "0776fb4cd7bc2d88ea433ce95bfc0439f862b24c339c7d4a835c42f561e8abe4"
+    },
+    {
+      "path": "다음담당자_시작요청.txt",
+      "bytes": 2875,
+      "sha256": "c2b5f7e1fd1d33bd88d1f7abaaaaa9ec5da779c46fd286b9c0aeca17d34a0621"
+    },
+    {
+      "path": "인수시점_확인기록.json",
+      "bytes": 1497,
+      "sha256": "8bf8077af79b875792fd1d54cc0bec00f17f04c536f80cc0ee3f4d59fa83e18a"
+    }
+  ]
+}

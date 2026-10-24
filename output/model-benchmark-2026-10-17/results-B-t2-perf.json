@@ -1,0 +1,203 @@
+{
+  "model": "B",
+  "environment": {
+    "cpu": "Intel(R) Core(TM) Ultra 5 325",
+    "logicalCpus": 8,
+    "physicalCpus": 8,
+    "ramBytes": 33685872640,
+    "availableRamBytesAtStart": 14386745344,
+    "os": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+    "threads": 2,
+    "device": "cpu",
+    "versions": {
+      "torch": "2.9.1+cpu",
+      "transformers": "4.57.6",
+      "numpy": "2.5.4",
+      "psutil": "7.1.3",
+      "safetensors": "0.8.0",
+      "tokenizers": "0.22.2"
+    }
+  },
+  "fixtureSha256": "5add9cfa32f3ffd630cf464d4015f28e7c6dd4121ca89a850cf313d78ed1b0aa",
+  "method": "BIO argmax, no confidence threshold or task-specific heuristics. Sequential batch=1 FP32 CPU. Long inputs use overlapping token windows; the most central window supplies each token tag. Original offsets preserved.",
+  "memoryBeforeLoad": {
+    "rss": 32768000,
+    "vms": 18436096,
+    "peak_wset": 32768000,
+    "private": 18436096
+  },
+  "parameterCount": 110059049,
+  "maxTokensPerWindow": 256,
+  "stride": 64,
+  "labelMapping": {
+    "PERSON_NAME": "PERSON",
+    "ADDRESS": "ADDRESS",
+    "PHONE_NUM": "PHONE",
+    "EMAIL": "EMAIL",
+    "ACCOUNT_NUM": "ACCOUNT",
+    "DOB": "DT_BIRTH",
+    "AGE": "AGE",
+    "POSITION": "POSITION",
+    "RRN": "RRN",
+    "CARD_NUM": "CARD",
+    "USER_ID": "USER_ID",
+    "PLATE_NUM": "PLATE",
+    "PASSPORT_NUM": "PASSPORT",
+    "DRIVER_LICENSE_NUM": "DRIVER_LICENSE",
+    "FOREIGNER_REG_NUM": "ALIEN"
+  },
+  "loadingInfo": {
+    "missing_keys": [],
+    "unexpected_keys": [],
+    "mismatched_keys": [],
+    "error_msgs": []
+  },
+  "modelFilesBytes": 441274291,
+  "importAndLoadSeconds": 8.066963799996302,
+  "memoryAfterLoad": {
+    "rss": 303947776,
+    "vms": 989286400,
+    "peak_wset": 303947776,
+    "private": 989286400
+  },
+  "firstInferenceSeconds": 0.09318719990551472,
+  "processStartToFirstResultSeconds": 8.800298699876294,
+  "cases": [],
+  "performance": [
+    {
+      "id": "N001",
+      "characters": 26,
+      "windows": 1,
+      "repeats": 3,
+      "seconds": [
+        0.026662700111046433,
+        0.02789290016517043,
+        0.026538799982517958
+      ],
+      "medianSeconds": 0.026662700111046433,
+      "maxSeconds": 0.02789290016517043,
+      "p95NearestRankSeconds": 0.02789290016517043,
+      "cpuSecondsPerRun": 0.046875,
+      "memoryAfter": {
+        "rss": 647782400,
+        "vms": 1009188864,
+        "peak_wset": 647782400,
+        "private": 1009188864
+      }
+    },
+    {
+      "id": "C01-body",
+      "characters": 401,
+      "windows": 1,
+      "repeats": 3,
+      "seconds": [
+        0.1868257001042366,
+        0.18279079999774694,
+        0.1840890001039952
+      ],
+      "medianSeconds": 0.1840890001039952,
+      "maxSeconds": 0.1868257001042366,
+      "p95NearestRankSeconds": 0.1868257001042366,
+      "cpuSecondsPerRun": 0.3645833333333333,
+      "memoryAfter": {
+        "rss": 659640320,
+        "vms": 1020645376,
+        "peak_wset": 659640320,
+        "private": 1020645376
+      }
+    },
+    {
+      "id": "N117",
+      "characters": 1000,
+      "windows": 3,
+      "repeats": 3,
+      "seconds": [
+        0.6411387999542058,
+        0.6378858999814838,
+        0.6489150000270456
+      ],
+      "medianSeconds": 0.6411387999542058,
+      "maxSeconds": 0.6489150000270456,
+      "p95NearestRankSeconds": 0.6489150000270456,
+      "cpuSecondsPerRun": 1.2291666666666667,
+      "memoryAfter": {
+        "rss": 666468352,
+        "vms": 1032450048,
+        "peak_wset": 666468352,
+        "private": 1032450048
+      }
+    },
+    {
+      "id": "N118",
+      "characters": 3000,
+      "windows": 9,
+      "repeats": 3,
+      "seconds": [
+        2.1212249000091106,
+        2.020568900043145,
+        2.1212712000124156
+      ],
+      "medianSeconds": 2.1212249000091106,
+      "maxSeconds": 2.1212712000124156,
+      "p95NearestRankSeconds": 2.1212712000124156,
+      "cpuSecondsPerRun": 4.005208333333333,
+      "memoryAfter": {
+        "rss": 669151232,
+        "vms": 1017618432,
+        "peak_wset": 669151232,
+        "private": 1017618432
+      }
+    },
+    {
+      "id": "N119",
+      "characters": 10000,
+      "windows": 31,
+      "repeats": 3,
+      "seconds": [
+        7.058181900065392,
+        7.186894700163975,
+        7.6201013000682
+      ],
+      "medianSeconds": 7.186894700163975,
+      "maxSeconds": 7.6201013000682,
+      "p95NearestRankSeconds": 7.6201013000682,
+      "cpuSecondsPerRun": 13.911458333333334,
+      "memoryAfter": {
+        "rss": 674533376,
+        "vms": 1023098880,
+        "peak_wset": 674541568,
+        "private": 1023098880
+      }
+    },
+    {
+      "id": "N120",
+      "characters": 30000,
+      "windows": 92,
+      "repeats": 3,
+      "seconds": [
+        21.535416000057012,
+        21.919172500027344,
+        21.812107200035825
+      ],
+      "medianSeconds": 21.812107200035825,
+      "maxSeconds": 21.919172500027344,
+      "p95NearestRankSeconds": 21.919172500027344,
+      "cpuSecondsPerRun": 41.8125,
+      "memoryAfter": {
+        "rss": 683569152,
+        "vms": 1031647232,
+        "peak_wset": 689688576,
+        "private": 1031647232
+      }
+    }
+  ],
+  "memoryEnd": {
+    "rss": 683569152,
+    "vms": 1031647232,
+    "peak_wset": 689688576,
+    "private": 1031647232
+  },
+  "blockedNetworkAttempts": 0,
+  "elapsedSeconds": 136.35402520000935
+}

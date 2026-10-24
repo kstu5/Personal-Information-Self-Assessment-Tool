@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-17",
+  "pythonTests": {
+    "passed": 27,
+    "command": "python scripts/test_backend.py",
+    "warning": "Starlette httpx test adapter deprecation"
+  },
+  "build": {
+    "passed": true,
+    "command": "pnpm run build"
+  },
+  "parity": "parity.json",
+  "ui": "ui-report.json",
+  "desktop": "desktop-report.json",
+  "desktopConsoleFree": "desktop-pythonw-report.json",
+  "sourceHashes": {
+    "backend/detection.py": "fe10531bdd2f300c005e96e72cc0eaec5c1c993291d9177bc27ba68fa633ac8f",
+    "backend/model_a.py": "7b911b59645b945a5da1dbbf3cc712279c84f9375f5550ae21d460742e23ed27",
+    "backend/model_assets.py": "1ecca56444162cfee6018f0154bfa6f3c12e3555752cb6ec44516030d2079c6c",
+    "backend/app.py": "65d3beb7b7a3dd15024a6022675a989599c7fb00c275cb86093ee1fe2da620a4",
+    "run.py": "498467bccebc212d8333268bab109d8432ea20b213187de15482ea55137a0fff",
+    "src/App.tsx": "45936c53dc9630c7a1907dda9ba851ae31490c96078b9369713602396d14fa00",
+    "scripts/setup.ps1": "2a00bcebf1e6fcc4ed8810b6be667a8522662ba38a561d0a185ec4c054cdb4ab",
+    "scripts/prepare_model_a.py": "931febb1541583caa6d5c546e3f18a9937933dd55be5e5f35a720171429f4f26",
+    "requirements.model-a.lock.txt": "2c5142a0ec66820093cf5156d5480f0d6a74edc4749ae6b15d09cc12af5fc528",
+    "models/model-a.json": "d32ac60f2f979af1be4806526e9251bfdccdfb47ec9d9beff6e38367bf61bde2"
+  }
+}

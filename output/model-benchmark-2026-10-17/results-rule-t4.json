@@ -1,0 +1,1901 @@
+{
+  "model": "rule",
+  "environment": {
+    "cpu": "Intel(R) Core(TM) Ultra 5 325",
+    "logicalCpus": 8,
+    "physicalCpus": 8,
+    "ramBytes": 33685872640,
+    "availableRamBytesAtStart": 14323441664,
+    "os": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+    "threads": 4,
+    "device": "cpu",
+    "versions": {
+      "torch": "2.9.1+cpu",
+      "transformers": "4.57.6",
+      "numpy": "2.5.4",
+      "psutil": "7.1.3",
+      "safetensors": "0.8.0",
+      "tokenizers": "0.22.2"
+    }
+  },
+  "fixtureSha256": "5add9cfa32f3ffd630cf464d4015f28e7c6dd4121ca89a850cf313d78ed1b0aa",
+  "method": "BIO argmax, no confidence threshold or task-specific heuristics. Sequential batch=1 FP32 CPU. Long inputs use overlapping token windows; the most central window supplies each token tag. Original offsets preserved.",
+  "memoryBeforeLoad": {
+    "rss": 33173504,
+    "vms": 18440192,
+    "peak_wset": 33173504,
+    "private": 18440192
+  },
+  "engineVersion": "1.16.0",
+  "importAndLoadSeconds": 0.1330255998764187,
+  "memoryAfterLoad": {
+    "rss": 35307520,
+    "vms": 21094400,
+    "peak_wset": 35307520,
+    "private": 21094400
+  },
+  "firstInferenceSeconds": 0.006479599978774786,
+  "processStartToFirstResultSeconds": 0.8924418000970036,
+  "cases": [
+    {
+      "id": "N001",
+      "predictions": [],
+      "seconds": 0.0002305000089108944,
+      "windows": 1
+    },
+    {
+      "id": "N002",
+      "predictions": [
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 4,
+          "end": 7,
+          "text": "박서윤",
+          "score": 0.7
+        }
+      ],
+      "seconds": 0.0002918001264333725,
+      "windows": 1
+    },
+    {
+      "id": "N003",
+      "predictions": [],
+      "seconds": 0.00011290004476904869,
+      "windows": 1
+    },
+    {
+      "id": "N004",
+      "predictions": [],
+      "seconds": 8.059991523623466e-05,
+      "windows": 1
+    },
+    {
+      "id": "N005",
+      "predictions": [],
+      "seconds": 6.389990448951721e-05,
+      "windows": 1
+    },
+    {
+      "id": "N006",
+      "predictions": [],
+      "seconds": 0.00012190011329948902,
+      "windows": 1
+    },
+    {
+      "id": "N007",
+      "predictions": [],
+      "seconds": 0.0003212001174688339,
+      "windows": 1
+    },
+    {
+      "id": "N008",
+      "predictions": [],
+      "seconds": 0.00027190009132027626,
+      "windows": 1
+    },
+    {
+      "id": "N009",
+      "predictions": [
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 11,
+          "end": 14,
+          "text": "한유진",
+          "score": 0.8
+        }
+      ],
+      "seconds": 0.0002506000455468893,
+      "windows": 1
+    },
+    {
+      "id": "N010",
+      "predictions": [
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 7,
+          "end": 10,
+          "text": "문지후",
+          "score": 0.9500000000000001
+        }
+      ],
+      "seconds": 0.00019890000112354755,
+      "windows": 1
+    },
+    {
+      "id": "N011",
+      "predictions": [
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 0,
+          "end": 3,
+          "text": "김하늘",
+          "score": 0.55
+        }
+      ],
+      "seconds": 0.00022779987193644047,
+      "windows": 1
+    },
+    {
+      "id": "N012",
+      "predictions": [],
+      "seconds": 0.00018079997971653938,
+      "windows": 1
+    },
+    {
+      "id": "N013",
+      "predictions": [],
+      "seconds": 0.00014050002209842205,
+      "windows": 1
+    },
+    {
+      "id": "N014",
+      "predictions": [],
+      "seconds": 7.949979044497013e-05,
+      "windows": 1
+    },
+    {
+      "id": "N015",
+      "predictions": [],
+      "seconds": 0.00021070009097456932,
+      "windows": 1
+    },
+    {
+      "id": "N016",
+      "predictions": [
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 11,
+          "end": 14,
+          "text": "강도윤",
+          "score": 0.8500000000000001
+        }
+      ],
+      "seconds": 0.0001610000617802143,
+      "windows": 1
+    },
+    {
+      "id": "N017",
+      "predictions": [],
+      "seconds": 0.00013689999468624592,
+      "windows": 1
+    },
+    {
+      "id": "N018",
+      "predictions": [
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 4,
+          "end": 7,
+          "text": "임소율",
+          "score": 0.7000000000000001
+        }
+      ],
+      "seconds": 0.00017699995078146458,
+      "windows": 1
+    },
+    {
+      "id": "N019",
+      "predictions": [],
+      "seconds": 0.00019080005586147308,
+      "windows": 1
+    },
+    {
+      "id": "N020",
+      "predictions": [],
+      "seconds": 0.00013689999468624592,
+      "windows": 1
+    },
+    {
+      "id": "N021",
+      "predictions": [
+        {
+          "label": "ADDRESS",
+          "raw_label": "ADDRESS",
+          "start": 6,
+          "end": 22,
+          "text": "서울특별시 마포구 예시로 12",
+          "score": 0.8
+        }
+      ],
+      "seconds": 0.00016940012574195862,
+      "windows": 1
+    },
+    {
+      "id": "N022",
+      "predictions": [
+        {
+          "label": "ADDRESS",
+          "raw_label": "ADDRESS",
+          "start": 6,
+          "end": 27,
+          "text": "서울특별시 마포구 예시로 12 302호",
+          "score": 0.8
+        }
+      ],
+      "seconds": 0.00016130018047988415,
+      "windows": 1
+    },
+    {
+      "id": "N023",
+      "predictions": [
+        {
+          "label": "ADDRESS",
+          "raw_label": "ADDRESS",
+          "start": 5,
+          "end": 23,
+          "text": "경기도 수원시 영통구 예시로 45",
+          "score": 0.8
+        }
+      ],
+      "seconds": 0.00017339992336928844,
+      "windows": 1
+    },
+    {
+      "id": "N024",
+      "predictions": [
+        {
+          "label": "ADDRESS",
+          "raw_label": "ADDRESS",
+          "start": 5,
+          "end": 40,
+          "text": "경기도 수원시 영통구 예시로 45 가상아파트 101동 1203호",
+          "score": 0.8
+        }
+      ],
+      "seconds": 0.0001759999431669712,
+      "windows": 1
+    },
+    {
+      "id": "N025",
+      "predictions": [
+        {
+          "label": "ADDRESS",
+          "raw_label": "ADDRESS",
+          "start": 7,
+          "end": 27,
+          "text": "부산광역시 해운대구 시험로 27 2층",
+          "score": 0.8
+        }
+      ],
+      "seconds": 0.00015119998715817928,
+      "windows": 1
+    },
+    {
+      "id": "N026",
+      "predictions": [
+        {
+          "label": "ADDRESS",
+          "raw_label": "ADDRESS",
+          "start": 6,
+          "end": 25,
+          "text": "대전광역시 유성구 가상동 123-4",
+          "score": 0.75
+        }
+      ],
+      "seconds": 0.0003581000491976738,
+      "windows": 1
+    },
+    {
+      "id": "N027",
+      "predictions": [
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 24,
+          "end": 27,
+          "text": "가상빌",
+          "score": 0.55
+        }
+      ],
+      "seconds": 0.00028830021619796753,
+      "windows": 1
+    },
+    {
+      "id": "N028",
+      "predictions": [
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 9,
+          "end": 11,
+          "text": "호수",
+          "score": 0.8
+        }
+      ],
+      "seconds": 0.00018090009689331055,
+      "windows": 1
+    },
+    {
+      "id": "N029",
+      "predictions": [
+        {
+          "label": "ADDRESS",
+          "raw_label": "ADDRESS",
+          "start": 6,
+          "end": 24,
+          "text": "경기도 성남시 분당구 예시로 10",
+          "score": 0.8
+        },
+        {
+          "label": "ADDRESS",
+          "raw_label": "ADDRESS",
+          "start": 31,
+          "end": 49,
+          "text": "경기도 성남시 분당구 시험로 20",
+          "score": 0.8
+        }
+      ],
+      "seconds": 0.0002470999024808407,
+      "windows": 1
+    },
+    {
+      "id": "N030",
+      "predictions": [
+        {
+          "label": "ADDRESS",
+          "raw_label": "ADDRESS",
+          "start": 4,
+          "end": 19,
+          "text": "광주광역시 북구 예시로 56",
+          "score": 0.8
+        }
+      ],
+      "seconds": 0.00018440000712871552,
+      "windows": 1
+    },
+    {
+      "id": "N031",
+      "predictions": [
+        {
+          "label": "PHONE",
+          "raw_label": "PHONE",
+          "start": 7,
+          "end": 20,
+          "text": "010-0000-0003",
+          "score": 1.0
+        }
+      ],
+      "seconds": 0.00016899988986551762,
+      "windows": 1
+    },
+    {
+      "id": "N032",
+      "predictions": [
+        {
+          "label": "PHONE",
+          "raw_label": "PHONE",
+          "start": 4,
+          "end": 17,
+          "text": "010 0000 0004",
+          "score": 1.0
+        }
+      ],
+      "seconds": 0.00012099999003112316,
+      "windows": 1
+    },
+    {
+      "id": "N033",
+      "predictions": [
+        {
+          "label": "PHONE",
+          "raw_label": "PHONE",
+          "start": 8,
+          "end": 19,
+          "text": "01000000005",
+          "score": 1.0
+        }
+      ],
+      "seconds": 8.999998681247234e-05,
+      "windows": 1
+    },
+    {
+      "id": "N034",
+      "predictions": [],
+      "seconds": 0.00017760018818080425,
+      "windows": 1
+    },
+    {
+      "id": "N035",
+      "predictions": [
+        {
+          "label": "PHONE",
+          "raw_label": "PHONE",
+          "start": 8,
+          "end": 24,
+          "text": "+82-10-0000-0007",
+          "score": 1.0
+        }
+      ],
+      "seconds": 0.00011409982107579708,
+      "windows": 1
+    },
+    {
+      "id": "N036",
+      "predictions": [
+        {
+          "label": "PHONE",
+          "raw_label": "PHONE",
+          "start": 6,
+          "end": 19,
+          "text": "010.0000.0008",
+          "score": 1.0
+        }
+      ],
+      "seconds": 0.00010870001278817654,
+      "windows": 1
+    },
+    {
+      "id": "N037",
+      "predictions": [
+        {
+          "label": "EMAIL",
+          "raw_label": "EMAIL",
+          "start": 7,
+          "end": 27,
+          "text": "tester17@example.com",
+          "score": 1.0
+        }
+      ],
+      "seconds": 0.00013489997945725918,
+      "windows": 1
+    },
+    {
+      "id": "N038",
+      "predictions": [
+        {
+          "label": "EMAIL",
+          "raw_label": "EMAIL",
+          "start": 5,
+          "end": 30,
+          "text": "sample.person@example.org",
+          "score": 1.0
+        }
+      ],
+      "seconds": 0.0001425999216735363,
+      "windows": 1
+    },
+    {
+      "id": "N039",
+      "predictions": [
+        {
+          "label": "EMAIL",
+          "raw_label": "EMAIL",
+          "start": 6,
+          "end": 35,
+          "text": "member [at] example [dot] com",
+          "score": 1.0
+        }
+      ],
+      "seconds": 0.00011319993063807487,
+      "windows": 1
+    },
+    {
+      "id": "N040",
+      "predictions": [
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 4,
+          "end": 6,
+          "text": "메일",
+          "score": 1.0
+        },
+        {
+          "label": "EMAIL",
+          "raw_label": "EMAIL",
+          "start": 8,
+          "end": 32,
+          "text": "review+event@example.com",
+          "score": 1.0
+        }
+      ],
+      "seconds": 0.00016060005873441696,
+      "windows": 1
+    },
+    {
+      "id": "N041",
+      "predictions": [
+        {
+          "label": "EMAIL",
+          "raw_label": "EMAIL",
+          "start": 0,
+          "end": 23,
+          "text": "test.member@example.net",
+          "score": 1.0
+        }
+      ],
+      "seconds": 0.00012190011329948902,
+      "windows": 1
+    },
+    {
+      "id": "N042",
+      "predictions": [
+        {
+          "label": "PHONE",
+          "raw_label": "PHONE",
+          "start": 4,
+          "end": 17,
+          "text": "010-0000-0009",
+          "score": 1.0
+        },
+        {
+          "label": "PHONE",
+          "raw_label": "PHONE",
+          "start": 26,
+          "end": 39,
+          "text": "010-0000-0009",
+          "score": 1.0
+        }
+      ],
+      "seconds": 0.0001767999492585659,
+      "windows": 1
+    },
+    {
+      "id": "N043",
+      "predictions": [
+        {
+          "label": "ACCOUNT",
+          "raw_label": "ACCOUNT",
+          "start": 6,
+          "end": 20,
+          "text": "110-000-000001",
+          "score": 0.9
+        }
+      ],
+      "seconds": 0.0001403999049216509,
+      "windows": 1
+    },
+    {
+      "id": "N044",
+      "predictions": [
+        {
+          "label": "POSTAL_CODE",
+          "raw_label": "POSTAL_CODE",
+          "start": 5,
+          "end": 12,
+          "text": "110-000",
+          "score": 0.85
+        }
+      ],
+      "seconds": 0.0001830998808145523,
+      "windows": 1
+    },
+    {
+      "id": "N045",
+      "predictions": [
+        {
+          "label": "POSTAL_CODE",
+          "raw_label": "POSTAL_CODE",
+          "start": 11,
+          "end": 18,
+          "text": "110-000",
+          "score": 0.85
+        }
+      ],
+      "seconds": 0.0001417999155819416,
+      "windows": 1
+    },
+    {
+      "id": "N046",
+      "predictions": [],
+      "seconds": 0.0001083998940885067,
+      "windows": 1
+    },
+    {
+      "id": "N047",
+      "predictions": [
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 0,
+          "end": 3,
+          "text": "시험용",
+          "score": 0.75
+        },
+        {
+          "label": "RRN",
+          "raw_label": "RRN",
+          "start": 17,
+          "end": 31,
+          "text": "900101-1000000",
+          "score": 0.7
+        }
+      ],
+      "seconds": 0.0002280999906361103,
+      "windows": 1
+    },
+    {
+      "id": "N048",
+      "predictions": [
+        {
+          "label": "RRN",
+          "raw_label": "RRN",
+          "start": 12,
+          "end": 28,
+          "text": "900101 - 1000000",
+          "score": 0.7
+        }
+      ],
+      "seconds": 0.00016410020180046558,
+      "windows": 1
+    },
+    {
+      "id": "N049",
+      "predictions": [],
+      "seconds": 0.00013689999468624592,
+      "windows": 1
+    },
+    {
+      "id": "N050",
+      "predictions": [
+        {
+          "label": "CARD",
+          "raw_label": "CARD",
+          "start": 10,
+          "end": 29,
+          "text": "4000-0000-0000-0002",
+          "score": 1.0
+        }
+      ],
+      "seconds": 0.00017290003597736359,
+      "windows": 1
+    },
+    {
+      "id": "N051",
+      "predictions": [],
+      "seconds": 0.00011370005086064339,
+      "windows": 1
+    },
+    {
+      "id": "N052",
+      "predictions": [
+        {
+          "label": "VEHICLE",
+          "raw_label": "VEHICLE",
+          "start": 8,
+          "end": 16,
+          "text": "123가4567",
+          "score": 0.85
+        }
+      ],
+      "seconds": 9.560002945363522e-05,
+      "windows": 1
+    },
+    {
+      "id": "N053",
+      "predictions": [],
+      "seconds": 0.0001385000068694353,
+      "windows": 1
+    },
+    {
+      "id": "N054",
+      "predictions": [
+        {
+          "label": "DRIVER_LICENSE",
+          "raw_label": "DRIVER_LICENSE",
+          "start": 12,
+          "end": 27,
+          "text": "11-00-000000-00",
+          "score": 0.85
+        }
+      ],
+      "seconds": 0.00014609983190894127,
+      "windows": 1
+    },
+    {
+      "id": "N055",
+      "predictions": [
+        {
+          "label": "AGE",
+          "raw_label": "AGE",
+          "start": 3,
+          "end": 6,
+          "text": "29세",
+          "score": 0.95
+        }
+      ],
+      "seconds": 6.919982843101025e-05,
+      "windows": 1
+    },
+    {
+      "id": "N056",
+      "predictions": [
+        {
+          "label": "AGE",
+          "raw_label": "AGE",
+          "start": 6,
+          "end": 12,
+          "text": "스물아홉 살",
+          "score": 0.85
+        }
+      ],
+      "seconds": 0.00010519986972212791,
+      "windows": 1
+    },
+    {
+      "id": "N057",
+      "predictions": [
+        {
+          "label": "DT_BIRTH",
+          "raw_label": "DT_BIRTH",
+          "start": 8,
+          "end": 20,
+          "text": "1996년 4월 12일",
+          "score": 0.95
+        }
+      ],
+      "seconds": 0.0007488999981433153,
+      "windows": 1
+    },
+    {
+      "id": "N058",
+      "predictions": [
+        {
+          "label": "DT_BIRTH",
+          "raw_label": "DT_BIRTH",
+          "start": 6,
+          "end": 16,
+          "text": "1996-04-12",
+          "score": 0.9
+        }
+      ],
+      "seconds": 9.660003706812859e-05,
+      "windows": 1
+    },
+    {
+      "id": "N059",
+      "predictions": [
+        {
+          "label": "HEIGHT",
+          "raw_label": "HEIGHT",
+          "start": 5,
+          "end": 10,
+          "text": "180cm",
+          "score": 0.9
+        },
+        {
+          "label": "WEIGHT",
+          "raw_label": "WEIGHT",
+          "start": 18,
+          "end": 22,
+          "text": "70kg",
+          "score": 0.9
+        }
+      ],
+      "seconds": 0.00012869993224740028,
+      "windows": 1
+    },
+    {
+      "id": "N060",
+      "predictions": [
+        {
+          "label": "HEIGHT",
+          "raw_label": "HEIGHT",
+          "start": 5,
+          "end": 11,
+          "text": "165 cm",
+          "score": 0.9
+        },
+        {
+          "label": "WEIGHT",
+          "raw_label": "WEIGHT",
+          "start": 16,
+          "end": 21,
+          "text": "58 kg",
+          "score": 0.9
+        }
+      ],
+      "seconds": 0.00012090010568499565,
+      "windows": 1
+    },
+    {
+      "id": "N061",
+      "predictions": [],
+      "seconds": 7.46001023799181e-05,
+      "windows": 1
+    },
+    {
+      "id": "N062",
+      "predictions": [
+        {
+          "label": "AGE",
+          "raw_label": "AGE",
+          "start": 9,
+          "end": 12,
+          "text": "32세",
+          "score": 0.95
+        }
+      ],
+      "seconds": 0.00017490005120635033,
+      "windows": 1
+    },
+    {
+      "id": "N063",
+      "predictions": [
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 3,
+          "end": 6,
+          "text": "박하차",
+          "score": 0.55
+        }
+      ],
+      "seconds": 0.0003440999425947666,
+      "windows": 1
+    },
+    {
+      "id": "N064",
+      "predictions": [
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 0,
+          "end": 3,
+          "text": "박하차",
+          "score": 0.55
+        }
+      ],
+      "seconds": 0.0001979998778551817,
+      "windows": 1
+    },
+    {
+      "id": "N065",
+      "predictions": [
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 4,
+          "end": 8,
+          "text": "주문번호",
+          "score": 0.65
+        }
+      ],
+      "seconds": 0.0002351999282836914,
+      "windows": 1
+    },
+    {
+      "id": "N066",
+      "predictions": [
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 12,
+          "end": 16,
+          "text": "주문번호",
+          "score": 0.65
+        }
+      ],
+      "seconds": 0.0002858999650925398,
+      "windows": 1
+    },
+    {
+      "id": "N067",
+      "predictions": [
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 7,
+          "end": 10,
+          "text": "포장재",
+          "score": 0.7
+        }
+      ],
+      "seconds": 0.00016769999638199806,
+      "windows": 1
+    },
+    {
+      "id": "N068",
+      "predictions": [
+        {
+          "label": "HEIGHT",
+          "raw_label": "HEIGHT",
+          "start": 7,
+          "end": 12,
+          "text": "180cm",
+          "score": 0.9
+        },
+        {
+          "label": "WEIGHT",
+          "raw_label": "WEIGHT",
+          "start": 19,
+          "end": 23,
+          "text": "70kg",
+          "score": 0.9
+        }
+      ],
+      "seconds": 0.00016520009376108646,
+      "windows": 1
+    },
+    {
+      "id": "N069",
+      "predictions": [
+        {
+          "label": "HEIGHT",
+          "raw_label": "HEIGHT",
+          "start": 7,
+          "end": 11,
+          "text": "75cm",
+          "score": 0.9
+        },
+        {
+          "label": "WEIGHT",
+          "raw_label": "WEIGHT",
+          "start": 17,
+          "end": 21,
+          "text": "12kg",
+          "score": 0.9
+        }
+      ],
+      "seconds": 0.00012909993529319763,
+      "windows": 1
+    },
+    {
+      "id": "N070",
+      "predictions": [
+        {
+          "label": "HEIGHT",
+          "raw_label": "HEIGHT",
+          "start": 16,
+          "end": 21,
+          "text": "180cm",
+          "score": 0.9
+        }
+      ],
+      "seconds": 0.0001892999280244112,
+      "windows": 1
+    },
+    {
+      "id": "N071",
+      "predictions": [],
+      "seconds": 0.00014999997802078724,
+      "windows": 1
+    },
+    {
+      "id": "N072",
+      "predictions": [],
+      "seconds": 0.0003542001359164715,
+      "windows": 1
+    },
+    {
+      "id": "N073",
+      "predictions": [
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 7,
+          "end": 10,
+          "text": "진달래",
+          "score": 0.55
+        }
+      ],
+      "seconds": 0.00026769982650876045,
+      "windows": 1
+    },
+    {
+      "id": "N074",
+      "predictions": [],
+      "seconds": 0.00020120013505220413,
+      "windows": 1
+    },
+    {
+      "id": "N075",
+      "predictions": [],
+      "seconds": 0.00014110002666711807,
+      "windows": 1
+    },
+    {
+      "id": "N076",
+      "predictions": [],
+      "seconds": 0.00011829985305666924,
+      "windows": 1
+    },
+    {
+      "id": "N077",
+      "predictions": [],
+      "seconds": 0.0001371998805552721,
+      "windows": 1
+    },
+    {
+      "id": "N078",
+      "predictions": [],
+      "seconds": 0.00013599987141788006,
+      "windows": 1
+    },
+    {
+      "id": "N079",
+      "predictions": [
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 9,
+          "end": 12,
+          "text": "경복궁",
+          "score": 0.6
+        }
+      ],
+      "seconds": 0.00019329995848238468,
+      "windows": 1
+    },
+    {
+      "id": "N080",
+      "predictions": [],
+      "seconds": 0.00010680011473596096,
+      "windows": 1
+    },
+    {
+      "id": "N081",
+      "predictions": [],
+      "seconds": 0.00015810015611350536,
+      "windows": 1
+    },
+    {
+      "id": "N082",
+      "predictions": [],
+      "seconds": 0.00018989993259310722,
+      "windows": 1
+    },
+    {
+      "id": "N083",
+      "predictions": [],
+      "seconds": 0.0004692000802606344,
+      "windows": 1
+    },
+    {
+      "id": "N084",
+      "predictions": [],
+      "seconds": 0.00013999990187585354,
+      "windows": 1
+    },
+    {
+      "id": "N085",
+      "predictions": [],
+      "seconds": 0.00017410004511475563,
+      "windows": 1
+    },
+    {
+      "id": "N086",
+      "predictions": [
+        {
+          "label": "IP",
+          "raw_label": "IP",
+          "start": 14,
+          "end": 22,
+          "text": "10.0.1.5",
+          "score": 1.0
+        }
+      ],
+      "seconds": 0.0001751999370753765,
+      "windows": 1
+    },
+    {
+      "id": "N087",
+      "predictions": [
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 3,
+          "end": 7,
+          "text": "모델번호",
+          "score": 0.65
+        }
+      ],
+      "seconds": 0.0002402001991868019,
+      "windows": 1
+    },
+    {
+      "id": "N088",
+      "predictions": [],
+      "seconds": 0.0001370999962091446,
+      "windows": 1
+    },
+    {
+      "id": "N089",
+      "predictions": [
+        {
+          "label": "HEIGHT",
+          "raw_label": "HEIGHT",
+          "start": 8,
+          "end": 13,
+          "text": "200cm",
+          "score": 0.9
+        }
+      ],
+      "seconds": 0.0001813999842852354,
+      "windows": 1
+    },
+    {
+      "id": "N090",
+      "predictions": [],
+      "seconds": 0.00018630013801157475,
+      "windows": 1
+    },
+    {
+      "id": "N091",
+      "predictions": [],
+      "seconds": 0.0005983998998999596,
+      "windows": 1
+    },
+    {
+      "id": "N092",
+      "predictions": [
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 8,
+          "end": 11,
+          "text": "설명서",
+          "score": 0.55
+        }
+      ],
+      "seconds": 0.0002484999131411314,
+      "windows": 1
+    },
+    {
+      "id": "N093",
+      "predictions": [],
+      "seconds": 0.00012529990635812283,
+      "windows": 1
+    },
+    {
+      "id": "N094",
+      "predictions": [
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 4,
+          "end": 7,
+          "text": "제조국",
+          "score": 0.55
+        },
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 16,
+          "end": 19,
+          "text": "제조사",
+          "score": 0.55
+        }
+      ],
+      "seconds": 0.0001898000482469797,
+      "windows": 1
+    },
+    {
+      "id": "N095",
+      "predictions": [],
+      "seconds": 0.00011099991388618946,
+      "windows": 1
+    },
+    {
+      "id": "N096",
+      "predictions": [],
+      "seconds": 0.00019919988699257374,
+      "windows": 1
+    },
+    {
+      "id": "N097",
+      "predictions": [
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 10,
+          "end": 13,
+          "text": "전시장",
+          "score": 0.55
+        }
+      ],
+      "seconds": 0.000202300027012825,
+      "windows": 1
+    },
+    {
+      "id": "N098",
+      "predictions": [],
+      "seconds": 0.00011230004020035267,
+      "windows": 1
+    },
+    {
+      "id": "N099",
+      "predictions": [],
+      "seconds": 0.00016120006330311298,
+      "windows": 1
+    },
+    {
+      "id": "N100",
+      "predictions": [
+        {
+          "label": "URL",
+          "raw_label": "URL",
+          "start": 15,
+          "end": 43,
+          "text": "https://example.com/guide입니다",
+          "score": 0.9
+        }
+      ],
+      "seconds": 0.00019990000873804092,
+      "windows": 1
+    },
+    {
+      "id": "N101",
+      "predictions": [],
+      "seconds": 0.0001447000540792942,
+      "windows": 1
+    },
+    {
+      "id": "N102",
+      "predictions": [],
+      "seconds": 0.00033459998667240143,
+      "windows": 1
+    },
+    {
+      "id": "N103",
+      "predictions": [
+        {
+          "label": "PHONE",
+          "raw_label": "PHONE",
+          "start": 17,
+          "end": 30,
+          "text": "010-0000-0010",
+          "score": 1.0
+        },
+        {
+          "label": "EMAIL",
+          "raw_label": "EMAIL",
+          "start": 36,
+          "end": 55,
+          "text": "event17@example.com",
+          "score": 1.0
+        }
+      ],
+      "seconds": 0.0003168999683111906,
+      "windows": 1
+    },
+    {
+      "id": "N104",
+      "predictions": [
+        {
+          "label": "HEIGHT",
+          "raw_label": "HEIGHT",
+          "start": 7,
+          "end": 11,
+          "text": "75cm",
+          "score": 0.9
+        },
+        {
+          "label": "HEIGHT",
+          "raw_label": "HEIGHT",
+          "start": 20,
+          "end": 25,
+          "text": "172cm",
+          "score": 0.9
+        }
+      ],
+      "seconds": 0.00016380008310079575,
+      "windows": 1
+    },
+    {
+      "id": "N105",
+      "predictions": [
+        {
+          "label": "PHONE",
+          "raw_label": "PHONE",
+          "start": 35,
+          "end": 48,
+          "text": "010-0000-0011",
+          "score": 1.0
+        }
+      ],
+      "seconds": 0.00026469980366528034,
+      "windows": 1
+    },
+    {
+      "id": "N106",
+      "predictions": [
+        {
+          "label": "ADDRESS",
+          "raw_label": "ADDRESS",
+          "start": 17,
+          "end": 35,
+          "text": "경기도 수원시 영통구 예시로 45",
+          "score": 0.8
+        },
+        {
+          "label": "WEIGHT",
+          "raw_label": "WEIGHT",
+          "start": 55,
+          "end": 59,
+          "text": "12kg",
+          "score": 0.9
+        }
+      ],
+      "seconds": 0.00022709998302161694,
+      "windows": 1
+    },
+    {
+      "id": "N107",
+      "predictions": [
+        {
+          "label": "POSTAL_CODE",
+          "raw_label": "POSTAL_CODE",
+          "start": 11,
+          "end": 18,
+          "text": "110-000",
+          "score": 0.85
+        }
+      ],
+      "seconds": 0.0001852000132203102,
+      "windows": 1
+    },
+    {
+      "id": "N108",
+      "predictions": [
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 0,
+          "end": 3,
+          "text": "최지우",
+          "score": 1.0
+        },
+        {
+          "label": "EMAIL",
+          "raw_label": "EMAIL",
+          "start": 12,
+          "end": 31,
+          "text": "jiwoo17@example.org",
+          "score": 1.0
+        }
+      ],
+      "seconds": 0.00017870008014142513,
+      "windows": 1
+    },
+    {
+      "id": "N109",
+      "predictions": [
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 22,
+          "end": 25,
+          "text": "박하차",
+          "score": 0.55
+        }
+      ],
+      "seconds": 0.0002778999041765928,
+      "windows": 1
+    },
+    {
+      "id": "N110",
+      "predictions": [
+        {
+          "label": "DT_BIRTH",
+          "raw_label": "DT_BIRTH",
+          "start": 24,
+          "end": 35,
+          "text": "1998년 2월 3일",
+          "score": 0.95
+        },
+        {
+          "label": "AGE",
+          "raw_label": "AGE",
+          "start": 42,
+          "end": 45,
+          "text": "28세",
+          "score": 0.95
+        }
+      ],
+      "seconds": 0.00023910007439553738,
+      "windows": 1
+    },
+    {
+      "id": "C01-title",
+      "predictions": [],
+      "seconds": 0.00016990001313388348,
+      "windows": 1
+    },
+    {
+      "id": "C01-body",
+      "predictions": [
+        {
+          "label": "AGE",
+          "raw_label": "AGE",
+          "start": 77,
+          "end": 80,
+          "text": "29세",
+          "score": 0.95
+        },
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 121,
+          "end": 124,
+          "text": "김하늘",
+          "score": 0.55
+        },
+        {
+          "label": "EMAIL",
+          "raw_label": "EMAIL",
+          "start": 164,
+          "end": 193,
+          "text": "haneul [at] example [dot] com",
+          "score": 1.0
+        },
+        {
+          "label": "ADDRESS",
+          "raw_label": "ADDRESS",
+          "start": 234,
+          "end": 250,
+          "text": "서울특별시 마포구 예시로 12",
+          "score": 0.8
+        },
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 313,
+          "end": 316,
+          "text": "박서윤",
+          "score": 1.0
+        },
+        {
+          "label": "PHONE",
+          "raw_label": "PHONE",
+          "start": 323,
+          "end": 336,
+          "text": "010-0000-0001",
+          "score": 1.0
+        },
+        {
+          "label": "EMAIL",
+          "raw_label": "EMAIL",
+          "start": 348,
+          "end": 366,
+          "text": "seoyun@example.com",
+          "score": 1.0
+        }
+      ],
+      "seconds": 0.0019516001921147108,
+      "windows": 1
+    },
+    {
+      "id": "C02-title",
+      "predictions": [],
+      "seconds": 0.0005153999663889408,
+      "windows": 1
+    },
+    {
+      "id": "C02-body",
+      "predictions": [
+        {
+          "label": "HEIGHT",
+          "raw_label": "HEIGHT",
+          "start": 26,
+          "end": 30,
+          "text": "75cm",
+          "score": 0.9
+        },
+        {
+          "label": "WEIGHT",
+          "raw_label": "WEIGHT",
+          "start": 37,
+          "end": 41,
+          "text": "12kg",
+          "score": 0.9
+        },
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 81,
+          "end": 83,
+          "text": "택배",
+          "score": 0.65
+        },
+        {
+          "label": "ADDRESS",
+          "raw_label": "ADDRESS",
+          "start": 112,
+          "end": 130,
+          "text": "경기도 수원시 영통구 예시로 45",
+          "score": 0.8
+        },
+        {
+          "label": "PHONE",
+          "raw_label": "PHONE",
+          "start": 158,
+          "end": 171,
+          "text": "010 0000 0002",
+          "score": 1.0
+        },
+        {
+          "label": "PHONE",
+          "raw_label": "PHONE",
+          "start": 187,
+          "end": 198,
+          "text": "01000000002",
+          "score": 1.0
+        },
+        {
+          "label": "POSTAL_CODE",
+          "raw_label": "POSTAL_CODE",
+          "start": 222,
+          "end": 229,
+          "text": "110-000",
+          "score": 0.85
+        },
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 251,
+          "end": 254,
+          "text": "포장재",
+          "score": 0.7
+        },
+        {
+          "label": "ACCOUNT",
+          "raw_label": "ACCOUNT",
+          "start": 347,
+          "end": 361,
+          "text": "110-000-000000",
+          "score": 0.9
+        }
+      ],
+      "seconds": 0.0017138998955488205,
+      "windows": 1
+    },
+    {
+      "id": "C03-title",
+      "predictions": [
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 0,
+          "end": 3,
+          "text": "박하차",
+          "score": 0.55
+        }
+      ],
+      "seconds": 0.0001691998913884163,
+      "windows": 1
+    },
+    {
+      "id": "C03-body",
+      "predictions": [
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 13,
+          "end": 16,
+          "text": "박하차",
+          "score": 0.55
+        },
+        {
+          "label": "HEIGHT",
+          "raw_label": "HEIGHT",
+          "start": 102,
+          "end": 107,
+          "text": "180cm",
+          "score": 0.9
+        },
+        {
+          "label": "WEIGHT",
+          "raw_label": "WEIGHT",
+          "start": 114,
+          "end": 118,
+          "text": "70kg",
+          "score": 0.9
+        },
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 203,
+          "end": 207,
+          "text": "주문번호",
+          "score": 0.65
+        },
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 232,
+          "end": 236,
+          "text": "주문번호",
+          "score": 1.0
+        }
+      ],
+      "seconds": 0.0019686000887304544,
+      "windows": 1
+    },
+    {
+      "id": "N117",
+      "predictions": [
+        {
+          "label": "PHONE",
+          "raw_label": "PHONE",
+          "start": 484,
+          "end": 497,
+          "text": "010-0000-0012",
+          "score": 1.0
+        },
+        {
+          "label": "EMAIL",
+          "raw_label": "EMAIL",
+          "start": 974,
+          "end": 999,
+          "text": "last.member17@example.com",
+          "score": 1.0
+        }
+      ],
+      "seconds": 0.003172399941831827,
+      "windows": 1
+    },
+    {
+      "id": "N118",
+      "predictions": [
+        {
+          "label": "PHONE",
+          "raw_label": "PHONE",
+          "start": 1484,
+          "end": 1497,
+          "text": "010-0000-0012",
+          "score": 1.0
+        },
+        {
+          "label": "EMAIL",
+          "raw_label": "EMAIL",
+          "start": 2974,
+          "end": 2999,
+          "text": "last.member17@example.com",
+          "score": 1.0
+        }
+      ],
+      "seconds": 0.01025870000012219,
+      "windows": 1
+    },
+    {
+      "id": "N119",
+      "predictions": [
+        {
+          "label": "PHONE",
+          "raw_label": "PHONE",
+          "start": 4984,
+          "end": 4997,
+          "text": "010-0000-0012",
+          "score": 1.0
+        },
+        {
+          "label": "EMAIL",
+          "raw_label": "EMAIL",
+          "start": 9974,
+          "end": 9999,
+          "text": "last.member17@example.com",
+          "score": 1.0
+        }
+      ],
+      "seconds": 0.032683199970051646,
+      "windows": 1
+    },
+    {
+      "id": "N120",
+      "predictions": [
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 14972,
+          "end": 14975,
+          "text": "산책하",
+          "score": 0.6000000000000001
+        },
+        {
+          "label": "PHONE",
+          "raw_label": "PHONE",
+          "start": 14984,
+          "end": 14997,
+          "text": "010-0000-0012",
+          "score": 1.0
+        },
+        {
+          "label": "PERSON",
+          "raw_label": "PERSON",
+          "start": 29959,
+          "end": 29962,
+          "text": "산책하",
+          "score": 1.0
+        },
+        {
+          "label": "EMAIL",
+          "raw_label": "EMAIL",
+          "start": 29974,
+          "end": 29999,
+          "text": "last.member17@example.com",
+          "score": 1.0
+        }
+      ],
+      "seconds": 0.10154019994661212,
+      "windows": 1
+    }
+  ],
+  "performance": [
+    {
+      "id": "N001",
+      "characters": 26,
+      "windows": 1,
+      "repeats": 7,
+      "seconds": [
+        0.000349600100889802,
+        0.0001583998091518879,
+        0.00013870000839233398,
+        0.00013770000077784061,
+        0.00013200007379055023,
+        0.00012659979984164238,
+        0.00012820004485547543
+      ],
+      "medianSeconds": 0.00013770000077784061,
+      "maxSeconds": 0.000349600100889802,
+      "p95NearestRankSeconds": 0.000349600100889802,
+      "cpuSecondsPerRun": 0.0,
+      "memoryAfter": {
+        "rss": 37134336,
+        "vms": 23121920,
+        "peak_wset": 37134336,
+        "private": 23121920
+      }
+    },
+    {
+      "id": "C01-body",
+      "characters": 401,
+      "windows": 1,
+      "repeats": 7,
+      "seconds": [
+        0.002638199832290411,
+        0.002710500033572316,
+        0.002275099977850914,
+        0.0021031000651419163,
+        0.001903400057926774,
+        0.001966299954801798,
+        0.002186399884521961
+      ],
+      "medianSeconds": 0.002186399884521961,
+      "maxSeconds": 0.002710500033572316,
+      "p95NearestRankSeconds": 0.002710500033572316,
+      "cpuSecondsPerRun": 0.002232142857142857,
+      "memoryAfter": {
+        "rss": 37146624,
+        "vms": 23121920,
+        "peak_wset": 37146624,
+        "private": 23121920
+      }
+    },
+    {
+      "id": "N117",
+      "characters": 1000,
+      "windows": 1,
+      "repeats": 7,
+      "seconds": [
+        0.0038417999166995287,
+        0.0033742000814527273,
+        0.0038431999273598194,
+        0.00428640004247427,
+        0.0034088001120835543,
+        0.0036196999717503786,
+        0.004253400024026632
+      ],
+      "medianSeconds": 0.0038417999166995287,
+      "maxSeconds": 0.00428640004247427,
+      "p95NearestRankSeconds": 0.00428640004247427,
+      "cpuSecondsPerRun": 0.002232142857142857,
+      "memoryAfter": {
+        "rss": 37146624,
+        "vms": 23121920,
+        "peak_wset": 37146624,
+        "private": 23121920
+      }
+    },
+    {
+      "id": "N118",
+      "characters": 3000,
+      "windows": 1,
+      "repeats": 7,
+      "seconds": [
+        0.01083360007032752,
+        0.010485999984666705,
+        0.01139479991979897,
+        0.010491800028830767,
+        0.010543899843469262,
+        0.01054170005954802,
+        0.01056959992274642
+      ],
+      "medianSeconds": 0.010543899843469262,
+      "maxSeconds": 0.01139479991979897,
+      "p95NearestRankSeconds": 0.01139479991979897,
+      "cpuSecondsPerRun": 0.011160714285714286,
+      "memoryAfter": {
+        "rss": 37146624,
+        "vms": 23121920,
+        "peak_wset": 37146624,
+        "private": 23121920
+      }
+    },
+    {
+      "id": "N119",
+      "characters": 10000,
+      "windows": 1,
+      "repeats": 7,
+      "seconds": [
+        0.03264290001243353,
+        0.031826799968257546,
+        0.03213760000653565,
+        0.03310359991155565,
+        0.03285910002887249,
+        0.0337992999702692,
+        0.04018240002915263
+      ],
+      "medianSeconds": 0.03285910002887249,
+      "maxSeconds": 0.04018240002915263,
+      "p95NearestRankSeconds": 0.04018240002915263,
+      "cpuSecondsPerRun": 0.033482142857142856,
+      "memoryAfter": {
+        "rss": 37146624,
+        "vms": 23121920,
+        "peak_wset": 37146624,
+        "private": 23121920
+      }
+    },
+    {
+      "id": "N120",
+      "characters": 30000,
+      "windows": 1,
+      "repeats": 7,
+      "seconds": [
+        0.09700950002297759,
+        0.09864480001851916,
+        0.0969654000364244,
+        0.09530919999815524,
+        0.09454230009578168,
+        0.09468399989418685,
+        0.09395679994486272
+      ],
+      "medianSeconds": 0.09530919999815524,
+      "maxSeconds": 0.09864480001851916,
+      "p95NearestRankSeconds": 0.09864480001851916,
+      "cpuSecondsPerRun": 0.09598214285714286,
+      "memoryAfter": {
+        "rss": 37289984,
+        "vms": 23121920,
+        "peak_wset": 37289984,
+        "private": 23121920
+      }
+    }
+  ],
+  "memoryEnd": {
+    "rss": 37289984,
+    "vms": 23121920,
+    "peak_wset": 37289984,
+    "private": 23121920
+  },
+  "blockedNetworkAttempts": 0,
+  "elapsedSeconds": 2.246169799938798
+}

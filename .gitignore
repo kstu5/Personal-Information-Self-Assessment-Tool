@@ -1,0 +1,39 @@
+# --- 실행 환경 / 의존성 (setup 스크립트와 lock 파일로 재생성) ---
+.runtime/
+.venv/
+node_modules/
+
+# --- 빌드 결과 / 캐시 ---
+dist/
+__pycache__/
+.pytest_cache/
+*.pyc
+
+# --- 실험 / 임시 산출물 (용량 큼, 로컬에만 보관) ---
+tmp/
+research/
+list.txt
+
+# --- 로컬 설정 / 시험 데이터 ---
+runtime.local.json
+*.piipost
+
+# --- output: 검증 결과 중 재생성 가능한 캐시류만 제외 ---
+output/**/profile/
+output/**/render-*/
+
+# --- 대용량 바이너리 안전망 (GitHub 파일당 100MB 제한) ---
+*.safetensors
+*.onnx
+*.msi
+*.dll
+*.zip
+
+# --- 선택: 보고서 버전별 .docx를 버전관리하지 않으려면 주석 해제 ---
+# *.docx
+
+# --- 설치판 빌드 산출물 / 로컬 도구 ---
+.tools/
+backend/HwpText.class
+installer/out/
+installer/stage/

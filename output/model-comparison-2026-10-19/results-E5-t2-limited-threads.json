@@ -1,0 +1,256 @@
+{
+  "model": "E5",
+  "fixtureSha256": "118d712e5790f5dea53b4a8ca229d0182769e409051f26fcecf58811b86dc3d2",
+  "environment": {
+    "cpu": "Intel(R) Core(TM) Ultra 5 325",
+    "ramBytes": 33685872640,
+    "availableRamAtStart": 17361358848,
+    "os": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+    "threads": 2,
+    "device": "cpu",
+    "batch": 1,
+    "versions": {
+      "torch": "2.9.1+cpu",
+      "transformers": "4.57.6",
+      "onnxruntime": "1.23.2",
+      "psutil": "7.1.3",
+      "tokenizers": "0.22.2",
+      "numpy": "2.5.4"
+    }
+  },
+  "memoryBeforeLoad": {
+    "rss": 32645120,
+    "vms": 19341312,
+    "peak_wset": 32645120,
+    "private": 19341312
+  },
+  "cases": [],
+  "context": [],
+  "performance": [
+    {
+      "id": "short",
+      "characters": 18,
+      "seconds": [
+        0.03094660025089979,
+        0.029173600021749735,
+        0.02890670020133257
+      ],
+      "medianSeconds": 0.029173600021749735,
+      "windows": 1,
+      "memory": {
+        "rss": 1671368704,
+        "vms": 2009853952,
+        "peak_wset": 2222354432,
+        "private": 2009853952
+      },
+      "tailPredictions": [
+        {
+          "start": 0,
+          "end": 2,
+          "raw_label": "private_person",
+          "score": 0.9995854496955872,
+          "text": "박하",
+          "label": "PERSON",
+          "utf16_start": 0,
+          "utf16_end": 2
+        }
+      ]
+    },
+    {
+      "id": "community",
+      "characters": 218,
+      "seconds": [
+        0.14303399994969368,
+        0.14182520005851984,
+        0.14147419994696975
+      ],
+      "medianSeconds": 0.14182520005851984,
+      "windows": 1,
+      "memory": {
+        "rss": 1680216064,
+        "vms": 2021371904,
+        "peak_wset": 2222354432,
+        "private": 2021371904
+      },
+      "tailPredictions": [
+        {
+          "start": 144,
+          "end": 164,
+          "raw_label": "private_address",
+          "score": 0.9707436561584473,
+          "text": "서울특별시 강서구 가상로 17, 40",
+          "label": "ADDRESS",
+          "utf16_start": 144,
+          "utf16_end": 164
+        },
+        {
+          "start": 180,
+          "end": 183,
+          "raw_label": "private_person",
+          "score": 0.9999024073282877,
+          "text": "문가온",
+          "label": "PERSON",
+          "utf16_start": 180,
+          "utf16_end": 183
+        }
+      ]
+    },
+    {
+      "id": "chars-1000",
+      "characters": 1000,
+      "seconds": [
+        0.8942219000309706,
+        0.9535046997480094,
+        0.9028507997281849
+      ],
+      "medianSeconds": 0.9028507997281849,
+      "windows": 4,
+      "memory": {
+        "rss": 1685278720,
+        "vms": 2024173568,
+        "peak_wset": 2222354432,
+        "private": 2024173568
+      },
+      "tailPredictions": [
+        {
+          "start": 906,
+          "end": 909,
+          "raw_label": "private_person",
+          "score": 0.912745734055837,
+          "text": "박하차",
+          "label": "PERSON",
+          "utf16_start": 906,
+          "utf16_end": 909
+        },
+        {
+          "start": 963,
+          "end": 966,
+          "raw_label": "private_person",
+          "score": 0.9999088446299235,
+          "text": "김하늘",
+          "label": "PERSON",
+          "utf16_start": 963,
+          "utf16_end": 966
+        },
+        {
+          "start": 974,
+          "end": 996,
+          "raw_label": "private_address",
+          "score": 0.9737967789173126,
+          "text": "서울특별시 강서구 가상로 17, 402호",
+          "label": "ADDRESS",
+          "utf16_start": 974,
+          "utf16_end": 996
+        }
+      ]
+    },
+    {
+      "id": "chars-3000",
+      "characters": 3000,
+      "seconds": [
+        2.751161400228739,
+        2.7741530002094805,
+        2.739624099805951
+      ],
+      "medianSeconds": 2.751161400228739,
+      "windows": 10,
+      "memory": {
+        "rss": 1687371776,
+        "vms": 2024382464,
+        "peak_wset": 2222354432,
+        "private": 2024382464
+      },
+      "tailPredictions": [
+        {
+          "start": 2963,
+          "end": 2966,
+          "raw_label": "private_person",
+          "score": 0.9998145500818888,
+          "text": "김하늘",
+          "label": "PERSON",
+          "utf16_start": 2963,
+          "utf16_end": 2966
+        },
+        {
+          "start": 2974,
+          "end": 2996,
+          "raw_label": "private_address",
+          "score": 0.9960367918014527,
+          "text": "서울특별시 강서구 가상로 17, 402호",
+          "label": "ADDRESS",
+          "utf16_start": 2974,
+          "utf16_end": 2996
+        }
+      ]
+    },
+    {
+      "id": "chars-10000",
+      "characters": 10000,
+      "seconds": [
+        9.209807499777526,
+        9.3690351000987,
+        9.22206629998982
+      ],
+      "medianSeconds": 9.22206629998982,
+      "windows": 34,
+      "memory": {
+        "rss": 1693507584,
+        "vms": 2029731840,
+        "peak_wset": 2222354432,
+        "private": 2029731840
+      },
+      "tailPredictions": [
+        {
+          "start": 9963,
+          "end": 9966,
+          "raw_label": "private_person",
+          "score": 0.9999123811721802,
+          "text": "김하늘",
+          "label": "PERSON",
+          "utf16_start": 9963,
+          "utf16_end": 9966
+        },
+        {
+          "start": 9974,
+          "end": 9996,
+          "raw_label": "private_address",
+          "score": 0.9999159276485443,
+          "text": "서울특별시 강서구 가상로 17, 402호",
+          "label": "ADDRESS",
+          "utf16_start": 9974,
+          "utf16_end": 9996
+        }
+      ]
+    }
+  ],
+  "importAndLoadSeconds": 10.382362900301814,
+  "memoryAfterLoad": {
+    "rss": 1667444736,
+    "vms": 1990012928,
+    "peak_wset": 2222354432,
+    "private": 1990012928
+  },
+  "details": {
+    "format": "PyTorch FP32",
+    "parameters": 277481509,
+    "loading": {
+      "missing_keys": [],
+      "unexpected_keys": [],
+      "mismatched_keys": [],
+      "error_msgs": []
+    }
+  },
+  "maxTokens": 256,
+  "stride": 64,
+  "firstInferenceSeconds": 0.03477549972012639,
+  "processStartToFirstResultSeconds": 11.091432600282133,
+  "memoryEnd": {
+    "rss": 1693507584,
+    "vms": 2029731840,
+    "peak_wset": 2222354432,
+    "private": 2029731840
+  },
+  "networkAttempts": 0,
+  "elapsedSeconds": 63.47034660028294
+}

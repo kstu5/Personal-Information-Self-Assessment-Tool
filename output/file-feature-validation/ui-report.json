@@ -1,0 +1,17 @@
+{
+  "checks": [
+    "Real A-model inspection, multiple file queue, and locations",
+    "Switching files preserves masking choices",
+    "Visible bulk selection, direct edit, full masking",
+    "Copy generation, rescan, review gate, and real download",
+    "Reload restores open files and generated copy, with review required again",
+    "390px layout without horizontal overflow",
+    "Manual image region selection for OCR misses",
+    "Actual redacted image preview after rescan",
+    "Remove confirmation and per-file cleanup",
+    "Excel sheet switching, cell addresses, forced calculation result, and hidden cells",
+    "No JavaScript errors or external requests"
+  ],
+  "errors": [],
+  "external": []
+}

@@ -1,0 +1,76 @@
+{
+  "model": "B",
+  "environment": {
+    "cpu": "Intel(R) Core(TM) Ultra 5 325",
+    "logicalCpus": 8,
+    "physicalCpus": 8,
+    "ramBytes": 33685872640,
+    "availableRamBytesAtStart": 14466732032,
+    "os": "Windows-11-10.0.26200-SP0",
+    "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+    "threads": 4,
+    "device": "cpu",
+    "versions": {
+      "torch": "2.9.1+cpu",
+      "transformers": "4.57.6",
+      "numpy": "2.5.4",
+      "psutil": "7.1.3",
+      "safetensors": "0.8.0",
+      "tokenizers": "0.22.2"
+    }
+  },
+  "fixtureSha256": "5add9cfa32f3ffd630cf464d4015f28e7c6dd4121ca89a850cf313d78ed1b0aa",
+  "method": "BIO argmax, no confidence threshold or task-specific heuristics. Sequential batch=1 FP32 CPU. Long inputs use overlapping token windows; the most central window supplies each token tag. Original offsets preserved.",
+  "memoryBeforeLoad": {
+    "rss": 32874496,
+    "vms": 18317312,
+    "peak_wset": 32874496,
+    "private": 18317312
+  },
+  "parameterCount": 110059049,
+  "maxTokensPerWindow": 256,
+  "stride": 64,
+  "labelMapping": {
+    "PERSON_NAME": "PERSON",
+    "ADDRESS": "ADDRESS",
+    "PHONE_NUM": "PHONE",
+    "EMAIL": "EMAIL",
+    "ACCOUNT_NUM": "ACCOUNT",
+    "DOB": "DT_BIRTH",
+    "AGE": "AGE",
+    "POSITION": "POSITION",
+    "RRN": "RRN",
+    "CARD_NUM": "CARD",
+    "USER_ID": "USER_ID",
+    "PLATE_NUM": "PLATE",
+    "PASSPORT_NUM": "PASSPORT",
+    "DRIVER_LICENSE_NUM": "DRIVER_LICENSE",
+    "FOREIGNER_REG_NUM": "ALIEN"
+  },
+  "loadingInfo": {
+    "missing_keys": [],
+    "unexpected_keys": [],
+    "mismatched_keys": [],
+    "error_msgs": []
+  },
+  "modelFilesBytes": 441274291,
+  "importAndLoadSeconds": 8.249708499992266,
+  "memoryAfterLoad": {
+    "rss": 304250880,
+    "vms": 989716480,
+    "peak_wset": 304250880,
+    "private": 989716480
+  },
+  "firstInferenceSeconds": 0.06852500000968575,
+  "processStartToFirstResultSeconds": 8.976003099931404,
+  "cases": [],
+  "performance": [],
+  "memoryEnd": {
+    "rss": 647970816,
+    "vms": 989859840,
+    "peak_wset": 647970816,
+    "private": 989859840
+  },
+  "blockedNetworkAttempts": 0,
+  "elapsedSeconds": 8.976165000116453
+}

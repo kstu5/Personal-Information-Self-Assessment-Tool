@@ -1,0 +1,21 @@
+# Store text as LF in the repository; let Git convert for the platform on checkout.
+* text=auto
+
+# Shell scripts must stay LF on every platform (CRLF breaks "#!/usr/bin/env bash").
+*.sh text eol=lf
+
+# The Windows launcher is UTF-16; never convert it.
+*.vbs -text
+
+# Binary files (documents, images, archives, model weights).
+*.docx binary
+*.pptx binary
+*.xlsx binary
+*.hwpx binary
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.zip binary
+*.safetensors binary
+*.onnx binary
