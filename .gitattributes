@@ -8,7 +8,7 @@
 *.vbs -text
 
 # Audit fixtures are hashed as bytes, including CSV/TSV line endings and CP949.
-test/fixtures/** -text
+test/fixtures/** -text whitespace=cr-at-eol
 
 # Binary files (documents, images, archives, model weights).
 *.docx binary
