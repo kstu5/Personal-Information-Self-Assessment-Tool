@@ -46,6 +46,66 @@ def parse_xml(raw):
     return E.fromstring(raw, E.XMLParser(resolve_entities=False, no_network=True, huge_tree=False))
 
 
+def text_slots(node):
+    """Ordered text and tail fields inside a text element, including empty fields.
+
+    HWPX change markers can split one displayed string between .text and .tail.
+    A nested paragraph owns its own text; its tail still belongs to this element.
+    """
+    if isinstance(node.tag, str):
+        yield node, 'text'
+    for child in node:
+        if local_name(child) != 'p':
+            yield from text_slots(child)
+        yield child, 'tail'
+
+
+def paragraph_slots(para):
+    for node in para.iter():
+        if local_name(node) not in {'t', 'delText', 'instrText'}:
+            continue
+        ancestors = list(node.iterancestors())
+        owner = next((a for a in ancestors if local_name(a) == 'p'), None)
+        if owner is not para:
+            continue
+        # A text element containing another text element is traversed only once.
+        if any(local_name(a) in {'t', 'delText', 'instrText'} for a in ancestors[:ancestors.index(para)]):
+            continue
+        yield from text_slots(node)
+
+
+def xml_anchor(tree, node):
+    # Thumbnail relationships may be removed before re-reading. Their sibling
+    # positions change, but an external relationship's Id does not.
+    if local_name(node) == 'Relationship' and node.get('Id'):
+        return {'tag': node.tag, 'relationshipId': node.get('Id')}
+    return {'path': tree.getroottree().getelementpath(node)}
+
+
+def metadata_attribute(node, attr):
+    """User-authored metadata only; never treat structural ids as editable text."""
+    ln = local_name(node)
+    ns = E.QName(node).namespace or ''
+    an = E.QName(attr).localname
+    if an.lower() in {'author', 'creator', 'lastmodifiedby', 'initials', 'username'} or ln in {'cmAuthor', 'author', 'trackChangeAuthor'} and an == 'name':
+        return '작성자'
+    word = ns in {'http://schemas.openxmlformats.org/wordprocessingml/2006/main',
+                  'http://purl.oclc.org/ooxml/wordprocessingml/main'}
+    drawing = ns.startswith(('http://schemas.openxmlformats.org/drawingml/',
+                             'http://purl.oclc.org/ooxml/drawingml/'))
+    presentation = ns in {'http://schemas.openxmlformats.org/presentationml/2006/main',
+                          'http://purl.oclc.org/ooxml/presentationml/main'}
+    if word and ln == 'docVar' and an == 'val':
+        return '문서 변수 값'
+    if (word and ln == 'hyperlink' or drawing and ln in {'hlinkClick', 'hlinkHover'}) and an == 'tooltip':
+        return '링크 도움말'
+    if ln in {'docPr', 'cNvPr'} and (drawing or presentation):
+        return {'name': '도형 이름', 'descr': '도형 대체 텍스트', 'title': '도형 제목'}.get(an)
+    if ns == 'urn:schemas-microsoft-com:vml':
+        return {'alt': '도형 대체 텍스트', 'title': '도형 제목'}.get(an)
+    return None
+
+
 def read_zip(path):
     with zipfile.ZipFile(path) as z:
         infos = z.infolist()
@@ -145,28 +205,32 @@ class Document:
                 selected = set()
                 for para in tree.iter():
                     if local_name(para) != 'p': continue
-                    nodes = [e for e in para.iter() if local_name(e) in {'t', 'delText', 'instrText'} and e.text and e not in selected]
-                    if not nodes: continue
-                    # Text boxes may contain nested paragraphs: only the nearest paragraph owns a text run.
-                    nodes = [e for e in nodes if next((a for a in e.iterancestors() if local_name(a) == 'p'), None) is para]
-                    if not nodes: continue
-                    selected.update(nodes)
-                    text = ''.join(e.text for e in nodes)
-                    deleted = any(local_name(a) == 'del' for e in nodes for a in e.iterancestors())
+                    slots = list(paragraph_slots(para))
+                    if not slots: continue
+                    selected.update(e for e, field in slots)
+                    text = ''.join(getattr(e, field) or '' for e, field in slots)
+                    deleted = any(local_name(a) == 'del' for e, field in slots for a in e.iterancestors()) or any(local_name(e) in {'deleteBegin', 'deleteEnd'} for e, field in slots)
                     memo = any(local_name(a) in {'memo','memogroup'} for a in para.iterancestors()) or any(local_name(e)=='fieldBegin' and e.get('type')=='MEMO' for e in para.iter())
                     self.add(text, f'{label} · 문단 {node_ids[para]+1}'+(' · 삭제된 변경 기록' if deleted else ' · 메모' if memo else ''),
-                             {'kind': 'xml', 'name': name, 'nodes': [node_ids[e] for e in nodes]})
+                             {'kind': 'xml', 'name': name, 'anchor': xml_anchor(tree, para), 'mode': 'paragraph',
+                              'slots': [{'node': node_ids[e], 'field': field} for e, field in slots]})
                 for e, idx in node_ids.items():
                     ln = local_name(e)
                     string_property = name.startswith('docProps/') and ln in {'title','subject','creator','keywords','description','lastModifiedBy','category','contentStatus','identifier','Company','Manager','HyperlinkBase','lpstr','lpwstr'}
                     if e not in selected and e.text and (ln in {'t', 'delText', 'instrText', 'text','meta','metaTag'} or ln=='stringParam' and e.get('name')=='Author' or string_property):
-                        self.add(e.text, f'{label} · {ln}', {'kind': 'xml', 'name': name, 'nodes': [idx]})
+                        slots = list(text_slots(e))
+                        selected.update(node for node, field in slots)
+                        self.add(''.join(getattr(node, field) or '' for node, field in slots), f'{label} · {ln}',
+                                 {'kind': 'xml', 'name': name, 'anchor': xml_anchor(tree, e), 'mode': 'element',
+                                  'slots': [{'node': node_ids[node], 'field': field} for node, field in slots]})
                     for attr, value in e.attrib.items():
-                        an = E.QName(attr).localname
-                        if an.lower() in {'author', 'creator', 'lastmodifiedby', 'initials', 'username'} or ln in {'cmAuthor', 'author','trackChangeAuthor'} and an == 'name':
-                            self.add(value, f'{label} · 작성자', {'kind': 'attr', 'name': name, 'node': idx, 'attr': attr})
+                        attribute_label = metadata_attribute(e, attr)
+                        if attribute_label:
+                            self.add(value, f'{label} · {attribute_label}', {'kind': 'attr', 'name': name, 'node': idx,
+                                     'anchor': xml_anchor(tree, e), 'attr': attr})
                     if ln == 'Relationship' and e.get('TargetMode') == 'External':
-                        self.add(e.get('Target', ''), f'{label} · 외부 링크 주소', {'kind': 'attr', 'name': name, 'node': idx, 'attr': 'Target'})
+                        self.add(e.get('Target', ''), f'{label} · 외부 링크 주소', {'kind': 'attr', 'name': name, 'node': idx,
+                                 'anchor': xml_anchor(tree, e), 'attr': 'Target'})
                         if not e.get('Type', '').endswith('/hyperlink'):
                             self.blockers.append('외부에서 불러오는 그림·문서 연결이 있어 사본 저장을 지원하지 않습니다.')
                 if any(local_name(e).lower() in {'altchunk', 'oleobject'} for e in tree.iter()):
@@ -177,6 +241,7 @@ class Document:
                 else:
                     self.blockers.append('지원하지 않는 내장 이미지·이진 개체가 있습니다. PNG·JPEG·BMP만 직접 가릴 수 있습니다.')
         self.coverage = ['본문·표·텍스트 상자', '머리말·꼬리말·각주', '저장된 메모·발표자 노트', '읽을 수 있는 변경 기록·작성자·문서 속성', '내장 PNG·JPEG·BMP의 OCR']
+        self.coverage.append('변경 표시 사이에 저장된 글자' if self.kind == '.hwpx' else '지원 도형 이름·대체 텍스트·제목·링크 도움말·문서 변수 값')
         self.warnings.append('본문은 서식이 없는 검토용 텍스트입니다. 클라우드 버전 이력과 지원하지 않는 개체는 검사 범위에 포함되지 않습니다. 저장 후 원래 문서 프로그램에서도 배치를 확인해 주세요.')
         self.warnings.append('옛 내용이 남을 수 있는 문서 내부 축소판 이미지는 사본에서 제거합니다.')
 
@@ -358,6 +423,30 @@ class Document:
         if not self.parts:
             self.blockers.insert(0,'이 HWP에서 읽을 수 있는 본문을 찾지 못했습니다. 개인정보가 없다는 뜻이 아닙니다. 메모만 있는 문서 등은 HWPX로 변환해 검사해 주세요.')
 
+    def xml_target_value(self, target):
+        """Read a saved XML field by its container, not its nonempty run indices.
+
+        Return None for a missing field. An existing field containing an empty
+        string is different: a user may intentionally clear an entire paragraph.
+        """
+        tree = self.trees.get(target['name'])
+        if tree is None:
+            return None
+        anchor = target['anchor']
+        if 'relationshipId' in anchor:
+            matches = [e for e in tree.iter(anchor['tag']) if e.get('Id') == anchor['relationshipId']]
+            if len(matches) != 1:
+                return None
+            node = matches[0]
+        else:
+            node = tree.find(anchor['path'])
+        if node is None:
+            return None
+        if target['kind'] == 'attr':
+            return node.get(target['attr'])
+        slots = paragraph_slots(node) if target['mode'] == 'paragraph' else text_slots(node)
+        return ''.join(getattr(e, field) or '' for e, field in slots)
+
     def edit_part(self, part, new):
         t=part['target']; kind=t['kind']
         if kind=='line': self.lines[t['index']]=new
@@ -370,20 +459,22 @@ class Document:
                 old=part['text']; import difflib
                 edits=[(a,b,new[c:d]) for op,a,b,c,d in difflib.SequenceMatcher(a=old,b=new,autojunk=False).get_opcodes() if op!='equal']
                 offsets=[]; pos=0
-                for idx in t['nodes']:
-                    value=nodes[idx].text or '';offsets.append((idx,pos,pos+len(value)));pos+=len(value)
+                for slot in t['slots']:
+                    value=getattr(nodes[slot['node']],slot['field']) or ''
+                    offsets.append((slot,pos,pos+len(value)));pos+=len(value)
                 for a,b,value in reversed(edits):
                     first=True
-                    for idx,start,end in offsets:
+                    for slot,start,end in offsets:
                         if a==b:
                             if not(start<=a<=end): continue
                         elif end<=a or start>=b: continue
-                        node=nodes[idx];text=node.text or ''
+                        node=nodes[slot['node']];field=slot['field'];text=getattr(node,field) or ''
                         lo=max(a-start,0);hi=min(b-start,len(text))
-                        node.text=text[:lo]+(value if first else '')+text[hi:]
-                        node.set('{http://www.w3.org/XML/1998/namespace}space','preserve');first=False
+                        setattr(node,field,text[:lo]+(value if first else '')+text[hi:])
+                        owner=node if field=='text' else node.getparent()
+                        owner.set('{http://www.w3.org/XML/1998/namespace}space','preserve');first=False
                         if a==b: break
-                if ''.join(nodes[i].text or '' for i in t['nodes'])!=new: raise FormatError('문서의 글자 위치가 일치하지 않아 저장하지 않았습니다.')
+                if ''.join(getattr(nodes[s['node']],s['field']) or '' for s in t['slots'])!=new: raise FormatError('문서의 글자 위치가 일치하지 않아 저장하지 않았습니다.')
         elif kind=='property': setattr(self.workbook.properties,t['key'],new)
         elif kind=='header': getattr(getattr(self.workbook.worksheets[t['sheet']],t['field']),t['side']).text=new
         elif kind=='sheet_name':
@@ -483,3 +574,22 @@ class Document:
         elif self.kind=='.txt': Path(output).write_bytes(''.join(self.lines).encode('utf-8'))
         elif self.kind=='.hwp': raise FormatError('HWP 수정 저장은 지원하지 않습니다.')
 
+
+def verify_text_edits(source, saved, edits):
+    """Require the exact requested text at the original field in the saved file."""
+    by_target = {json.dumps(p['target'],sort_keys=True):p['text'] for p in saved.parts}
+    for part in source.parts:
+        if part['id'] not in edits:
+            continue
+        want = edits[part['id']]
+        target = part['target']
+        if target['kind'] in {'xml','attr'}:
+            # Run contents may be empty after a cross-run replacement. Resolve
+            # the original paragraph/attribute even if it is absent from parts.
+            got = saved.xml_target_value(target)
+            valid = got is not None and got == want
+        else:
+            got = by_target.get(json.dumps(target,sort_keys=True),'')
+            valid = got == want or not got and not want.strip() or source.kind in {'.csv','.tsv'} and got == "'"+want
+        if not valid:
+            raise FormatError('저장한 사본의 수정 위치를 재확인하지 못했습니다. 파일을 제공하지 않습니다.')

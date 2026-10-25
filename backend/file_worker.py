@@ -11,7 +11,7 @@ def main():
         if event in {'socket.connect','socket.getaddrinfo','socket.sendto'}:
             raise RuntimeError('Document processing is offline')
     sys.addaudithook(deny_network)
-    from backend.file_formats import Document, FormatError
+    from backend.file_formats import Document, FormatError, verify_text_edits
     job=Path(sys.argv[1]); spec=json.loads(job.read_text(encoding='utf-8'))
     work=job.parent; response=work/spec['response']
     try:
@@ -21,15 +21,7 @@ def main():
             doc.export(output,spec['edits'],spec['regions'])
             verified=work/'verification';verified.mkdir(exist_ok=True)
             reread=Document(output,verified).load()
-            # For editable text sources, re-extraction must contain the exact expected text at the same target.
-            by_target={json.dumps(p['target'],sort_keys=True):p['text'] for p in reread.parts}
-            for p in doc.parts:
-                if p['id'] not in spec['edits']: continue
-                want=spec['edits'][p['id']]
-                got=by_target.get(json.dumps(p['target'],sort_keys=True),'')
-                # Empty strings are intentionally omitted by the extractor.
-                if got!=want and not(not got and not want.strip()) and not(doc.kind in {'.csv','.tsv'} and got=="'"+want):
-                    raise FormatError('저장한 사본의 수정 위치를 재확인하지 못했습니다. 파일을 제공하지 않습니다.')
+            verify_text_edits(doc,reread,spec['edits'])
             manifest=reread.manifest()
         else:
             manifest=doc.manifest()

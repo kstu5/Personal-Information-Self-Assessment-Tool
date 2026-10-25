@@ -15,7 +15,7 @@ from backend.file_review import FileReviewStore, utf16
 
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'.runtime'/'file-python'))
-from backend.file_formats import Document, FormatError, read_zip
+from backend.file_formats import Document, FormatError, read_zip, parse_xml
 
 
 class RegexDetector:
@@ -236,3 +236,108 @@ def test_excel_hidden_validation_prompts_are_not_silently_ignored(tmp_path):
     w=Workbook();w.active['A1']='안내';dv=DataValidation(type='list',formula1='"김민수,이지은"');w.active.add_data_validation(dv);dv.add('A1')
     source=tmp_path/'validation.xlsx';w.save(source)
     with pytest.raises(FormatError):Document(source,tmp_path).load()
+
+
+@pytest.mark.parametrize('mode,custom,expected',[
+    ('full',None,'█████'),('partial',None,'김**'),('custom','[담당자]','[담당자]'),('custom','',''),
+])
+def test_cross_run_word_edits_survive_worker_verification(store,tmp_path,mode,custom,expected):
+    from docx import Document as Word
+    source=tmp_path/'runs.docx';d=Word();p=d.add_paragraph('😀 담당 ')
+    p.add_run('김').bold=True;p.add_run('민').italic=True;p.add_run('수')
+    d.add_paragraph('공개 문구 유지');d.save(source);before=source.read_bytes()
+    j=store.upload(source.name,before,source);ready=wait(store,j['id'])
+    c=next(c for c in ready['candidates'] if c['text']=='김민수')
+    choice={'mode':mode}
+    if custom is not None:choice['text']=custom
+    store.export(j['id'],ready['revision'],{c['id']:choice},[]);done=wait(store,j['id'])
+    assert done['exportResult'],done.get('error')
+    saved=Word(store.output(j['id'])[0])
+    assert saved.paragraphs[0].text=='😀 담당 '+expected
+    assert saved.paragraphs[1].text=='공개 문구 유지'
+    assert saved.paragraphs[0].runs[1].bold and saved.paragraphs[0].runs[2].italic
+    assert source.read_bytes()==before
+
+
+def test_hwpx_mixed_text_and_change_marker_tails_are_edited(store,tmp_path):
+    source=tmp_path/'tails.hwpx'
+    section='''<hp:sec xmlns:hp="http://www.hancom.co.kr/hwpml/2011/paragraph">
+      <hp:p><hp:run><hp:t>😀 담당 김<hp:deleteBegin/>민<hp:deleteEnd/>수 연락 010-<hp:deleteBegin/>0000<hp:deleteEnd/>-1234</hp:t></hp:run></hp:p>
+      <hp:p><hp:run><hp:t>공개 안내</hp:t></hp:run></hp:p>
+    </hp:sec>'''
+    with zipfile.ZipFile(source,'w') as z:
+        z.writestr('Contents/content.hpf','<package/>');z.writestr('Contents/section0.xml',section)
+    original=source.read_bytes();j=store.upload(source.name,original,source);ready=wait(store,j['id'])
+    assert ready['state']=='ready',ready
+    assert {c['text'] for c in ready['candidates']}=={'김민수','010-0000-1234'}
+    store.export(j['id'],ready['revision'],{c['id']:{'mode':'full'} for c in ready['candidates']},[])
+    done=wait(store,j['id']);assert done['exportResult'],done.get('error')
+    out,_=store.output(j['id'])
+    with zipfile.ZipFile(out) as z:
+        tree=parse_xml(z.read('Contents/section0.xml'))
+        text=''.join(tree.itertext())
+        assert '김민수' not in text and '010-0000-1234' not in text
+        assert text.count('█████')==2 and '공개 안내' in text
+        assert len([e for e in tree.iter() if e.tag.endswith('deleteBegin')])==2
+    assert source.read_bytes()==original
+
+
+@pytest.mark.parametrize('extension,main,content',[
+    ('.docx','word/document.xml','''<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing">
+      <w:body><w:p><w:r><w:t>공개 안내</w:t></w:r><w:hyperlink w:tooltip="010-0000-1234"/><v:rect id="shape42" alt="이지은" title="김민수"/><wp:docPr id="42" name="김민수" descr="010-0000-1234" title="이지은"/></w:p></w:body>
+      <w:docVars><w:docVar w:name="qa-variable" w:val="김민수"/></w:docVars></w:document>'''),
+    ('.pptx','ppt/presentation.xml','''<p:presentation xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">
+      <p:cNvPr id="42" name="김민수" descr="010-0000-1234" title="이지은"/><a:hlinkClick tooltip="010-0000-1234"/></p:presentation>'''),
+    ('.docx','word/document.xml','''<w:document xmlns:w="http://purl.oclc.org/ooxml/wordprocessingml/main" xmlns:wp="http://purl.oclc.org/ooxml/drawingml/wordprocessingDrawing">
+      <w:body><w:p><w:hyperlink w:tooltip="010-0000-1234"/><wp:docPr id="42" name="김민수" descr="010-0000-1234" title="이지은"/></w:p></w:body>
+      <w:docVars><w:docVar w:name="qa-variable" w:val="김민수"/></w:docVars></w:document>'''),
+])
+def test_ooxml_user_metadata_is_reviewed_and_structural_ids_preserved(store,tmp_path,extension,main,content):
+    source=tmp_path/('metadata'+extension)
+    with zipfile.ZipFile(source,'w') as z:z.writestr(main,content)
+    j=store.upload(source.name,source.read_bytes());ready=wait(store,j['id'])
+    assert ready['state']=='ready',ready
+    # Every occurrence in the source metadata must be reachable, not just one per value.
+    expected=sum(content.count(token) for token in ('김민수','이지은','010-0000-1234'))
+    assert len(ready['candidates'])==expected
+    assert all('도형' in c['location'] or '링크 도움말' in c['location'] or '문서 변수 값' in c['location'] for c in ready['candidates'])
+    store.export(j['id'],ready['revision'],{c['id']:{'mode':'full'} for c in ready['candidates']},[])
+    done=wait(store,j['id']);assert done['exportResult'],done.get('error')
+    with zipfile.ZipFile(store.output(j['id'])[0]) as z:
+        raw=z.read(main).decode()
+        assert all(token not in raw for token in ('김민수','이지은','010-0000-1234'))
+        assert 'id="42"' in raw
+        if 'shape42' in content:assert 'id="shape42"' in raw
+        if 'qa-variable' in content:assert 'qa-variable' in raw
+
+
+def test_relationship_identity_survives_thumbnail_removal(store,tmp_path):
+    source=tmp_path/'links.docx'
+    rels='''<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+      <Relationship Id="thumb" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/thumbnail" Target="docProps/thumbnail.png"/>
+      <Relationship Id="contact" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" TargetMode="External" Target="mailto:sample@example.invalid"/>
+    </Relationships>'''
+    with zipfile.ZipFile(source,'w') as z:
+        z.writestr('word/document.xml','<document/>');z.writestr('_rels/.rels',rels);z.writestr('docProps/thumbnail.png',b'unused thumbnail')
+    j=store.upload(source.name,source.read_bytes());ready=wait(store,j['id'])
+    assert len(ready['candidates'])==1
+    store.export(j['id'],ready['revision'],{ready['candidates'][0]['id']:{'mode':'full'}},[])
+    done=wait(store,j['id']);assert done['exportResult'],done.get('error')
+    with zipfile.ZipFile(store.output(j['id'])[0]) as z:
+        rel=parse_xml(z.read('_rels/.rels'));assert len(rel)==1
+        assert rel[0].get('Id')=='contact' and rel[0].get('Target')=='mailto:█████'
+
+
+def test_empty_xml_edits_are_verified_but_missing_or_wrong_fields_are_rejected(tmp_path):
+    from docx import Document as Word
+    from backend.file_formats import verify_text_edits
+    source=tmp_path/'empty.docx';d=Word();d.add_paragraph('김민수');d.save(source)
+    original=Document(source,tmp_path).load();p=next(p for p in original.parts if p['text']=='김민수');edits={p['id']:''}
+    out=tmp_path/'cleared.docx';original.export(out,edits,[]);saved=Document(out,tmp_path).load()
+    verify_text_edits(original,saved,edits)
+    tree=saved.trees['word/document.xml'];para=tree.find(p['target']['anchor']['path'])
+    # An empty original field is valid; an absent field must never pass as empty.
+    para.getparent().remove(para)
+    with pytest.raises(FormatError):verify_text_edits(original,saved,edits)
+    saved=Document(out,tmp_path).load();node=next(e for e in saved.trees['word/document.xml'].iter() if e.tag.endswith('}t'));node.text='변조된 내용'
+    with pytest.raises(FormatError):verify_text_edits(original,saved,edits)
