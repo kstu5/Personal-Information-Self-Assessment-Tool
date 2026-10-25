@@ -7,21 +7,21 @@
 
 [Setup]
 AppId={{6F0B2C7E-3A5D-4E88-9B44-0D1C5E7A9F21}
-AppName=게시 전 개인정보 검토
+AppName=개인정보 자가진단 도구
 AppVersion={#AppVersion}
-AppPublisher=게시 전
+AppPublisher=개인정보 자가진단 도구
 DefaultDirName={localappdata}\Programs\BeforePost
-DefaultGroupName=게시 전
+DefaultGroupName=개인정보 자가진단 도구
 PrivilegesRequired=lowest
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 DisableProgramGroupPage=yes
 OutputDir=out
-OutputBaseFilename=BeforePost-Setup-{#AppVersion}
+OutputBaseFilename=PrivacySelfAssessmentTool-Setup-{#AppVersion}
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
-UninstallDisplayName=게시 전 개인정보 검토
+UninstallDisplayName=개인정보 자가진단 도구
 CloseApplications=no
 
 [Languages]
@@ -34,8 +34,8 @@ Name: "desktopicon"; Description: "바탕 화면에 바로가기 만들기"; Fla
 Source: "{#StageDir}\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs ignoreversion
 
 [Icons]
-Name: "{autoprograms}\게시 전 개인정보 검토"; Filename: "{app}\python\pythonw.exe"; Parameters: "-X utf8 ""{app}\run.py"""; WorkingDir: "{app}"
-Name: "{autodesktop}\게시 전 개인정보 검토"; Filename: "{app}\python\pythonw.exe"; Parameters: "-X utf8 ""{app}\run.py"""; WorkingDir: "{app}"; Tasks: desktopicon
+Name: "{autoprograms}\개인정보 자가진단 도구"; Filename: "{app}\python\pythonw.exe"; Parameters: "-X utf8 ""{app}\run.py"""; WorkingDir: "{app}"
+Name: "{autodesktop}\개인정보 자가진단 도구"; Filename: "{app}\python\pythonw.exe"; Parameters: "-X utf8 ""{app}\run.py"""; WorkingDir: "{app}"; Tasks: desktopicon
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}\python"
@@ -60,7 +60,7 @@ begin
   StepNames[1] := 'packages';    StepLabels[1] := '프로그램 구성요소를 내려받는 중 (수 분 걸릴 수 있습니다)...';
   StepNames[2] := 'tools';       StepLabels[2] := '탐지 모델과 OCR 데이터를 내려받는 중...';
   StepNames[3] := 'jre';         StepLabels[3] := 'HWP 읽기 도구(Java)를 준비하는 중...';
-  StepNames[4] := 'libreoffice'; StepLabels[4] := 'XLSX 확인 도구(LibreOffice)를 준비하는 중...';
+  StepNames[4] := 'libreoffice'; StepLabels[4] := '문서 미리보기·XLSX 확인 도구(LibreOffice)를 준비하는 중...';
   StepNames[5] := 'webview2';    StepLabels[5] := '화면 구성요소(WebView2)를 확인하는 중...';
 end;
 

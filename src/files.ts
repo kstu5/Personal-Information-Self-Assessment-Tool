@@ -22,7 +22,7 @@ async function digest(file: File): Promise<string> {
   if (file.size > 2_000_000) throw new Error('파일이 너무 큽니다. 2 MB 이하의 작업 파일을 선택해 주세요.');
   return Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', await file.arrayBuffer()))).map(x => x.toString(16).padStart(2,'0')).join('');
 }
-const types = [{ description: '게시 전 작업 파일', accept: { 'application/json': ['.piipost'] } }];
+const types = [{ description: '개인정보 자가진단 도구 작업 파일', accept: { 'application/json': ['.piipost'] } }];
 export function cancelled(error: unknown): boolean { return error instanceof DOMException && error.name === 'AbortError'; }
 
 export async function openDocument(): Promise<{ draft: Draft; file: SavedFile } | null> {

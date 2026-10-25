@@ -34,7 +34,7 @@ def main():
         name = 'Local\\BeforePost-' + hashlib.sha256(str(ROOT).encode()).hexdigest()[:16]
         mutex = kernel.CreateMutexW(None, False, name)
         if ctypes.get_last_error() == 183:
-            ctypes.windll.user32.MessageBoxW(None, '게시 전 프로그램이 이미 실행 중입니다.', '게시 전', 0x40)
+            ctypes.windll.user32.MessageBoxW(None, '개인정보 자가진단 도구가 이미 실행 중입니다.', '개인정보 자가진단 도구', 0x40)
             kernel.CloseHandle(mutex)
             return
     sock = socket.socket()
@@ -62,13 +62,13 @@ def main():
             args.ready_file.write_text(json.dumps({'url': url}), encoding='utf-8')
         if desktop:
             import webview
-            desktop.window = webview.create_window('게시 전 · 개인정보 검토', url, width=1280, height=880, min_size=(760, 600), background_color='#f5f7f8')
+            desktop.window = webview.create_window('개인정보 자가진단 도구', url, width=1280, height=880, min_size=(760, 600), background_color='#f5f7f8')
             desktop.window.events.closing += desktop.closing
             webview.start(gui='edgechromium', private_mode=True, debug=False)
         else:
             if args.browser:
                 webbrowser.open(url)
-            print(f'게시 전: {url}\n종료하려면 Ctrl+C를 누르세요.', flush=True)
+            print(f'개인정보 자가진단 도구: {url}\n종료하려면 Ctrl+C를 누르세요.', flush=True)
             while thread.is_alive():
                 thread.join(timeout=.5)
     except KeyboardInterrupt:
@@ -91,6 +91,6 @@ if __name__ == '__main__':
         # No draft text or paths from files are included in startup diagnostics.
         if sys.platform == 'win32' and not any(x in sys.argv for x in ['--headless', '--browser']):
             import ctypes
-            ctypes.windll.user32.MessageBoxW(None, '프로그램을 실행하지 못했습니다. 실행 환경과 WebView2 설치를 확인해 주세요. 자세한 안내는 README.md에 있습니다.', '게시 전', 0x10)
+            ctypes.windll.user32.MessageBoxW(None, '프로그램을 실행하지 못했습니다. 실행 환경과 WebView2 설치를 확인해 주세요. 자세한 안내는 README.md에 있습니다.', '개인정보 자가진단 도구', 0x10)
         else:
             raise

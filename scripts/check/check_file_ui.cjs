@@ -1,6 +1,6 @@
 const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
 const fs=require('fs'),path=require('path'),assert=require('assert/strict');
-const root=path.resolve(__dirname, '..', '..'),out=path.join(root,'output','file-feature-validation');fs.mkdirSync(out,{recursive:true});
+const root=path.resolve(__dirname, '..', '..'),out=path.join(root,'local-only/outputs','file-feature-validation');fs.mkdirSync(out,{recursive:true});
 const url=JSON.parse(fs.readFileSync(path.join(root,'tmp','file-feature-ready.json'),'utf8')).url;
 const report={checks:[],errors:[],external:[]};
 const created=new Set();let context,token;

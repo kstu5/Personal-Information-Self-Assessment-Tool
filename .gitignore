@@ -22,9 +22,11 @@ runtime.local.json
 /local-only/*
 !/local-only/README.md
 
-# --- output: 검증 결과 중 재생성 가능한 캐시류만 제외 ---
-output/**/profile/
-output/**/render-*/
+# --- 이전 경로의 열린 문서와 개발 산출물은 로컬 전용 ---
+/output/
+/reports/
+/report_qa/
+/test/
 
 # --- 대용량 바이너리 안전망 (GitHub 파일당 100MB 제한) ---
 *.safetensors
@@ -32,9 +34,6 @@ output/**/render-*/
 *.msi
 *.dll
 *.zip
-
-# --- 선택: 보고서 버전별 .docx를 버전관리하지 않으려면 주석 해제 ---
-# *.docx
 
 # --- 설치판 빌드 산출물 / 로컬 도구 ---
 .tools/

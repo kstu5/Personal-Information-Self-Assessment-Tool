@@ -64,7 +64,7 @@ def main():
     finally:
         watchdog.cancel();server.should_exit=True;app.state.detector.close();thread.join(10);sock.close()
     report['serverStopped']=not thread.is_alive();report['temporaryCopiesRemoved']=not app.state.documents.root.exists()
-    (ROOT/'output'/'file-feature-validation'/'desktop-report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+    (ROOT/'local-only/outputs'/'file-feature-validation'/'desktop-report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
     print(json.dumps(report,ensure_ascii=True))
     assert not report['errors'] and report['serverStopped'] and report['temporaryCopiesRemoved']
 

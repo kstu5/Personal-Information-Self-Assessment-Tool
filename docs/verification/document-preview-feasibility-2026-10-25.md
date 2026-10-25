@@ -28,7 +28,7 @@ HWP·HWPX는 같은 변환기로 처리된다고 보장할 수 없습니다. 이
 
 ## 이 PC에서 측정한 부담
 
-[측정 스크립트](../../test/benchmark_document_preview.py)로 기존 예시 6개에 대해 총 10회 실행했습니다. 정상적인 Office 변환은 각 2회이고 HWP/HWPX는 각 1회입니다. 원본 6개의 SHA-256이 모두 유지됐습니다. 실제 앱 화면·모델 검사 전체 시간의 벤치마크는 아닙니다.
+[측정 스크립트](../../validation/benchmark_document_preview.py)로 기존 예시 6개에 대해 총 10회 실행했습니다. 정상적인 Office 변환은 각 2회이고 HWP/HWPX는 각 1회입니다. 원본 6개의 SHA-256이 모두 유지됐습니다. 실제 앱 화면·모델 검사 전체 시간의 벤치마크는 아닙니다.
 
 | 문서 | 변환 결과 | 새 프로필에서 변환 | 같은 프로필로 새 프로세스 실행 | 변환 중 프로세스 트리 전용 메모리 최고값 |
 |---|---|---:|---:|---:|
@@ -56,7 +56,7 @@ HWP·HWPX는 같은 변환기로 처리된다고 보장할 수 없습니다. 이
 
 일치하지 않는 대상을 조용히 숨기거나 화면에 없는 후보를 없다고 판단해서는 안 됩니다. 발표자 노트·숨김 시트·문서 속성·변경 기록은 페이지 화면 밖에도 존재하므로 별도 검출 목록이 계속 필요합니다.
 
-[시안 제작 스크립트](../../test/build_preview_probe.py)는 실제 이력서 검출 결과와 변환 화면으로 로컬 읽기 전용 HTML을 만듭니다. 위험도 색상, 화면/목록 클릭, 위험도 필터를 확인하기 위한 조사 시안이며 제품에 통합한 기능이 아닙니다. 점선은 같은 문구가 여러 곳에 있어 검증된 원문 대응이 없다는 뜻입니다. 수정·가림 저장은 제공하지 않습니다.
+[시안 제작 스크립트](../../validation/build_preview_probe.py)는 실제 이력서 검출 결과와 변환 화면으로 로컬 읽기 전용 HTML을 만듭니다. 위험도 색상, 화면/목록 클릭, 위험도 필터를 확인하기 위한 조사 시안이며 제품에 통합한 기능이 아닙니다. 점선은 같은 문구가 여러 곳에 있어 검증된 원문 대응이 없다는 뜻입니다. 수정·가림 저장은 제공하지 않습니다.
 
 ## 대안 비교
 
@@ -68,7 +68,7 @@ HWP·HWPX는 같은 변환기로 처리된다고 보장할 수 없습니다. 이
 | ONLYOFFICE Docs 같은 전체 문서 편집 서버 | 여러 Office 형식의 보기·편집 통합 | 공식 Windows 서버 최소 RAM 2GB, 권장 4GB 이상, 여유 디스크 40GB. 이것은 시스템 요구사항이며 실제 앱 추가 메모리·설치 크기 실측이 아님 | 현 로컬 도구의 미리보기만을 위해 도입하는 것은 권장하지 않음 |
 | 한컴 통합문서뷰어 등 변환 엔진 | 공식 안내상 HWP/HWPX를 PDF·이미지 등으로 변환 가능 | 현재 설치되어 있지 않음. 제공 방식·라이선스·비용·용량·메모리는 공급사 확인 및 별도 실측 필요 | 한글 원본 화면 지원이 필수일 때 별도 검토 |
 
-LibreOffice의 [공식 PDF 변환 문서](https://help.libreoffice.org/latest/en-US/text/shared/guide/pdf_params.html)와 [변환 필터 문서](https://help.libreoffice.org/latest/en-US/text/shared/guide/convertfilters.html), docx-preview의 [공식 README](https://github.com/VolodymyrBaydalka/docxjs), ONLYOFFICE의 [Windows 시스템 요구사항](https://helpcenter.onlyoffice.com/docs/installation/docs-community-sys-reqs-windows.aspx), 한컴 개발자의 [변환 지원 답변](https://forum.developer.hancom.com/t/hwp-hwpx/3017)을 참고했습니다.
+LibreOffice의 [공식 PDF 변환 문서](https://help.libreoffice.org/lavalidation/en-US/text/shared/guide/pdf_params.html)와 [변환 필터 문서](https://help.libreoffice.org/lavalidation/en-US/text/shared/guide/convertfilters.html), docx-preview의 [공식 README](https://github.com/VolodymyrBaydalka/docxjs), ONLYOFFICE의 [Windows 시스템 요구사항](https://helpcenter.onlyoffice.com/docs/installation/docs-community-sys-reqs-windows.aspx), 한컴 개발자의 [변환 지원 답변](https://forum.developer.hancom.com/t/hwp-hwpx/3017)을 참고했습니다.
 
 ## 권장 적용 순서
 
@@ -83,8 +83,8 @@ LibreOffice의 [공식 PDF 변환 문서](https://help.libreoffice.org/latest/en
 
 ## 산출물과 재현
 
-- 공유 후보: 이 보고서, `test/benchmark_document_preview.py`, `test/build_preview_probe.py`.
-- 로컬 전용: `test/qa/preview-research/<실행번호>/`의 변환 PDF·PNG·HTML, 변환기 프로필·로그·상세 JSON.
-- 측정: 앱 Python 환경에서 `test/benchmark_document_preview.py` 실행. 기존 로컬 LibreOffice·psutil·PyMuPDF가 필요합니다.
-- 시안: 같은 환경에서 `test/build_preview_probe.py test/qa/preview-research/<실행번호>` 실행. 기존 가상 이력서의 실제 모델 결과가 `local-only/context-review/after/`에 있을 때만 위치 대조 시안을 만들 수 있습니다. 해당 상세 결과는 Git에 포함되지 않습니다.
+- 공유 후보: 이 보고서, `validation/benchmark_document_preview.py`, `validation/build_preview_probe.py`.
+- 로컬 전용: `validation/qa/preview-research/<실행번호>/`의 변환 PDF·PNG·HTML, 변환기 프로필·로그·상세 JSON.
+- 측정: 앱 Python 환경에서 `validation/benchmark_document_preview.py` 실행. 기존 로컬 LibreOffice·psutil·PyMuPDF가 필요합니다.
+- 시안: 같은 환경에서 `validation/build_preview_probe.py validation/qa/preview-research/<실행번호>` 실행. 기존 가상 이력서의 실제 모델 결과가 `local-only/context-review/after/`에 있을 때만 위치 대조 시안을 만들 수 있습니다. 해당 상세 결과는 Git에 포함되지 않습니다.
 - 재현 스크립트의 단순 문구 검색은 제품에 적용할 위치 대응 알고리즘이 아닙니다.

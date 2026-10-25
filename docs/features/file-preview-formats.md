@@ -43,4 +43,4 @@ XLSX는 전체 인쇄 페이지보다 셀 보기를 기본으로 두는 편이 �
 - 실제 화면에서 TXT 내용 보기, CSV의 셀 선택·부분 가림, HWPX의 본문 수정·메모 선택 시 전체 위치 이동, HWP의 읽기 전용과 저장 제한을 확인했다.
 - 700px 창에서 내용 화면과 처리 패널이 세로로 배치되고 문서 너비 685px로 가로 넘침이 없음을 확인했다.
 - Python 정규 시험 95개, 화면 관련 시험 11개와 TypeScript 검사·빌드를 통과했다. 추가 시험은 CSV/TSV의 빈 셀·빈 행·셀 내부 줄바꿈·수정 후 위치, TXT의 빈 행, HWPX의 본문/속성 구분, 형식별 기본 보기와 본문 정렬·구간 이동을 포함한다.
-- 상세 API 응답·요약·스크린샷은 로컬 전용 `test/qa/format-previews/`, 재현 도구는 [check_format_previews.py](../../test/check_format_previews.py)에 있다.
+- 상세 API 응답·요약·스크린샷은 로컬 전용 `validation/qa/format-previews/`, 재현 도구는 [check_format_previews.py](../../validation/check_format_previews.py)에 있다.

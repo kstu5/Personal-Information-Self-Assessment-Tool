@@ -25,7 +25,7 @@ def main():
         if not thread.is_alive():raise RuntimeError('Test server failed to start')
         time.sleep(.05)
     assert server.started, 'Test server startup timed out'
-    desktop.window=webview.create_window('게시 전 실행 확인',url,width=1100,height=800,hidden=True)
+    desktop.window=webview.create_window('개인정보 자가진단 도구 실행 확인',url,width=1100,height=800,hidden=True)
     desktop.window.events.closing += desktop.closing
     # The native window and app API are real; only OS dialog selection is deterministic.
     desktop.window.create_file_dialog=lambda *args,**kwargs:(str(selected),)

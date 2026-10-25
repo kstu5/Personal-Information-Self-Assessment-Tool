@@ -178,7 +178,7 @@ export function PrivacyReview({draft,result,choices,disabled,onChange,onWrite}:P
   const others=candidates.filter(c=>['keep','custom'].includes(choices[c.id]?.mode));
   return <fieldset className="privacy-review" disabled={disabled} aria-label="개인정보 검토와 수정">
     {tip&&<div className="rv-tooltip" role="tooltip" style={{left:tip.left,top:tip.top}}>{tip.text}</div>}
-    <div className="page-heading"><div><span className="eyebrow">검사 결과</span><h1>게시 전 개인정보 검토</h1><p>본문을 읽고, 표시된 항목을 직접 선택해 수정하세요.</p></div><div className="rv-continue"><button className="secondary" onClick={onWrite}>수정한 글로 이어쓰기</button><span>적용한 가림·수정을 가져갑니다.</span></div></div>
+    <div className="page-heading"><div><span className="eyebrow">검사 결과</span><h1>개인정보 자가진단 도구</h1><p>본문을 읽고, 표시된 항목을 직접 선택해 수정하세요.</p></div><div className="rv-continue"><button className="secondary" onClick={onWrite}>수정한 글로 이어쓰기</button><span>적용한 가림·수정을 가져갑니다.</span></div></div>
     <p className="review-notice result-notice">자동 검사는 개인정보를 잘못 표시하거나 놓칠 수 있습니다. 게시 전, 표시되지 않은 부분까지 직접 한 번 더 확인해 주세요.</p>
     <section className="dashboard rv-dashboard" aria-label="개인정보 후보 대시보드">
       <div className="rv-dash-head"><h2>검출된 개인정보</h2><span>위험도는 처리 전 검출 기준 · 같은 값도 위치별 집계</span></div>

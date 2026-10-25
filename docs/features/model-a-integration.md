@@ -23,7 +23,7 @@
 
 ## 로컬 실행과 설치
 
-이 PC는 모델·실행 패키지·화면 빌드까지 준비되어 있다. `게시전 실행.vbs`로 실행한다. 이미 열린 이전 버전 창은 글을 저장하고 닫은 뒤 다시 실행해야 한다. 결과 하단에 `ko-pii 1.16.0 + atonlee/koelectra-ko-pii-ner (이름·주소)`가 표시된다.
+이 PC는 모델·실행 패키지·화면 빌드까지 준비되어 있다. `개인정보 자가진단 도구 실행.vbs`로 실행한다. 이미 열린 이전 버전 창은 글을 저장하고 닫은 뒤 다시 실행해야 한다. 결과 하단에 `ko-pii 1.16.0 + atonlee/koelectra-ko-pii-ner (이름·주소)`가 표시된다.
 
 새 환경에서는 `scripts/setup.ps1`이 공식 PyTorch CPU 배포처와 PyPI에서 고정 패키지를 설치하고, Hugging Face의 고정 revision에서 파일을 준비한다. 모델은 최초 준비 때만 내려받는다. `scripts/prepare/prepare_model_a.py --from-local <폴더>`로 미리 받은 같은 모델을 복사할 수도 있다. `models/model-a.json`에 크기와 SHA-256이 고정되어 있고, 복사·다운로드 후와 모델 로딩 전에 검사한다. 실패한 다운로드는 활성 파일로 교체하지 않는다.
 
@@ -58,7 +58,7 @@ node scripts/check/check_ui.cjs
 python scripts/check/check_desktop.py
 ```
 
-기록은 `output/model-a-integration-2026-10-17`에 보관한다. `parity.json`은 고정 입력의 SHA-256, 패키지 버전, 전체 사례 대조 결과를 담는다. 입력은 기존 합성 사례이며 사용자 원문을 수집하지 않았다. 앞선 A/B 보고서와 고정 정답은 그대로 보존했다.
+기록은 `local-only/outputs/model-a-integration-2026-10-17`에 보관한다. `parity.json`은 고정 입력의 SHA-256, 패키지 버전, 전체 사례 대조 결과를 담는다. 입력은 기존 합성 사례이며 사용자 원문을 수집하지 않았다. 앞선 A/B 보고서와 고정 정답은 그대로 보존했다.
 
 ## 개선과 남은 한계
 

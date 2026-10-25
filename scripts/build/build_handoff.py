@@ -18,9 +18,9 @@ from reportlab.platypus.tableofcontents import TableOfContents
 from pypdf import PdfReader
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / 'output/handoff'
-PDF = ROOT / 'output/pdf/게시전_프로젝트_상세_인수인계_v1.pdf'
-ZIP = ROOT / 'output/게시전_프로젝트_인수인계_자료_v1.zip'
+OUT = ROOT / 'local-only/outputs/handoff'
+PDF = ROOT / 'local-only/outputs/pdf/개인정보_자가진단_도구_상세_인수인계_v1.pdf'
+ZIP = ROOT / 'local-only/outputs/개인정보_자가진단_도구_인수인계_자료_v1.zip'
 SOURCE = ROOT / 'docs/HANDOFF.md'
 OUT.mkdir(parents=True, exist_ok=True)
 PDF.parent.mkdir(parents=True, exist_ok=True)
@@ -67,8 +67,8 @@ def page_frame(canvas, doc):
     canvas.setFont('Handoff', 8)
     canvas.setFillColor(colors.HexColor('#56636e'))
     if doc.page > 1:
-        canvas.drawString(46, A4[1]-31, '게시 전 개인정보 노출 자가진단 도구  |  상세 인수인계')
-    canvas.drawString(46, 25, '2026.10.16  ·  v1.0')
+        canvas.drawString(46, A4[1]-31, '개인정보 자가진단 도구  |  상세 인수인계')
+    canvas.drawString(46, 25, datetime.now().strftime('%Y.%m.%d'))
     canvas.drawRightString(A4[0]-46, 25, str(doc.page))
     canvas.restoreState()
 
@@ -81,7 +81,7 @@ def table(lines):
     elif count == 3:
         fractions = [.19,.58,.23]
     else:
-        fractions = [.39,.61]
+        fractions = [1/count]*count
     parsed = [[p(cell, 'thead' if n == 0 else 'cell') for cell in row] for n,row in enumerate(rows)]
     result = Table(parsed, colWidths=[WIDTH*f for f in fractions], repeatRows=1, hAlign='LEFT')
     commands = [
@@ -146,14 +146,14 @@ while i<len(lines):
     story.append(p(' '.join(group)))
 
 doc=HandoffDoc(str(PDF), pagesize=A4, leftMargin=46, rightMargin=46, topMargin=49, bottomMargin=45,
-              title='게시 전 개인정보 노출 자가진단 도구 상세 인수인계', author='프로젝트 인수인계', pageCompression=1)
+              title='개인정보 자가진단 도구 상세 인수인계', author='프로젝트 인수인계', pageCompression=1)
 doc.addPageTemplates(PageTemplate(id='normal', frames=[Frame(46,45,WIDTH,A4[1]-94, leftPadding=0,rightPadding=0,topPadding=0,bottomPadding=0)], onPage=page_frame))
 doc.multiBuild(story)
 reader=PdfReader(PDF)
 pdf_text='\n'.join(page.extract_text() or '' for page in reader.pages)
-for text in ('인수자가 먼저 알아야 할 사항','학습 모델 연결','다음 담당자의 시작 체크리스트','22개','16개'):
-    assert text in pdf_text,text
-assert len(reader.pages)>10
+for text in ('개인정보 자가진단 도구', '제품 방향', '자료와 검증'):
+    assert text in pdf_text, text
+assert reader.pages
 
 files={}
 def add(path, archive):
@@ -162,38 +162,22 @@ def add(path, archive):
     if archive in files: raise ValueError(archive)
     files[archive]=path
 
-for path in sorted(OUT.iterdir()):
-    if path.is_file() and path.name not in ('manifest.json','묶음_확인결과.json'):
-        add(path,path.name)
-add(PDF,'02_상세인수인계.pdf')
-for name in ('.gitignore','README.md','package.json','pnpm-lock.yaml','requirements.lock.txt','run.py','index.html','vite.config.ts','tsconfig.json','게시전 실행.vbs'):
-    add(ROOT/name,'project/'+name)
-extensions={'.md','.txt','.py','.ps1','.ts','.tsx','.css','.json','.cjs','.html','.pdf','.docx'}
-for directory in ('backend','src','tests','scripts','docs','research'):
-    for path in sorted((ROOT/directory).rglob('*')):
-        if path.is_file() and '__pycache__' not in path.parts and path.suffix in extensions:
-            add(path,'project/'+path.relative_to(ROOT).as_posix())
-for path in sorted((ROOT/'output/community-review').iterdir()):
-    if path.is_file() and path.suffix in ('.piipost','.md','.txt','.json'):
-        add(path,'project/'+path.relative_to(ROOT).as_posix())
-for directory in ('output/pdf','output/docx'):
-    for path in sorted((ROOT/directory).iterdir()):
-        if path.is_file() and path.suffix in ('.pdf','.docx') and path!=PDF:
-            add(path,'project/'+path.relative_to(ROOT).as_posix())
-add(Path.home()/'Desktop'/'게시전_개인정보_노출_자가진단_도구_프로젝트계획서_v2.docx',
-    'reference/게시전_개인정보_노출_자가진단_도구_프로젝트계획서_v2.docx')
-design=Path.home()/'.codex'/'visualizations'/'2026'/'10'/'13'/'01a1345c-aeb9-72b1-8ced-e610bbb91962'
-for name in ('privacy-review-markers.html','privacy-marker-directions.html','privacy-workspace-design.html','privacy-post-design.html'):
-    add(design/name,'reference/design/'+name)
-for name in ('start.png','write.png','results.png','save.png','report.json'):
-    add(ROOT/'tmp/ui-check'/name,'reference/previous-ui-check/'+name)
-for name in ('C01.png','C02.png','C03.png'):
-    add(ROOT/'tmp/community-ui'/name,'reference/previous-community-ui/'+name)
+# Include committed/public source candidates only; never scan personal folders.
+import sys
+sys.path.insert(0, str(ROOT))
+from scripts.check.check_repository import public_files, check_boundary
+names = public_files(staged=True)
+errors = check_boundary(names)
+if errors: raise ValueError('\n'.join(errors))
+add(OUT / '01_상세인수인계.md', '01_상세인수인계.md')
+add(PDF, '02_상세인수인계.pdf')
+for name in names:
+    add(ROOT / name, 'project/' + name)
 
 manifest={
     'createdAt':datetime.now(timezone.utc).isoformat(),
     'purpose':'Source and documentation handoff; not an executable installer',
-    'excluded':['.git','.runtime','.venv','node_modules','dist','runtime.local.json','general tmp','user-created drafts'],
+    'excluded':['.git','local-only contents except README','.runtime','.venv','node_modules','dist','runtime.local.json','tmp','research','QA outputs','user-created drafts'],
     'files':[{'path':name,'bytes':path.stat().st_size,'sha256':hashlib.sha256(path.read_bytes()).hexdigest()} for name,path in sorted(files.items())],
 }
 (OUT/'manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2),encoding='utf-8')

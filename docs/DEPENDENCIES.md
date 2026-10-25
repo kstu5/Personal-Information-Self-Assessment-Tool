@@ -1,5 +1,7 @@
 # Third party dependencies
 
+> 초기 개발 환경의 메타데이터 기록입니다. 현재 설치 목록 전체를 나타내지 않습니다. Python은 루트 requirements lock 파일 3개, 화면은 package.json·pnpm-lock.yaml, 모델은 models/model-a.json, 외부 도구는 scripts/prepare/prepare_file_tools.py·installer/components.json을 확인하세요. 배포 시 실제 포함한 구성 요소의 라이선스·고지는 별도로 확인해야 합니다. 새 로컬 환경 기록은 local-only/outputs/environment/에 생성하며 이 파일을 자동으로 덮어쓰지 않습니다.
+
 ## atonlee/koelectra-ko-pii-ner added 2026-10-17
 
 `atonlee/koelectra-ko-pii-ner` is pinned at revision `1e75c01e707232401883cf364151bbe2e560c708`. Its model card declares Apache-2.0 for weights and attributes CC BY 4.0 training sources. The original model card is retained with the model. See [model attribution and integration details](features/model-a-integration.md#출처와-라이선스).

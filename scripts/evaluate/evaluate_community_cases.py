@@ -27,7 +27,7 @@ def main():
 
     fixture = ROOT / 'research' / 'community_cases_v1.json'
     data = json.loads(fixture.read_text(encoding='utf-8'))
-    out = ROOT / 'output' / 'community-review'
+    out = ROOT / 'local-only/outputs' / 'community-review'
     out.mkdir(parents=True, exist_ok=True)
     app = create_app(8765)
     report = {

@@ -1,5 +1,5 @@
 {
-  "name": "before-post-privacy-review",
+  "name": "privacy-self-assessment-tool",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -8,7 +8,8 @@
     "dev": "vite --host 127.0.0.1",
     "build": "tsc --noEmit && vite build",
     "check": "tsc --noEmit",
-    "test:masking": "node --test tests/masking.test.mjs"
+    "test:masking": "node --test tests/masking.test.mjs",
+    "test:frontend": "node --test tests/masking.test.mjs tests/document-draft.test.mjs tests/file-preview.test.mjs"
   },
   "dependencies": {
     "react": "19.3.1",

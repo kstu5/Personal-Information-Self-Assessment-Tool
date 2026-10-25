@@ -12,7 +12,7 @@ class Desktop:
     def choose_save(self, filename: str):
         import webview
         result = self.window.create_file_dialog(webview.FileDialog.SAVE, save_filename=filename,
-                                                file_types=('게시 전 작업 파일 (*.piipost)',))
+                                                file_types=('개인정보 자가진단 도구 작업 파일 (*.piipost)',))
         if not result:
             return None
         path = Path(result[0] if isinstance(result, (tuple, list)) else result)
@@ -24,7 +24,7 @@ class Desktop:
     def choose_open(self):
         import webview
         result = self.window.create_file_dialog(webview.FileDialog.OPEN, allow_multiple=False,
-                                                file_types=('게시 전 작업 파일 (*.piipost)', '모든 파일 (*.*)'))
+                                                file_types=('개인정보 자가진단 도구 작업 파일 (*.piipost)', '모든 파일 (*.*)'))
         return Path(result[0]) if result else None
 
     def choose_documents(self):

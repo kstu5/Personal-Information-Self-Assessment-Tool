@@ -6,7 +6,7 @@ sys.path.insert(0,str(ROOT/'.runtime'/'file-python'))
 import pymupdf as fitz
 
 def main():
-    source=ROOT/'output'/'file-feature-validation';out=source/('render-'+str(time.time_ns()));out.mkdir()
+    source=ROOT/'local-only/outputs'/'file-feature-validation';out=source/('render-'+str(time.time_ns()));out.mkdir()
     profile=out/'profile';rows=[]
     for name in ('meeting-reviewed.docx','briefing-reviewed.pptx','participants-reviewed.xlsx'):
         folder=out/Path(name).stem;folder.mkdir()

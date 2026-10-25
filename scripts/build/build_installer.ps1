@@ -19,6 +19,14 @@ try {
     if (-not (Get-Command javac -ErrorAction SilentlyContinue)) { throw 'javac (JDK 11+) is required on the build PC to precompile HwpText.java.' }
 
     $stage = Join-Path $root 'installer\stage'
+    $stage = [IO.Path]::GetFullPath($stage)
+    $expectedStage = [IO.Path]::GetFullPath((Join-Path $root 'installer\stage'))
+    if ($stage -ne $expectedStage -or -not $stage.StartsWith([IO.Path]::GetFullPath($root) + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
+        throw 'Installer stage must stay inside the project installer directory.'
+    }
+    if ((Test-Path -LiteralPath $stage) -and ((Get-Item -LiteralPath $stage).Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+        throw 'Installer stage must not be a junction or symbolic link.'
+    }
     if (Test-Path -LiteralPath $stage) { Remove-Item -LiteralPath $stage -Recurse -Force }
     New-Item -ItemType Directory -Force $stage | Out-Null
 

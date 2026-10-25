@@ -61,4 +61,4 @@ Python 시험 중 Starlette의 httpx 시험 어댑터 사용 중단 예고 경�
 
 제공한 작업 파일 3개를 별도 시험 브라우저의 실제 빌드에서 열어 원문 보존, 실제 API 결과 일치, 색상·목록·건수, 원문 위치 이동, 재검토 안내를 확인했다. 선택 창만 시험 파일 선택으로 대체했다. 브라우저 외부 요청과 JavaScript 오류는 없었다. 제품 탐지 규칙과 UI 코드는 변경하지 않았다.
 
-원문·전체 후보·판정과 재현 자료는 `output/community-review`에, 8쪽 보고서는 `output/pdf/커뮤니티_게시글_3종_개인정보_탐지_점검보고서_v1.pdf`에 저장했다. 재실행 도구는 `scripts/evaluate/evaluate_community_cases.py`, `scripts/check/check_community_ui.cjs`다.
+원문·전체 후보·판정과 재현 자료는 `local-only/outputs/community-review`에, 8쪽 보고서는 `local-only/outputs/pdf/커뮤니티_게시글_3종_개인정보_탐지_점검보고서_v1.pdf`에 저장했다. 재실행 도구는 `scripts/evaluate/evaluate_community_cases.py`, `scripts/check/check_community_ui.cjs`다.

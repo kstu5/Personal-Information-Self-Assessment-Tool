@@ -1,6 +1,6 @@
 const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
 const fs=require('fs'),path=require('path'),assert=require('assert/strict');
-const root=path.resolve(__dirname, '..', '..'),out=path.join(root,'output','ocr-fix-validation');
+const root=path.resolve(__dirname, '..', '..'),out=path.join(root,'local-only/outputs','ocr-fix-validation');
 const url=JSON.parse(fs.readFileSync(path.join(root,'tmp','ocr-fix-ready.json'),'utf8')).url;
 const report={checks:[],errors:[]};let context,token,id;
 (async()=>{

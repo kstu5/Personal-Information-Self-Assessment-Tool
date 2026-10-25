@@ -15,5 +15,5 @@ try {
     Start-Process -FilePath $taskPython -ArgumentList @('-X', 'utf8', ('"' + $taskEntry + '"')) -WorkingDirectory $taskRoot -WindowStyle Normal
 } catch {
     Add-Type -AssemblyName System.Windows.Forms
-    [System.Windows.Forms.MessageBox]::Show('실행 환경을 찾을 수 없습니다. 프로젝트의 README.md에서 설치 안내를 확인해 주세요.', '게시 전') | Out-Null
+    [System.Windows.Forms.MessageBox]::Show('실행 환경을 찾을 수 없습니다. 프로젝트의 README.md에서 설치 안내를 확인해 주세요.', '개인정보 자가진단 도구') | Out-Null
 }

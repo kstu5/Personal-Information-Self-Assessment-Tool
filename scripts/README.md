@@ -1,15 +1,16 @@
-# scripts
+# 설치·개발 도구
 
-설치·실행 진입점은 이 폴더 바로 아래에 두고, 나머지 도구는 용도별 폴더로 나눕니다.
+프로젝트 루트에서 실행합니다. 명령은 [루트 README](../README.md)에 정리했습니다.
 
 | 위치 | 용도 |
 |---|---|
-| `setup.ps1` | 새 PC 환경 설치(의존성, 모델, 화면 빌드). 루트 README의 설치 안내가 이 파일을 가리킵니다. |
-| `start.ps1` | 전용 창 실행. `게시전 실행.vbs`가 호출합니다. |
-| `setup.sh`, `start.sh` | 위 두 파일의 Linux 대응판(브라우저 모드). 자세한 내용은 루트 README의 "Linux에서 설치하기" |
-| `prepare/` | 환경 준비 보조: 파일 도구(`prepare_file_tools.py`), atonlee/koelectra-ko-pii-ner(`prepare_model_a.py`), 환경 기록(`record_environment.py`) |
-| `check/` | 검증 도구: 백엔드(`test_backend.py`), 모델(`check_model_a.py`), 전용 창(`check_*desktop.py`), 화면(`check_*ui.cjs`), 파일 기능(`check_file_*.py`) |
-| `evaluate/` | 탐지 평가: 규칙 기준선(`rule_baseline.py`), 소규모 평가, 커뮤니티 사례 평가, 문맥 진단 |
-| `build/` | 문서 생성: 커뮤니티 점검 보고서, 인수인계 PDF·ZIP |
+| `setup.ps1`, `start.ps1` | Windows 소스 설치·실행. 정식 이름의 루트 VBS가 start를 호출 |
+| `setup.sh`, `start.sh` | Linux 브라우저 모드 보조 도구. Windows와 동일한 전체 파일 지원은 미검증 |
+| `prepare/` | 파일 도구·atonlee/koelectra-ko-pii-ner 준비, 로컬 환경 기록 |
+| `check/test_backend.py` | `tests/`만 수집하는 정규 Python 시험 |
+| `check/check_repository.py` | 공개 경계·문서 링크·예시 해시·Python 구문 확인. 커밋 전 `--staged` 사용 |
+| 그 밖의 `check/` | 모델·전용 창·파일·화면 검증. 일부 과거 도구는 로컬 research/원시 결과가 필요 |
+| `evaluate/` | 탐지 평가·문맥 조사. 일부 과거 입력은 로컬 보관 |
+| `build/` | 설치판·인수인계·보고서 제작. 생성물은 로컬 전용 |
 
-프로젝트 루트에서 실행하세요. 예: `python scripts/check/test_backend.py`, `node scripts/check/check_ui.cjs`
+문서 재현과 예시 제작은 `validation/`, 자동 시험은 `tests/`, 완성 가상 문서는 `examples/`에 있습니다. 출력은 `local-only/outputs/` 또는 지정된 로컬 QA 위치에 생성합니다. 과거 평가 자료가 없는 새 복제본에서는 정규 시험과 `validation/`의 공개 입력 기반 확인을 먼저 사용하세요.

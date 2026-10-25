@@ -32,7 +32,7 @@ def test_text_content_preview_retains_line_gaps_and_edit_targets(tmp_path):
 
 
 def test_hwpx_content_preview_excludes_metadata_without_dropping_it(tmp_path):
-    original=next((ROOT/'test/format-document-examples/files').glob('*.hwpx'))
+    original=next((ROOT/'examples/formats/files').glob('*.hwpx'))
     entries=read_zip(original)
     entries['docProps/core.xml']=b'<core xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:creator>Metadata author</dc:creator></core>'
     path=tmp_path/'input.hwpx';write_zip(path,entries)

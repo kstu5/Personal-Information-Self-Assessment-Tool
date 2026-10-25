@@ -6,11 +6,11 @@
 
 | 합성 입력 | 실제 후보 수 | 확인한 표시 |
 |---|---:|---|
-| [이력서 DOCX](../../test/shared-document-examples/이력서_검사예시.docx) | 14 | 텍스트·위치와 선택 후보의 강조 표시 |
-| [당첨자 XLSX](../../test/shared-document-examples/추첨당첨자_명단예시.xlsx) | 33 | 셀 표, 내부 배송정보 시트의 숨김 표시와 이름·전화·이메일·주소 |
-| [이력서 PDF](../../test/shared-document-examples/이력서_검사예시.pdf) | 29 | 실제 원본 페이지와 가림 후 사본 페이지 |
+| [이력서 DOCX](../../examples/documents/이력서_검사예시.docx) | 14 | 텍스트·위치와 선택 후보의 강조 표시 |
+| [당첨자 XLSX](../../examples/documents/추첨당첨자_명단예시.xlsx) | 33 | 셀 표, 내부 배송정보 시트의 숨김 표시와 이름·전화·이메일·주소 |
+| [이력서 PDF](../../examples/documents/이력서_검사예시.pdf) | 29 | 실제 원본 페이지와 가림 후 사본 페이지 |
 
-후보 수는 정확도나 정답 수가 아니다. PDF는 OCR과 글자층이 같은 정보를 각각 검출할 수 있다. 정답은 [별도 확인 목록](../../test/shared-document-examples/검사_확인목록.md)과 비교한다.
+후보 수는 정확도나 정답 수가 아니다. PDF는 OCR과 글자층이 같은 정보를 각각 검출할 수 있다. 정답은 [별도 확인 목록](../../examples/documents/검사_확인목록.md)과 비교한다.
 
 ## 화면에서 확인한 동작
 

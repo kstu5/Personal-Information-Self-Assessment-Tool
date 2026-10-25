@@ -363,7 +363,7 @@ def test_word_line_breaks_and_tabs_keep_context_and_support_direct_replacement(t
 
 def test_line_break_audit_maps_normalized_gold_back_to_exact_source_offsets():
     import importlib.util
-    spec=importlib.util.spec_from_file_location('audit_scoring',ROOT/'test/run_document_audit.py')
+    spec=importlib.util.spec_from_file_location('audit_scoring',ROOT/'validation/run_document_audit.py')
     mod=importlib.util.module_from_spec(spec);spec.loader.exec_module(mod)
     text='😀 성명 김\n민수';start=len('😀 성명 '.encode('utf-16-le'))//2
     job={'manifest':{'parts':[{'id':'p0','text':text,'location':'본문'}]},

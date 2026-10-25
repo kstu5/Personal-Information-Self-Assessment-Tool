@@ -36,7 +36,7 @@ try {
     & $venvPython scripts/prepare/prepare_file_tools.py
     if ($LASTEXITCODE -ne 0) { throw 'Document tool preparation failed.' }
     & $venvPython scripts/prepare/prepare_model_a.py
-    if ($LASTEXITCODE -ne 0) { throw 'A model preparation failed.' }
+    if ($LASTEXITCODE -ne 0) { throw 'atonlee/koelectra-ko-pii-ner preparation failed.' }
 
     # Install and build frontend (using npx pnpm)
     Write-Output 'Installing frontend dependencies...'

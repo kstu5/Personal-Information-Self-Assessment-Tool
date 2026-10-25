@@ -7,7 +7,7 @@ import httpx
 
 def main():
     url=json.loads((ROOT/'tmp'/'file-feature-ready.json').read_text('utf-8'))['url']
-    out=ROOT/'output'/'file-feature-validation';out.mkdir(parents=True,exist_ok=True)
+    out=ROOT/'local-only/outputs'/'file-feature-validation';out.mkdir(parents=True,exist_ok=True)
     client=httpx.Client(base_url=url,timeout=90,trust_env=False)
     page=client.get('/').text
     boot=json.loads(html.unescape(re.search(r'<meta name="app-boot" content="([^"]+)"',page)[1]))

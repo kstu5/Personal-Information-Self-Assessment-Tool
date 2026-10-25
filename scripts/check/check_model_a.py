@@ -27,7 +27,7 @@ def main():
     socket.socket.connect=no_network
     socket.socket.connect_ex=no_network
 
-    base=ROOT/'output/model-benchmark-2026-10-17'
+    base=ROOT/'local-only/outputs/model-benchmark-2026-10-17'
     frozen=base/'cases-frozen.json'
     data=json.loads(frozen.read_text(encoding='utf-8'))
     sha=hashlib.sha256(frozen.read_bytes()).hexdigest()
@@ -93,7 +93,7 @@ def main():
             'runtimeBytes':sum(p.stat().st_size for p in ML_RUNTIME.rglob('*') if p.is_file()),
             'versions':{name:importlib.metadata.version(name) for name in ['torch','transformers','tokenizers','numpy','safetensors']},
             'cases':records}
-    output=ROOT/'output/model-a-integration-2026-10-17'
+    output=ROOT/'local-only/outputs/model-a-integration-2026-10-17'
     output.mkdir(parents=True,exist_ok=True)
     (output/'parity.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
     print(json.dumps({k:v for k,v in report.items() if k!='cases'},ensure_ascii=False),flush=True)

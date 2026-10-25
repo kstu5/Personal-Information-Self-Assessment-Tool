@@ -16,14 +16,14 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 from pypdf import PdfReader
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / 'output' / 'community-review'
+OUT = ROOT / 'local-only/outputs' / 'community-review'
 DATA = json.loads((OUT / 'community-evaluation.json').read_text(encoding='utf-8'))
 UI = json.loads((OUT / 'ui-verification.json').read_text(encoding='utf-8'))
 CASES = DATA['cases']
 TOTAL = DATA['totals']
 assert not UI['errors'] and len(UI['cases']) == 3
 assert DATA['fixtureSha256'] == hashlib.sha256((ROOT / 'research' / 'community_cases_v1.json').read_bytes()).hexdigest()
-PDF = ROOT / 'output' / 'pdf' / '커뮤니티_게시글_3종_개인정보_탐지_점검보고서_v1.pdf'
+PDF = ROOT / 'local-only/outputs' / 'pdf' / '커뮤니티_게시글_3종_개인정보_탐지_점검보고서_v1.pdf'
 PDF.parent.mkdir(parents=True, exist_ok=True)
 STATUS = {'exact': '완전 탐지', 'partial': '부분 탐지', 'wrong_label': '유형 오분류', 'missed': '미탐'}
 RISK = {'CRITICAL':'심각', 'HIGH':'높음', 'MEDIUM':'보통', 'LOW':'낮음', 'INFO':'참고'}
@@ -128,7 +128,7 @@ def footer(canvas, doc):
     canvas.saveState()
     canvas.setFont('Malgun',8)
     canvas.setFillColor(colors.HexColor('#64717d'))
-    canvas.drawString(45,A4[1]-29,'게시 전 개인정보 노출 자가진단 도구')
+    canvas.drawString(45,A4[1]-29,'개인정보 자가진단 도구')
     canvas.drawString(45,27,'합성 게시글 시험  |  ko-pii 1.16.0  |  2026년 10월 16일')
     canvas.drawRightString(A4[0]-45,27,str(doc.page))
     canvas.restoreState()
@@ -211,7 +211,7 @@ p('시험 묶음에는 원문 작업 파일 3개, 사람이 읽는 점검기록.
 p('이번 실패를 개선한 뒤에는 다른 이름·문장·거래 글을 포함한 별도 평가 자료로 다시 확인해야 한다. 이 세 글만 맞추는 규칙으로 전체 품질을 판단하지 않는다.','small')
 
 doc=SimpleDocTemplate(str(PDF),pagesize=A4,rightMargin=45,leftMargin=45,topMargin=52,bottomMargin=45,
-                      title='커뮤니티 게시글 3종 개인정보 탐지 점검보고서',author='게시 전 프로젝트')
+                      title='커뮤니티 게시글 3종 개인정보 탐지 점검보고서',author='개인정보 자가진단 도구')
 doc.build(FLOW,onFirstPage=footer,onLaterPages=footer)
 
 # Plain-text counterpart and reproducible file bundle.
@@ -252,8 +252,8 @@ lines.extend(['## 화면 확인','', '세 글의 파일 불러오기, 원문 보
               '', '개발 환경: python scripts/evaluate/evaluate_community_cases.py. 화면 시험: run.py --headless --ready-file tmp/community-ready.json 실행 후 scripts/check/check_community_ui.cjs 실행.',
               '', '측정 방법은 backend/app.py, backend/detection.py의 현재 경로를 사용한다. 결과 파일은 API 인증 토큰을 포함하지 않는다.'])
 (OUT/'점검기록.md').write_text('\n'.join(lines)+'\n',encoding='utf-8')
-(OUT/'사용안내.txt').write_text('커뮤니티 가상 게시글 시험 자료\n\n1. 압축을 풀어 주세요.\n2. 게시 전 프로그램에서 저장한 글 불러오기를 누르세요.\n3. C01, C02, C03의 .piipost 파일 중 하나를 선택하세요.\n4. 개인정보 검사를 누르고 보고서의 결과와 비교하세요.\n\nko-pii 1.16.0에서 후보 수는 7곳, 9곳, 6곳입니다. 탐지 결과는 파일에 저장되지 않고 실행할 때 다시 계산합니다. 모든 글은 시험용이며 실제 연락 또는 송금에 사용하지 마세요.\n\n점검기록.md: 읽을 수 있는 상세 기록\ncommunity-evaluation.json: 기대 항목과 실제 구간\nui-verification.json: 화면 확인 결과\ncommunity_cases_v1.json: 실행 전에 고정한 원문과 기대 항목\n',encoding='utf-8')
-archive=ROOT/'output'/'커뮤니티_게시글_3종_시험자료.zip'
+(OUT/'사용안내.txt').write_text('커뮤니티 가상 게시글 시험 자료\n\n1. 압축을 풀어 주세요.\n2. 개인정보 자가진단 도구에서 저장한 글 불러오기를 누르세요.\n3. C01, C02, C03의 .piipost 파일 중 하나를 선택하세요.\n4. 개인정보 검사를 누르고 보고서의 결과와 비교하세요.\n\nko-pii 1.16.0에서 후보 수는 7곳, 9곳, 6곳입니다. 탐지 결과는 파일에 저장되지 않고 실행할 때 다시 계산합니다. 모든 글은 시험용이며 실제 연락 또는 송금에 사용하지 마세요.\n\n점검기록.md: 읽을 수 있는 상세 기록\ncommunity-evaluation.json: 기대 항목과 실제 구간\nui-verification.json: 화면 확인 결과\ncommunity_cases_v1.json: 실행 전에 고정한 원문과 기대 항목\n',encoding='utf-8')
+archive=ROOT/'local-only/outputs'/'커뮤니티_게시글_3종_시험자료.zip'
 with zipfile.ZipFile(archive,'w',zipfile.ZIP_DEFLATED) as z:
     for f in sorted(OUT.iterdir()):
         if f.is_file():z.write(f,arcname=f.name)
