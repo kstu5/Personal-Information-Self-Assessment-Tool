@@ -1,0 +1,110 @@
+.file-findings{margin:0 0 26px}
+.preview-mode-note{font-size:11px;line-height:1.9;color:#6a7e88;margin:0 0 12px}
+.file-risk-overview{background:#fff;border:1px solid #dde5e5;border-radius:14px;padding:22px}
+.file-risk-overview-head{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:20px}
+.file-risk-overview-head>div{display:flex;align-items:baseline;gap:9px}
+.file-risk-overview-head>div>strong{font-size:32px;line-height:1.2;letter-spacing:-1px}
+.file-risk-overview-head>div>span{font-size:12px;color:#667784}
+.file-risk-overview-head>p{text-align:right;font-size:12px;color:#667784;line-height:1.8}
+.file-risk-overview-head>p>b{color:#2c594b;margin-left:5px}
+.file-risk-overview-head>p>span{display:block;font-size:11px;color:#788994}
+.file-risk-cards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.file-findings .file-risk-card{display:flex;align-items:stretch;flex-direction:column;text-align:left;gap:8px;padding:15px 14px 13px;border:1px solid color-mix(in srgb,currentColor 23%,white);border-radius:10px;background:color-mix(in srgb,currentColor 4%,white);transition:background .15s,border-color .15s}
+.file-findings .file-risk-card:hover{background:color-mix(in srgb,currentColor 9%,white);border-color:currentColor}
+.file-findings .file-risk-card[aria-pressed=true]{border-color:currentColor;box-shadow:0 0 0 1px currentColor;background:color-mix(in srgb,currentColor 9%,white)}
+.file-findings .file-risk-card.is-empty{background:#fafbfc;border-color:#e5e9ed}
+.file-risk-card-name{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600}
+.file-risk-card-name>i,.file-findings-group-name>i{width:7px;height:7px;border-radius:50%;background:currentColor;flex:none}
+.file-risk-card-name>span{margin-left:auto;font-size:12px}
+.file-risk-card>strong{font-size:28px;line-height:1.2;font-weight:700;font-variant-numeric:tabular-nums}
+.file-risk-card>strong>small{font-size:11px;font-weight:400;margin-left:5px}
+.file-risk-guidance{font-size:10px;color:#667582;white-space:nowrap}
+.file-risk-meter{display:block;height:4px;background:color-mix(in srgb,currentColor 13%,white);border-radius:8px;overflow:hidden;margin-top:3px}
+.file-risk-meter>span{display:block;height:100%;background:currentColor;border-radius:8px}
+.file-findings-panel{border:1px solid #dde5e8;border-radius:14px;background:#fff;overflow:hidden;margin-top:16px}
+.file-findings-heading{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:21px 22px 14px}
+.file-findings-heading>div{min-width:0}
+.file-findings-heading h3{display:flex;align-items:center;gap:10px;font-size:16px;margin:0 0 6px}
+.file-findings-heading h3>span{font-size:13px;color:#305f50;font-variant-numeric:tabular-nums}
+.file-findings-heading h3 small{font-size:11px;color:#7a8994;font-weight:400}
+.file-findings-heading p{font-size:11px;line-height:1.8;color:#667986}
+.file-findings-search{flex:0 1 215px;min-width:170px}
+.file-findings-search input{width:100%;padding:10px 12px!important;font-size:12px!important;background:#fbfcfc!important}
+.file-findings-filter{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 22px 14px;font-size:11px;color:#687b86}
+.file-findings-filter>span{overflow-wrap:anywhere}
+.file-findings-filter>button{font-size:11px;text-decoration:underline;text-underline-offset:3px;padding:4px;flex:none}
+.file-findings-bulk{display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:#f5f8f7;border-top:1px solid #e6ece9;border-bottom:1px solid #e6ece9;padding:12px 22px;font-size:11px;color:#526b60}
+.file-findings-bulk>label{display:flex;align-items:center;gap:8px;cursor:pointer;color:#394b47}
+.file-findings-bulk>span{margin-left:auto}
+.file-findings-bulk>span>small{font-size:10px}
+.file-findings-bulk>div{display:flex;gap:6px}
+.file-findings-bulk button{font-size:11px;padding:6px 9px;border:1px solid #d9e3de;background:#fff}
+.file-findings-groups{max-height:540px;overflow:auto;scrollbar-gutter:stable}
+.file-findings-group+ .file-findings-group{border-top:1px solid #e1e7e9}
+.file-findings-group>summary{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 22px;cursor:pointer;list-style:none;background:color-mix(in srgb,currentColor 5%,white)}
+.file-findings-group>summary::-webkit-details-marker{display:none}
+.file-findings-group-name{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600}
+.file-findings-group-name>b{font-size:11px;padding:1px 7px;border-radius:4px;background:#fff}
+.file-findings-group-name>small{font-size:10px;font-weight:400;color:#687b86;margin-left:3px}
+.file-findings-pending{color:#657783;font-size:10px;white-space:nowrap}
+.file-findings-pending>span{display:inline-block;font-size:15px;margin-left:12px;transform:rotate(-90deg)}
+.file-findings-group[open] .file-findings-pending>span{transform:none}
+.file-findings-group>ol{margin:0;padding:0;list-style:none}
+.file-finding{display:grid;grid-template-columns:18px minmax(0,1fr) 140px;gap:13px;align-items:center;padding:16px 22px 16px 19px;border-left:3px solid color-mix(in srgb,currentColor 55%,white);border-bottom:1px solid #edf0f2;background:#fff}
+.file-finding:last-child{border-bottom:0}
+.file-finding.is-focused{background:color-mix(in srgb,currentColor 4%,white);box-shadow:inset 0 0 0 1px currentColor}
+.file-findings .file-finding-content{display:flex;align-items:flex-start;flex-direction:column;justify-content:center;text-align:left;min-width:0;padding:3px;gap:5px;border-radius:5px;color:#253340}
+.file-finding-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:10px}
+.file-finding-type{background:#edf1f5;color:#566774;border-radius:4px;padding:2px 6px}
+.file-finding-status{font-size:10px;color:#7a8791}
+.file-finding-status.has-choice{color:#26705b}
+.file-finding-content>strong{font-size:14px;font-weight:600;line-height:1.65;overflow-wrap:anywhere;white-space:pre-wrap;max-width:100%}
+.file-finding-location{font-size:11px;color:#697e8b;line-height:1.6;overflow-wrap:anywhere;max-width:100%}
+.file-finding-result{font-size:10px;line-height:1.8;color:#5c796c;overflow-wrap:anywhere;max-width:100%}
+.file-finding-result>b{margin-left:6px;font-weight:500}
+.file-finding-actions{display:flex;flex-direction:column;align-items:stretch;gap:8px}
+.file-finding-actions select{width:100%;font-size:11px!important;padding:8px!important;color:#465f55}
+.file-finding-actions>button{font-size:11px;color:#647b70;padding:4px;align-self:flex-end}
+.file-findings-empty{padding:36px 20px;text-align:center;color:#536873}
+.file-findings-empty>strong{font-size:13px;font-weight:600}
+.file-findings-empty>p{font-size:12px;line-height:1.9;margin:9px 0 16px;color:#75858f}
+.file-findings-empty>button{font-size:11px}
+@media(max-width:1050px){
+  .file-risk-overview{padding:18px}
+  .file-risk-cards{gap:7px}
+  .file-findings .file-risk-card{padding:12px 10px}
+  .file-risk-guidance{font-size:9px}
+  .file-findings-heading{flex-wrap:wrap;gap:13px}
+  .file-findings-search{flex-basis:100%}
+  .file-findings-bulk>div{width:100%;justify-content:flex-end}
+}
+@media(max-width:720px){
+  .file-risk-overview-head{align-items:flex-start;margin-bottom:16px;gap:12px}
+  .file-risk-overview-head>div{gap:6px;flex-wrap:wrap}
+  .file-risk-overview-head>div>strong{font-size:28px}
+  .file-risk-overview-head>div>span{font-size:11px}
+  .file-risk-overview-head>p{font-size:11px}
+  .file-risk-overview-head>p>span{font-size:10px;max-width:150px}
+  .file-risk-cards{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .file-risk-card>strong{font-size:25px}
+  .file-findings .file-risk-card{padding:13px 11px}
+  .file-risk-guidance{font-size:10px}
+  .file-findings-heading{padding:18px 16px 10px}
+  .file-findings-filter{padding:0 16px 12px}
+  .file-findings-bulk{padding:12px 16px;gap:10px}
+  .file-findings-groups{max-height:510px}
+  .file-findings-group>summary{padding:13px 16px}
+  .file-findings-group-name>small{display:none}
+  .file-finding{grid-template-columns:18px minmax(0,1fr);padding:14px 16px 14px 13px;gap:8px 11px}
+  .file-finding>input{grid-row:1 / 3;align-self:start;margin-top:9px}
+  .file-finding-actions{grid-column:2;flex-direction:row;align-items:center;gap:10px}
+  .file-finding-actions select{width:145px;max-width:100%}
+  .file-finding-actions>button{margin-left:auto;white-space:nowrap;align-self:center}
+}
+@media(max-width:380px){
+  .file-risk-overview{padding:14px}
+  .file-risk-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .file-findings-bulk>span{margin-left:0}
+  .file-findings-group-name{gap:5px}
+  .file-finding-actions{flex-wrap:wrap}
+}
