@@ -7,9 +7,7 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "tsc --noEmit && vite build",
-    "check": "tsc --noEmit",
-    "test:masking": "node --test tests/masking.test.mjs",
-    "test:frontend": "node --test tests/masking.test.mjs tests/document-draft.test.mjs tests/file-preview.test.mjs"
+    "check": "tsc --noEmit"
   },
   "dependencies": {
     "react": "19.3.1",

@@ -7,8 +7,7 @@
 # The Windows launcher is UTF-16; never convert it.
 *.vbs -text
 
-# Audit fixtures are hashed as bytes, including CSV/TSV line endings and CP949.
-validation/fixtures/** -text whitespace=cr-at-eol
+# Preserve the twelve example files byte-for-byte on every platform.
 examples/formats/files/** -text whitespace=cr-at-eol
 
 # Binary files (documents, images, archives, model weights).
@@ -24,8 +23,4 @@ examples/formats/files/** -text whitespace=cr-at-eol
 *.safetensors binary
 *.onnx binary
 
-# Preserve synthetic example input bytes across Windows and Linux.
-examples/documents/*.docx binary
-examples/documents/*.pdf binary
-examples/documents/*.xlsx binary
 *.hwp binary

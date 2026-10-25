@@ -41,7 +41,7 @@ echo "Installing Python dependencies..."
 # continue without it and say so (image OCR is then unavailable).
 if ! "$VENV_PYTHON" -m pip install --upgrade -r requirements.files.lock.txt; then
   warn "Document packages failed to install; retrying without tesserocr (image OCR will be unavailable)."
-  warn "To enable OCR install the build headers first, e.g.: sudo apt install libtesseract-dev libleptonica-dev tesseract-ocr-kor (see docs/features/file-tools.md)"
+  warn "To enable OCR install the build headers first, e.g.: sudo apt install libtesseract-dev libleptonica-dev tesseract-ocr-kor (see README.md)"
   FILES_NO_OCR="$(mktemp)"
   grep -vi '^tesserocr' requirements.files.lock.txt > "$FILES_NO_OCR"
   "$VENV_PYTHON" -m pip install --upgrade -r "$FILES_NO_OCR" \

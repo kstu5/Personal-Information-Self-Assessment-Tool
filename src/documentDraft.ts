@@ -3,6 +3,7 @@ import {partialMask,replacement} from './masking.ts';
 import type {FileCandidate,FilePart,FileSelection} from './documentTypes.ts';
 
 export function fileReplacement(candidate:FileCandidate,choice?:MaskChoice):string {
+  if(candidate.imageTextEditable&&choice?.mode==='full')return '비공개';
   return choice?.mode==='partial'?(candidate.partialText??partialMask(candidate)):replacement(candidate,choice);
 }
 

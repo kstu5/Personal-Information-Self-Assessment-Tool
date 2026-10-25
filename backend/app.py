@@ -201,6 +201,15 @@ def create_app(port: int, *, desktop: Any = None, dist: Path | None = None) -> F
     async def preview_document(payload: PreviewRequest):
         return documents.preview(payload.id,payload.output,payload.retry)
 
+    @app.post('/api/documents/image-preview')
+    async def image_preview(payload: ExportRequest):
+        if payload.textEdits:raise DocumentError('이미지 문구는 검출 항목의 직접 수정을 사용해 주세요.')
+        return documents.image_draft(payload.id,payload.revision,payload.choices,payload.regions)
+
+    @app.get('/api/documents/{ident}/image-preview/{version}')
+    async def image_preview_file(ident: str,version: str):
+        return FileResponse(documents.image_draft_asset(ident,version),media_type='image/png')
+
     @app.get('/api/documents/{ident}/preview/{page}')
     async def preview_document_page(ident: str,page: int,output: bool=False):
         return FileResponse(documents.preview_asset(ident,page,output),media_type='image/png')

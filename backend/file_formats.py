@@ -521,7 +521,9 @@ class Document:
             else: c.comment.author=new
         else: raise FormatError('이 영역은 글자 직접 수정을 지원하지 않습니다.')
 
-    def export(self, output, edits, regions):
+    def export(self, output, edits, regions, image_edits=None):
+        if image_edits and self.kind not in {'.png','.jpg','.jpeg'}:
+            raise FormatError('문구 교체는 PNG·JPG·JPEG 이미지 파일에서 지원합니다.')
         if self.blockers: raise FormatError(self.blockers[0])
         for pid,new in edits.items():
             p=next((p for p in self.parts if p['id']==pid),None)
@@ -538,6 +540,11 @@ class Document:
             boxes_by_asset.setdefault(a['id'],[]).append(b)
         for a in self.assets:
             if a['target']['kind']=='pdfpage': continue
+            if image_edits:
+                from backend.image_edit import save_image
+                save_image(Image.open(self.work/a['file']),output,
+                           [e for e in image_edits if e['asset']==a['id']],boxes_by_asset.get(a['id'],[]))
+                continue
             im=Image.open(self.work/a['file']).convert('RGB'); draw=ImageDraw.Draw(im)
             for b in boxes_by_asset.get(a['id'],[]):
                 box=(math.floor(b[0]),math.floor(b[1]),min(im.width,math.ceil(b[2])),min(im.height,math.ceil(b[3])))

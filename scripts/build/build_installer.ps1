@@ -30,10 +30,15 @@ try {
     if (Test-Path -LiteralPath $stage) { Remove-Item -LiteralPath $stage -Recurse -Force }
     New-Item -ItemType Directory -Force $stage | Out-Null
 
-    # 설치판에 들어가는 파일만 명시적으로 복사한다(.venv, .runtime, 연구 자료 등은 제외).
+    # Explicit payload: app, required installation files and twelve synthetic examples.
     Copy-Item run.py, requirements.lock.txt, requirements.files.lock.txt, requirements.model-a.lock.txt $stage
     if (Test-Path LICENSE) { Copy-Item LICENSE $stage }
     foreach ($d in 'dist', 'models') { Copy-Item -Recurse $d (Join-Path $stage $d) }
+    $examples = @(Get-ChildItem -LiteralPath 'examples\formats\files' -File)
+    if ($examples.Count -ne 12) { throw 'Expected exactly twelve example documents.' }
+    New-Item -ItemType Directory -Force (Join-Path $stage 'examples\formats\files') | Out-Null
+    foreach ($example in $examples) { Copy-Item -LiteralPath $example.FullName -Destination (Join-Path $stage 'examples\formats\files') }
+    Copy-Item -LiteralPath 'examples\README.md' -Destination (Join-Path $stage 'examples\README.md')
     New-Item -ItemType Directory -Force (Join-Path $stage 'backend'), (Join-Path $stage 'scripts\prepare'), (Join-Path $stage 'installer') | Out-Null
     Copy-Item backend\*.py, backend\HwpText.java (Join-Path $stage 'backend')
     Copy-Item scripts\prepare\prepare_file_tools.py, scripts\prepare\prepare_model_a.py (Join-Path $stage 'scripts\prepare')
@@ -48,6 +53,9 @@ try {
         } elseif ($package -ne 'scheduler') { throw "Required frontend license missing: $package" }
     }
     $notices | Set-Content -LiteralPath (Join-Path $stage 'THIRD-PARTY-NOTICES.txt') -Encoding UTF8
+    $sourceCommit = (& git rev-parse HEAD).Trim()
+    if ($LASTEXITCODE -ne 0) { throw 'Cannot identify the release source commit.' }
+    @{ version=$version; sourceCommit=$sourceCommit } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $stage 'BUILD-INFO.json') -Encoding UTF8
 
     & javac --release 11 -encoding UTF-8 -cp $jar -d (Join-Path $stage 'backend') backend\HwpText.java
     if ($LASTEXITCODE -ne 0) { throw 'HwpText.java compile failed.' }
@@ -59,7 +67,14 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'Inno Setup compile failed.' }
     $artifact = Join-Path $root "installer\out\PrivacySelfAssessmentTool-Setup-$version.exe"
     if (-not (Test-Path -LiteralPath $artifact)) { throw 'Expected installer output is missing.' }
-    $digest = (Get-FileHash -LiteralPath $artifact -Algorithm SHA256).Hash.ToLowerInvariant()
-    "$digest  $([IO.Path]::GetFileName($artifact))" | Set-Content -LiteralPath (Join-Path $root 'installer\out\SHA256SUMS.txt') -Encoding ASCII
+    $exampleZip = Join-Path $root "installer\out\PrivacySelfAssessmentTool-Examples-$version.zip"
+    if (Test-Path -LiteralPath $exampleZip) { Remove-Item -LiteralPath $exampleZip -Force }
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    [IO.Compression.ZipFile]::CreateFromDirectory((Join-Path $stage 'examples'), $exampleZip, [IO.Compression.CompressionLevel]::Optimal, $false, [Text.Encoding]::UTF8)
+    $sums = foreach ($releaseFile in @($artifact,$exampleZip)) {
+        $digest = (Get-FileHash -LiteralPath $releaseFile -Algorithm SHA256).Hash.ToLowerInvariant()
+        "$digest  $([IO.Path]::GetFileName($releaseFile))"
+    }
+    $sums | Set-Content -LiteralPath (Join-Path $root 'installer\out\SHA256SUMS.txt') -Encoding ASCII
     '{0}  {1:N1} MB' -f $artifact, ((Get-Item -LiteralPath $artifact).Length / 1MB)
 } finally { Pop-Location }

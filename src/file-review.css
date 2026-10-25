@@ -20,3 +20,5 @@
 /* Keep the official product name readable at desktop and mobile widths. */
 .brand{flex-shrink:0}.brand strong{white-space:nowrap}.topbar{column-gap:16px}.local-badge{white-space:nowrap;flex-shrink:0}
 @media(max-width:420px){.topbar{padding-left:16px;padding-right:16px;column-gap:8px}.brand{gap:8px}.brand-icon{width:36px;height:36px}.brand strong{font-size:16px}.local-badge{margin-left:auto}.topbar .local-badge{font-size:8px;padding:4px}}
+
+.image-edit-warnings{margin:12px 0;padding:12px 14px;border:1px solid #e4acac;border-radius:8px;background:#fff7f7;color:#842d2d}.image-edit-warnings p{margin:6px 0}.image-edit-warnings ul{margin:6px 0;padding-left:20px}.region-box.edit-warning{border:2px dashed #c83c3c;background:transparent;pointer-events:none}

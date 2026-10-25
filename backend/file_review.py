@@ -198,6 +198,7 @@ class FileReviewStore:
                         if p['text'][lo:hi]!=c['text']:raise DocumentError('검출 위치가 원문과 일치하지 않습니다.')
                         item={**c,'id':f"{p['id']}:{start}:{end}:{c['label']}",'part':p['id'],'start':start,'end':end,'location':p['location']}
                         item['partialText']=replacement(c['text'],c['label'],{'mode':'partial'})
+                        item['imageTextEditable']=manifest['kind'] in {'.png','.jpg','.jpeg'} and bool(p.get('asset'))
                         if p.get('asset'):
                             item['asset']=p['asset'];item['boxes']=p['boxes'][lo:hi]
                             asset=next(v for v in manifest['assets'] if v['id']==p['asset'])
@@ -306,15 +307,15 @@ class FileReviewStore:
             raise DocumentError('문서 화면이 아직 준비되지 않았거나 바뀌었습니다. 다시 열어 주세요.')
         return job['work']/value['directory']/value['pages'][page]['file']
 
-    def export(self,ident,revision,choices,manual,text_edits=None):
-        job=self._job(ident)
+    def _selection(self,job,revision,choices,manual,text_edits=None):
         with self.lock:
             if job['state']!='ready' or revision!=job['revision']:raise DocumentError('현재 검사 결과와 일치하지 않습니다. 준비가 끝난 뒤 다시 시도해 주세요.')
             if job['manifest']['blockers']:raise DocumentError(job['manifest']['blockers'][0])
             if not isinstance(choices,dict) or len(choices)>6000 or not isinstance(manual,list) or len(manual)>1000:raise DocumentError('선택한 항목 수가 올바르지 않습니다.')
             known={c['id']:c for c in job['candidates']}
             if any(k not in known for k in choices):raise DocumentError('검사 결과에 없는 항목입니다.')
-            edits={};regions=[]; parts={p['id']:p for p in job['manifest']['parts']}
+            if any(not isinstance(v,dict) or v.get('mode') not in {'keep','partial','full','custom'} for v in choices.values()):raise DocumentError('가림 선택이 올바르지 않습니다.')
+            edits={};regions=[];image_edits=[]; parts={p['id']:p for p in job['manifest']['parts']}
             for p in parts.values():
                 selected=[c for c in job['candidates'] if c['part']==p['id'] and choices.get(c['id'],{}).get('mode','keep')!='keep']
                 if not selected:continue
@@ -324,8 +325,15 @@ class FileReviewStore:
                     if not isinstance(choice,dict):raise DocumentError('가림 선택이 올바르지 않습니다.')
                     new=replacement(c['text'],c['label'],choice)
                     if is_image:
-                        if choice.get('mode')=='custom':raise DocumentError('PDF·이미지는 영역 가림을 이용해 주세요.')
-                        regions.extend({'asset':p['asset'],'box':b} for b in c['maskBoxes'][choice['mode']])
+                        if c.get('imageTextEditable'):
+                            from backend.image_edit import validate_text,ImageEditError
+                            new='비공개' if choice['mode']=='full' else new
+                            try:validate_text(new)
+                            except ImageEditError as e:raise DocumentError(str(e))
+                            image_edits.append({'asset':p['asset'],'box':c['maskBoxes']['full'][0],'text':new,'originalText':c['text']})
+                        else:
+                            if choice.get('mode')=='custom':raise DocumentError('PDF·내장 이미지는 영역 가림을 이용해 주세요. 문구 교체는 PNG·JPG·JPEG 파일에서 지원합니다.')
+                            regions.extend({'asset':p['asset'],'box':b} for b in c['maskBoxes'][choice['mode']])
                     else:
                         lo,hi=py_offset(value,c['start']),py_offset(value,c['end'])
                         if value[lo:hi]!=c['text']:raise DocumentError('수정할 위치가 원문과 일치하지 않습니다.')
@@ -343,15 +351,21 @@ class FileReviewStore:
                 if len(b)!=4 or any(type(x) not in (int,float) or not math.isfinite(x) for x in b) or not(0<=b[0]<b[2]<=a['width'] and 0<=b[1]<b[3]<=a['height']):raise DocumentError('직접 지정한 영역이 이미지 밖에 있습니다.')
                 regions.append({'asset':r['asset'],'box':b})
             if len(regions)>20000:raise DocumentError('가림 영역이 너무 많습니다. 문서를 나누어 처리해 주세요.')
+            return edits,regions,image_edits
+
+    def export(self,ident,revision,choices,manual,text_edits=None):
+        job=self._job(ident)
+        with self.lock:
+            edits,regions,image_edits=self._selection(job,revision,choices,manual,text_edits)
             job.update(state='exporting',progress='선택한 내용을 새 사본에 적용하는 중',exportResult=None,output=None,error=None)
-            self.pool.submit(self._export,job,edits,regions)
+            self.pool.submit(self._export,job,edits,regions,image_edits)
             return self._public(job)
 
-    def _export(self,job,edits,regions):
+    def _export(self,job,edits,regions,image_edits=None):
         try:
             self._unchanged(job)
             output='reviewed'+job['manifest']['outputSuffix']
-            manifest=self._adapter(job,'export',output=output,edits=edits,regions=regions)
+            manifest=self._adapter(job,'export',output=output,edits=edits,regions=regions,imageEdits=image_edits or [])
             candidates=self._scan(job,manifest,'수정 사본 재검사')
             self._check_cancel(job);self._unchanged(job)
             filename=Path(job['name']).stem[:80]+'_개인정보처리본_'+time.strftime('%Y%m%d_%H%M%S')+job['manifest']['outputSuffix']
@@ -362,6 +376,48 @@ class FileReviewStore:
         except Exception as e:
             self._failed(job,e)
             if not job['cancel'].is_set():self._update(job,state='ready',output=None)
+
+    def image_draft(self,ident,revision,choices,manual):
+        job=self._job(ident)
+        self._unchanged(job)
+        with self.lock:
+            if job['manifest'] is None or job['manifest']['kind'] not in {'.png','.jpg','.jpeg'}:
+                raise DocumentError('이미지 문구 미리보기는 PNG·JPG·JPEG 파일에서 지원합니다.')
+            _,regions,image_edits=self._selection(job,revision,choices,manual)
+            version=hashlib.sha256(json.dumps(['image-text-v2',revision,choices,manual],sort_keys=True,ensure_ascii=False).encode()).hexdigest()
+            cached=job.get('imageDraft')
+            if cached and cached['version']==version:
+                return {k:v for k,v in cached.items() if k not in {'directory'}}
+            cached={'state':'queued','version':version,'directory':'image-draft-'+secrets.token_hex(8)}
+            job['imageDraft']=cached
+            self.pool.submit(self._image_draft,job,cached,image_edits,regions)
+            return {k:v for k,v in cached.items() if k!='directory'}
+
+    def _image_draft(self,job,cached,image_edits,regions):
+        directory=job['work']/cached['directory']
+        try:
+            if job.get('imageDraft') is not cached:return
+            self._check_cancel(job);self._unchanged(job)
+            directory.mkdir()
+            asset=job['manifest']['assets'][0]
+            with self.lock:cached['state']='rendering'
+            value=self._adapter(job,'image-draft',image=asset['file'],output=cached['directory']+'/image.png',imageEdits=image_edits,regions=regions)
+            self._check_cancel(job);self._unchanged(job)
+            with self.lock:
+                if job.get('imageDraft') is cached:cached.update(state='ready',warnings=value.get('warnings',[]))
+        except Exception as e:
+            with self.lock:cached.update(state='error',message=str(e) if isinstance(e,DocumentError) else '이미지 미리보기를 만들지 못했습니다.')
+        finally:
+            # Retain only the latest private preview, including rapid typing/cancel.
+            for old in job['work'].glob('image-draft-*'):
+                if old.is_dir() and old.name!=(job.get('imageDraft') or {}).get('directory'):shutil.rmtree(old,ignore_errors=True)
+
+    def image_draft_asset(self,ident,version):
+        job=self._job(ident);self._unchanged(job)
+        cached=job.get('imageDraft')
+        if not cached or cached['state']!='ready' or cached['version']!=version:
+            raise DocumentError('현재 선택과 일치하는 이미지 미리보기가 없습니다. 다시 확인해 주세요.')
+        return job['work']/cached['directory']/'image.png'
 
     def output(self,ident):
         job=self._job(ident)

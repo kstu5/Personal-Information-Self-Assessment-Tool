@@ -69,6 +69,9 @@ def refine_detections(text, detections):
     result = []
     purposes = [(m.start(), m.end()) for m in _PURPOSE.finditer(text)]
     for detection in detections:
+        # A number followed by 세트 is a quantity, not a person's age.
+        if detection.label == 'AGE' and re.fullmatch(r'\d+[ \t]*세',detection.text) and re.match(r'트(?=$|[\s.,/()·:;]|[씩를을이가은는와과])',text[detection.end:]):
+            continue
         if detection.label == 'DT_BIRTH' and _ordinary_date(text, detection.start, detection.end):
             continue
         if detection.label == 'PERSON':

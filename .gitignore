@@ -18,9 +18,17 @@ list.txt
 runtime.local.json
 *.piipost
 
-# --- 비공개 작업 자료: 안내 파일만 공유하고 나머지는 로컬 보관 ---
-/local-only/*
-!/local-only/README.md
+# --- 공개 저장소에는 실행 코드·필수 설치 자료·예시 12종만 포함 ---
+/local-only/
+/AGENTS.md
+/docs/
+/tests/
+/validation/
+/scripts/check/
+/scripts/evaluate/
+/examples/documents/
+/examples/formats/*.md
+/examples/formats/*.json
 
 # --- 이전 경로의 열린 문서와 개발 산출물은 로컬 전용 ---
 /output/

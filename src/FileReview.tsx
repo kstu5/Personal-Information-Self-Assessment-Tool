@@ -25,30 +25,67 @@ async function binary(path:string,options:RequestInit={}) {
 
 function ImageReview({job,asset,regions,onRegion,output,selectedBoxes,locked,candidates,selection,onSelect}:{job:DocumentJob;asset:FileAsset;regions:Region[];onRegion:(box:Box)=>void;output:boolean;selectedBoxes:Box[];locked:boolean;candidates:FileCandidate[];selection:FileSelection;onSelect:(c:FileCandidate)=>void}) {
   const [url,setUrl]=useState(''),[error,setError]=useState(''),[drag,setDrag]=useState<Box|null>(null);
-  const [drawing,setDrawing]=useState(false);
+  const [warnings,setWarnings]=useState<{box:Box;message:string}[]>([]);
+  const [loading,setLoading]=useState(true);
+  const [drawing,setDrawing]=useState(false),[markers,setMarkers]=useState(false);
   const start=useRef<[number,number]|null>(null);
   const applied=!output&&selection.draftView==='applied';
-  useEffect(()=>{let stop=false,local='';setUrl('');setError('');
-    void binary(`${job.id}/assets/${asset.id}?output=${output}`).then(r=>r.blob()).then(b=>{local=URL.createObjectURL(b);if(!stop)setUrl(local);else URL.revokeObjectURL(local);}).catch(e=>{if(!stop)setError(message(e));});
-    return()=>{stop=true;if(local)URL.revokeObjectURL(local);};
-  },[job.id,asset.id,output,job.exportResult?.sha256]);
+  const natural=['.png','.jpg','.jpeg'].includes(job.manifest?.kind||'');
+  const draftKey=natural&&applied?JSON.stringify([selection.choices,regions]):'';
+  const identity=`${job.id}:${asset.id}:${output}:${applied}`,previousIdentity=useRef(identity);
+  useEffect(()=>()=>{if(url)URL.revokeObjectURL(url);},[url]);
+  useEffect(()=>{let stop=false;const controller=new AbortController();setLoading(true);setError('');setWarnings([]);
+    if(previousIdentity.current!==identity){setUrl('');previousIdentity.current=identity;}
+    async function show(path:string){
+      const b=await (await binary(path,{signal:controller.signal})).blob();
+      const local=URL.createObjectURL(b);if(!stop){setUrl(local);setLoading(false);}else URL.revokeObjectURL(local);
+    }
+    async function load(){
+      let path=`${job.id}/assets/${asset.id}?output=${output}`;
+      if(natural&&applied){
+        if(job.state!=='ready')return;
+        const [choices,manual]=JSON.parse(draftKey);
+        const deadline=Date.now()+60000;
+        while(!stop){
+          const result=await api<{state:string;version:string;message?:string;warnings?:{box:Box;message:string}[]}>('documents/image-preview',{id:job.id,revision:job.revision,choices,regions:manual},controller.signal);
+          if(stop)return;
+          if(result.state==='error')throw new Error(result.message||'이미지 미리보기를 만들지 못했습니다.');
+          if(result.state==='ready'){path=`${job.id}/image-preview/${result.version}`;setWarnings(result.warnings||[]);break;}
+          if(Date.now()>deadline)throw new Error('미리보기 준비가 지연됩니다. 원본으로 전환한 뒤 다시 확인해 주세요.');
+          await new Promise(resolve=>setTimeout(resolve,300));
+        }
+      }
+      if(stop)return;
+      await show(path);
+    }
+    const timer=setTimeout(()=>{void load().catch(async e=>{
+      if(stop)return;
+      setError(message(e)+(natural&&applied?' 적용 결과 대신 원본을 표시합니다. 문구를 수정한 뒤 다시 확인해 주세요.':''));
+      if(natural&&applied)try{await show(`${job.id}/assets/${asset.id}?output=false`);}catch{if(!stop){setUrl('');setLoading(false);}}
+      else setLoading(false);
+    });},natural&&applied?300:0);
+    return()=>{stop=true;clearTimeout(timer);controller.abort();};
+  },[job.id,asset.id,output,job.exportResult?.sha256,job.revision,job.state,applied,natural,draftKey,identity]);
   function point(e:PointerEvent<HTMLDivElement>):[number,number]{const r=e.currentTarget.getBoundingClientRect();return [Math.max(0,Math.min(asset.width,(e.clientX-r.left)*asset.width/r.width)),Math.max(0,Math.min(asset.height,(e.clientY-r.top)*asset.height/r.height))];}
   function rectangle(b:Box,key:string,kind:string){return <span key={key} className={`region-box ${kind}`} style={{left:`${b[0]/asset.width*100}%`,top:`${b[1]/asset.height*100}%`,width:`${(b[2]-b[0])/asset.width*100}%`,height:`${(b[3]-b[1])/asset.height*100}%`}}/>;}
   return <div className="image-review" id={`file-asset-${asset.id}`}>
-    <p>{output?'저장할 사본의 실제 이미지입니다.':applied?'적용 미리보기입니다. 선택한 가림과 직접 지정한 영역을 검게 표시합니다.':'원본 이미지입니다. 체크는 처리 지정, 점선은 직접 지정한 가림 영역입니다.'}</p>
-    {!output&&<button className="secondary image-draw-toggle" disabled={locked} aria-pressed={drawing} onClick={()=>setDrawing(v=>!v)}>{drawing?'영역 지정 종료':'직접 영역 가리기'}</button>}
+    <p>{error&&natural&&applied?'수정을 적용하지 못해 원본을 표시합니다.':output?'저장할 사본의 실제 이미지입니다.':applied?natural?'원문 영역을 지우고 선택한 문구를 다시 쓴 모습입니다. 경고가 없는 결과는 저장 사본에도 같은 방식으로 적용합니다.':'적용 미리보기입니다. 선택한 가림과 직접 지정한 영역을 검게 표시합니다.':'원본 이미지입니다. 체크는 처리 지정, 점선은 직접 지정한 가림 영역입니다.'}</p>
+    {(applied||output)&&<label><input type="checkbox" checked={markers} onChange={e=>setMarkers(e.target.checked)}/>검출 표시 보기</label>}
+    {!output&&<button className="secondary image-draw-toggle" disabled={locked||loading} aria-pressed={drawing} onClick={()=>setDrawing(v=>!v)}>{drawing?'영역 지정 종료':'직접 영역 가리기'}</button>}
     {error&&<p role="alert">{error}</p>}
-    {!url&&!error&&<p role="status">미리보기 준비 중…</p>}
-    {url&&<div className={`image-canvas ${output||!drawing?'readonly':''}`} style={{aspectRatio:`${asset.width}/${asset.height}`}}
-      onPointerDown={e=>{if(output||locked||!drawing)return;e.preventDefault();e.currentTarget.setPointerCapture(e.pointerId);start.current=point(e);setDrag([...start.current,...start.current]);}}
+    {!!warnings.length&&<div className="image-edit-warnings" role="alert"><strong>일부 문구를 적용하지 못했습니다.</strong><p>빨간 테두리의 항목은 원문을 보여줍니다. 문구를 바꾸기 전에는 수정 사본을 생성할 수 없습니다.</p><ul>{warnings.map((w,i)=><li key={i}>{w.message}</li>)}</ul></div>}
+    {loading&&!error&&<p role="status">{url?'변경 사항을 적용하는 중입니다. 아래는 갱신 전 미리보기입니다.':'미리보기 준비 중…'}</p>}
+    {(url||loading)&&<div className={`image-canvas ${output||!drawing?'readonly':''}`} aria-busy={loading} style={{aspectRatio:`${asset.width}/${asset.height}`}}
+      onPointerDown={e=>{if(output||locked||loading||!url||!drawing)return;e.preventDefault();e.currentTarget.setPointerCapture(e.pointerId);start.current=point(e);setDrag([...start.current,...start.current]);}}
       onPointerMove={e=>{if(!start.current)return;const p=point(e),s=start.current;setDrag([Math.min(s[0],p[0]),Math.min(s[1],p[1]),Math.max(s[0],p[0]),Math.max(s[1],p[1])]);}}
       onPointerUp={e=>{if(output||locked||!drawing){start.current=null;setDrag(null);return;}if(!start.current)return;const p=point(e),s=start.current;const b:Box=[Math.min(s[0],p[0]),Math.min(s[1],p[1]),Math.max(s[0],p[0]),Math.max(s[1],p[1])];start.current=null;setDrag(null);if(b[2]-b[0]>2&&b[3]-b[1]>2)onRegion(b);}}
       onPointerCancel={()=>{start.current=null;setDrag(null);}}>
-      <img src={url} alt={`${asset.location} ${output?'수정 사본':'원본 사본'}`} draggable={false}/>
-      {!drawing&&<CandidateOverlay asset={asset} candidates={candidates.filter(c=>c.asset===asset.id)} selection={selection} boxes={c=>({boxes:c.maskBoxes?.full||c.boxes||[]})} onSelect={onSelect}/>}
-      {applied&&selectedBoxes.map((b,i)=>rectangle(b,`candidate-${i}`,'opaque'))}
-      {!output&&regions.filter(r=>r.asset===asset.id).map((r,i)=>rectangle(r.box,`manual-${i}`,applied?'opaque':'region-outline'))}
+      {url&&<img src={url} alt={`${asset.location} ${loading?'갱신 전 미리보기':error&&natural&&applied?'수정 실패 · 원본':output?'수정 사본':applied?'적용 미리보기':'원본 사본'}`} draggable={false}/>}
+      {url&&!drawing&&(!(applied||output)||markers)&&<CandidateOverlay asset={asset} candidates={candidates.filter(c=>c.asset===asset.id)} selection={selection} boxes={c=>({boxes:c.maskBoxes?.full||c.boxes||[]})} onSelect={onSelect}/>}
+      {applied&&!natural&&selectedBoxes.map((b,i)=>rectangle(b,`candidate-${i}`,'opaque'))}
+      {!output&&!(applied&&natural)&&regions.filter(r=>r.asset===asset.id).map((r,i)=>rectangle(r.box,`manual-${i}`,applied?'opaque':'region-outline'))}
       {drag&&rectangle(drag,'drag','drawing')}
+      {warnings.map((w,i)=>rectangle(w.box,`warning-${i}`,'edit-warning'))}
     </div>}
   </div>;
 }
@@ -90,7 +127,10 @@ export function FileReview({active,onWorkChange}:{active:boolean;onWorkChange:(w
   const job=jobs.find(j=>j.id===id),s=states[id]||EMPTY_SELECTION;
   const working=!!job&&ACTIVE.has(job.state),locked=working||!job||job.state!=='ready'||!!job.manifest?.blockers.length;
   function selectState(patch:Partial<FileSelection>){setStates(old=>({...old,[id]:{...(old[id]||EMPTY_SELECTION),...patch}}));}
-  function changed(patch:Partial<FileSelection>){selectState({draftView:'applied',...patch,verified:false,exportDirty:true,showOutput:false,saved:false});}
+  function changed(patch:Partial<FileSelection>){
+    if(job?.state==='ready'&&job.error)setJobs(old=>old.map(j=>j.id===id?{...j,error:null}:j));
+    selectState({draftView:'applied',...patch,verified:false,exportDirty:true,showOutput:false,saved:false});
+  }
   const hasWork=jobs.some(j=>ACTIVE.has(j.state)||!(states[j.id]?.saved));
   useEffect(()=>{
     let stop=false;
@@ -190,15 +230,15 @@ export function FileReview({active,onWorkChange}:{active:boolean;onWorkChange:(w
         <div><span className={`risk-${focus.risk}`}>{riskName(focus.risk)} · {focus.labelName}</span><small>{focus.location}</small><button aria-label="선택 편집 닫기" onClick={()=>selectState({focus:null})}>×</button></div><strong>{focus.text}</strong>
         {focus.ocrConfidence!==undefined&&<p className="ocr-reading-note">{focus.ocrConfidence<80?'글자 인식이 불확실합니다.':'이미지에서 읽은 글자입니다.'} 원문과 다르게 읽혔거나 개인정보가 아니면 ‘가리지 않음’을 선택하세요.</p>}
         <div className={`file-choice-state ${draftStatus(focus,s)!=='unset'?'assigned':''}`} role="status">{focus.part in s.textEdits?'✓ 영역 직접 수정 지정':s.choices[focus.id]?`✓ ${MODE_NAMES[s.choices[focus.id].mode]} 지정`:'처리 방법 미설정'}</div>
-        <div className="file-choice-buttons">{(['partial','full','keep','custom'] as MaskMode[]).map(mode=><button key={mode} disabled={locked||focus.part in s.textEdits||!!focus.asset&&mode==='custom'} aria-pressed={!(focus.part in s.textEdits)&&s.choices[focus.id]?.mode===mode} onClick={()=>apply(mode,[focus.id])}>{MODE_NAMES[mode]}</button>)}</div>
-        {s.choices[focus.id]?.mode==='custom'&&<label htmlFor="file-custom-input">바꿀 내용<input id="file-custom-input" maxLength={2000} value={(s.choices[focus.id] as {text:string}).text} disabled={locked} onChange={e=>changed({choices:{...s.choices,[focus.id]:{mode:'custom',text:e.target.value}}})}/></label>}
-        <p>{focus.part in s.textEdits?'이 영역의 직접 수정 내용이 우선합니다. 텍스트 · 위치에서 확인하거나 취소할 수 있습니다.':focus.asset?'PDF·이미지는 영역 가림을 지원합니다. 글자를 새 문구로 바꾸는 직접 수정은 지원하지 않습니다.':s.choices[focus.id]?'변경 예정 → '+replacement(focus,s.choices[focus.id]):'아직 처리 방법을 지정하지 않았습니다.'}</p>{!focus.asset&&<p>선택한 항목만 바꿉니다. 사본 생성 후 실제 문서 화면에서 결과를 확인해 주세요.</p>}
+        <div className="file-choice-buttons">{(['partial','full','keep','custom'] as MaskMode[]).map(mode=><button key={mode} disabled={locked||focus.part in s.textEdits||!!focus.asset&&!focus.imageTextEditable&&mode==='custom'} aria-pressed={!(focus.part in s.textEdits)&&s.choices[focus.id]?.mode===mode} onClick={()=>apply(mode,[focus.id])}>{focus.imageTextEditable&&mode==='full'?'비공개 표시':MODE_NAMES[mode]}</button>)}</div>
+        {s.choices[focus.id]?.mode==='custom'&&<label htmlFor="file-custom-input">바꿀 내용<input id="file-custom-input" maxLength={focus.imageTextEditable?80:2000} value={(s.choices[focus.id] as {text:string}).text} disabled={locked} onChange={e=>changed({choices:{...s.choices,[focus.id]:{mode:'custom',text:e.target.value}}})}/></label>}
+        <p>{focus.part in s.textEdits?'이 영역의 직접 수정 내용이 우선합니다. 텍스트 · 위치에서 확인하거나 취소할 수 있습니다.':focus.asset&&!focus.imageTextEditable?'PDF·내장 이미지는 영역 가림을 지원합니다. 문구 교체는 PNG·JPG·JPEG 파일에서 지원합니다.':s.choices[focus.id]?'변경 예정 → '+replacement(focus,s.choices[focus.id]):'아직 처리 방법을 지정하지 않았습니다.'}</p>{focus.imageTextEditable&&<p>원래 글자 크기를 유지하고 같은 줄의 빈 공간까지 활용합니다. 한 줄 80자 이하로 입력하세요. 주변 글자·표 선과 겹치는 문구는 경고로 알려드립니다. 글꼴과 배경은 원본과 다를 수 있습니다.</p>}{!focus.asset&&<p>선택한 항목만 바꿉니다. 사본 생성 후 실제 문서 화면에서 결과를 확인해 주세요.</p>}
         {s.choices[focus.id]&&!(focus.part in s.textEdits)&&<button className="draft-clear-choice" disabled={locked} onClick={()=>clearChoice(focus.id)}>처리 선택 취소</button>}
         {focus.asset&&<button className="secondary" disabled={locked} onClick={()=>{changed({choices:{...s.choices,[focus.id]:{mode:'keep'}},focus:null});setNotice('이 항목의 자동 가림을 해제했습니다. 이미지에서 원하는 범위를 드래그해 다시 지정하세요.');document.querySelector('.image-canvas')?.scrollIntoView({block:'center',behavior:'smooth'});}}>가림 범위 직접 다시 지정</button>}
       </section>}
       <FileFindings overview="hidden" output={s.showOutput} candidates={shownCandidates} selection={shownSelection} locked={locked||s.showOutput} onState={selectState} onSelect={chooseShown} onApply={apply} formatReplacement={replacement}/>
       </aside></div>
-      <div className="file-applied-columns">{(['partial','full','custom'] as const).map(mode=><section key={mode}><h3>{MODE_NAMES[mode]} 적용 목록 <small>{all.filter(c=>s.choices[c.id]?.mode===mode).length}곳</small></h3><div>{all.filter(c=>s.choices[c.id]?.mode===mode).map(c=><article key={c.id}><button onClick={()=>choose(c)}><small>{c.labelName} · {c.location}</small><span>{c.text} → {c.asset?'영역 가림':replacement(c,s.choices[c.id])}</span></button><select aria-label={`${c.text} 적용 변경`} disabled={locked} value={mode} onChange={e=>apply(e.target.value as MaskMode,[c.id])}><option value="partial">부분</option><option value="full">전체</option><option value="custom" disabled={!!c.asset}>수정</option></select><button disabled={locked||!!c.asset} onClick={()=>apply('custom',[c.id])}>편집</button><button disabled={locked} onClick={()=>clearChoice(c.id)}>취소</button></article>)}</div></section>)}</div>
+      <div className="file-applied-columns">{(['partial','full','custom'] as const).map(mode=><section key={mode}><h3>{MODE_NAMES[mode]} 적용 목록 <small>{all.filter(c=>s.choices[c.id]?.mode===mode).length}곳</small></h3><div>{all.filter(c=>s.choices[c.id]?.mode===mode).map(c=><article key={c.id}><button onClick={()=>choose(c)}><small>{c.labelName} · {c.location}</small><span>{c.text} → {c.asset&&!c.imageTextEditable?'영역 가림':replacement(c,s.choices[c.id])}</span></button><select aria-label={`${c.text} 적용 변경`} disabled={locked} value={mode} onChange={e=>apply(e.target.value as MaskMode,[c.id])}><option value="partial">부분</option><option value="full">전체</option><option value="custom" disabled={!!c.asset&&!c.imageTextEditable}>수정</option></select><button disabled={locked||!!c.asset&&!c.imageTextEditable} onClick={()=>apply('custom',[c.id])}>편집</button><button disabled={locked} onClick={()=>clearChoice(c.id)}>취소</button></article>)}</div></section>)}</div>
       <section className="file-export"><div><h3>수정 사본 만들기</h3><p>선택한 위치를 처리한 뒤 새 파일을 다시 열어 검사합니다.<br/>원본에는 덮어쓰지 않으며, 선택하지 않은 정보는 그대로 남습니다.</p></div><button className="primary" disabled={locked||!!m.blockers.length} onClick={()=>void generate()}>{job.state==='exporting'?'사본 처리 중…':'사본 생성 · 재검사'}</button>
       {exported&&!s.exportDirty&&<div className="file-export-result"><strong>재검사 완료 · 남은 후보 {exported.candidates.length}개</strong><p>{exported.filename}</p>{exported.candidates.length>0&&<details className="residual-list"><summary>남은 후보 {exported.candidates.length}개 보기</summary>{exported.candidates.map(c=><button key={c.id} onClick={()=>selectState({showOutput:true,view:c.asset?'images':'text',asset:c.asset||s.asset,page:Math.floor(exported.parts.findIndex(p=>p.id===c.part)/25)})}><span className={`risk-${c.risk}`}>{c.labelName}</span> {c.text} <small>{c.location}</small></button>)}</details>}<button className="secondary" onClick={previewOutput}>실제 사본 확인</button><label><input type="checkbox" checked={s.verified} onChange={e=>selectState({verified:e.target.checked})}/>남은 후보, 이미지 가림 범위, 지원 제한을 확인했습니다.</label><button className="primary" disabled={!s.verified||working} onClick={()=>void save()}>{boot.desktop?'새 파일로 사본 저장':'사본 다운로드'}</button></div>}
       </section><p className="file-footer-note">자동 검사는 오탐과 누락이 있을 수 있습니다. OCR 재검사 0건도 이미지에 개인정보가 없다는 뜻은 아닙니다. 부분 가림은 일부 개인정보를 남깁니다. 사본을 원래 문서 프로그램에서 열어 배치와 내용도 확인해 주세요.</p>

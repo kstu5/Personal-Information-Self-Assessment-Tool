@@ -1,7 +1,7 @@
 import type { Candidate } from './types';
 import type { MaskChoices } from './masking';
 export type Box=[number,number,number,number];
-export type FileCandidate=Candidate&{part:string;location:string;asset?:string;boxes?:Box[];partialText?:string;maskBoxes?:{full:Box[];partial:Box[]};ocrConfidence?:number};
+export type FileCandidate=Candidate&{part:string;location:string;asset?:string;boxes?:Box[];partialText?:string;maskBoxes?:{full:Box[];partial:Box[]};ocrConfidence?:number;imageTextEditable?:boolean};
 export type FilePart={id:string;text:string;location:string;asset?:string;sheet?:string;cell?:string;row?:number;column?:number;hidden?:boolean;flow?:{line?:number;section?:string;order?:number}};
 export type TableSize={rows:number;columns:number};
 export type FileAsset={id:string;location:string;width:number;height:number};
@@ -9,7 +9,7 @@ export type PreviewLink={state:'linked'|'ambiguous'|'unavailable';hits:{page:num
 export type DocumentPreview={state:'queued'|'rendering'|'ready'|'error';version:string;message?:string;pages:FileAsset[];links:Record<string,PreviewLink>;warnings:string[]};
 export type Region={asset:string;box:Box};
 export type ExportResult={filename:string;candidates:FileCandidate[];parts:FilePart[];assets:FileAsset[];warnings:string[];sha256:string;tableSize?:TableSize|null};
-export type DocumentJob={id:string;name:string;state:string;progress:string;revision:string;error?:string;
+export type DocumentJob={id:string;name:string;state:string;progress:string;revision:string;error?:string|null;
   manifest:null|{parts:FilePart[];assets:FileAsset[];warnings:string[];blockers:string[];coverage:string[];kind:string;outputSuffix:string;tableSize?:TableSize|null;calculation:null|{count:number;at:string;method:string}};
   candidates:FileCandidate[];exportResult:ExportResult|null};
 export type FileSelection={choices:MaskChoices;regions:Region[];textEdits:Record<string,string>;selected:string[];focus:string|null;page:number;previewPage:number;asset:string;filter:string;search:string;verified:boolean;exportDirty:boolean;showOutput:boolean;draftView:'original'|'applied';view:'text'|'images'|'sheet'|'pages'|'content';sheet:string;gridRow:number;gridColumn:number;saved:boolean};
