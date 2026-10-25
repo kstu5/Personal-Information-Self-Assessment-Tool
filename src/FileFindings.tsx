@@ -81,7 +81,7 @@ export function FileFindings({ candidates, selection: s, locked, onState, onSele
                 <strong>{c.text}</strong><span className="file-finding-location">{c.location}</span>
                 {choice && choice.mode !== 'keep' && !edited && <span className="file-finding-result">변경 예정 <b>{c.asset ? '선택한 이미지 영역 가림' : formatReplacement(c, choice) || '(빈 내용)'}</b></span>}
               </button>
-              <div className="file-finding-actions">{!output&&<select aria-label={`${c.text} 가림 방법`} disabled={locked || edited} value={choice?.mode || ''} onChange={e => { const mode = e.target.value as MaskMode; onApply(mode, [c.id]); if (mode === 'custom') onSelect(c, true); }}>
+              <div className="file-finding-actions">{!output&&<select aria-label={`${c.text} 가림 방법`} disabled={locked || edited} value={choice?.mode || ''} onChange={e => onApply(e.target.value as MaskMode, [c.id])}>
                 <option value="" disabled>처리 방법 선택</option>{(['keep', 'partial', 'full', 'custom'] as MaskMode[]).map(mode => <option key={mode} value={mode} disabled={!!c.asset && mode === 'custom'}>{MODE_NAMES[mode]}</option>)}
               </select>}<button onClick={() => onSelect(c)}>{output?'사본 위치':'원문 위치'} <span aria-hidden="true">↗</span></button></div>
             </li>;

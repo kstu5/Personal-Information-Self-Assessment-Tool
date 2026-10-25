@@ -13,5 +13,5 @@ request=urllib.request.Request(url+'/api/check',data=json.dumps({'title':'','bod
 result=json.loads(opener.open(request,timeout=90).read())
 assert boot['desktop'] is True
 assert any(c['label']=='PHONE' for c in result['candidates'])
-assert 'A 모델' in result['engine']
+assert 'atonlee/koelectra-ko-pii-ner' in result['engine']
 print('Console-free Windows app and its spawned detector are working.')

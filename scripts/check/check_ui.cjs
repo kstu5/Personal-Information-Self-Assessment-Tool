@@ -41,12 +41,12 @@ let filename='작업 파일.piipost', failWrite=false, cancelPicker=false, cance
   const originalTitle=await page.locator('#post-title').inputValue();
   await screenshot('write');
   await page.getByRole('button',{name:'개인정보 검사',exact:true}).click();await page.locator('.dashboard').waitFor({timeout:90000});
-  assert.ok(await page.getByText(/ko-pii 1.16.0 \+ A 모델/).isVisible());
+  assert.ok(await page.getByText(/ko-pii 1.16.0 \+ atonlee\/koelectra-ko-pii-ner/).isVisible());
   const count=await page.locator('.marker').count();assert.ok(count>0);assert.equal(Number(await page.locator('.total>strong').textContent()),count);
   assert.ok((await page.locator('.post-inner h2').textContent()).includes(originalTitle));
   const firstText=await page.locator('.marker').first().innerText();
   await page.locator('.marker').first().click();assert.equal(await page.locator('.rv-original').innerText(),firstText);
-  await screenshot('results');check('Actual ko-pii + A model, full original text, counts, and individual marker selection');
+  await screenshot('results');check('Actual ko-pii + atonlee/koelectra-ko-pii-ner, full original text, counts, and individual marker selection');
   await page.getByRole('button',{name:'수정한 글로 이어쓰기',exact:true}).click();
   await page.getByRole('button',{name:'저장',exact:true}).click();await page.getByRole('dialog').waitFor();await screenshot('save');
   assert.equal(await page.locator('#filename').inputValue(),'10월 독서 모임 함께 읽을 분을 찾습니다');

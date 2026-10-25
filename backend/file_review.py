@@ -18,6 +18,7 @@ import threading
 import time
 
 from backend.documents import DocumentError
+from backend.model_assets import MODEL_REPO
 
 ROOT=Path(__file__).resolve().parents[1]
 MAX_UPLOAD=20*1024*1024
@@ -163,7 +164,7 @@ class FileReviewStore:
         if current:batches.append(current)
         for index,batch in enumerate(batches):
             self._check_cancel(job)
-            self._update(job,progress=f'{phase} · {index+1}/{len(batches)} 구간 (A 모델)')
+            self._update(job,progress=f'{phase} · {index+1}/{len(batches)} 구간 ({MODEL_REPO})')
             text='\n\n'.join(p['text'] for p in batch)
             # A post inspection may already own the shared model. Wait without switching detectors.
             deadline=time.monotonic()+90
@@ -357,7 +358,7 @@ class FileReviewStore:
             self._update(job,state='ready',progress='수정 사본을 다시 열어 검사했습니다. 결과를 확인한 뒤 저장해 주세요.',output=output,outputManifest=manifest,
                 exportResult={'filename':filename,'candidates':candidates,'parts':[{k:v for k,v in p.items() if k not in {'target','boxes','ocrConfidences'}} for p in manifest['parts']],
                               'assets':[{k:v for k,v in a.items() if k not in {'target','file'}} for a in manifest['assets']],
-                              'warnings':manifest['warnings'],'sha256':digest(job['work']/output)})
+                              'warnings':manifest['warnings'],'tableSize':manifest.get('tableSize'),'sha256':digest(job['work']/output)})
         except Exception as e:
             self._failed(job,e)
             if not job['cancel'].is_set():self._update(job,state='ready',output=None)

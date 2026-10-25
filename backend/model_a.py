@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 import sys
 
-from backend.model_assets import MODEL_DIR, verify_model
+from backend.model_assets import MODEL_DIR, MODEL_REPO, verify_model
 
 DELEGATED_LABELS = frozenset({'PERSON', 'ADDRESS'})
 LABEL_MAP = {'NAME': 'PERSON', 'ADDRESS': 'ADDRESS'}
@@ -96,7 +96,7 @@ class HybridDetector:
     def __init__(self, path: Path = MODEL_DIR):
         self.model = ModelA(path)
         from ko_pii import __version__
-        self.name = f'ko-pii {__version__} + A 모델 (이름·주소)'
+        self.name = f'ko-pii {__version__} + {MODEL_REPO} (이름·주소)'
 
     def detect(self, text: str):
         from ko_pii import detect_all

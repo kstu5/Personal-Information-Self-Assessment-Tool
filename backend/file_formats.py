@@ -159,8 +159,9 @@ class Document:
         self.parts, self.assets, self.warnings, self.blockers, self.coverage = [], [], [], [], []
         self.entries, self.trees, self.workbook = {}, {}, None
         self.calculation = None
+        self.table_size = None
 
-    def add(self, text, location, target, *, boxes=None, asset=None):
+    def add(self, text, location, target, *, boxes=None, asset=None, flow=None):
         text = str(text)
         if not text.strip(): return
         if len(text) > 30000 or len(self.parts) >= MAX_PARTS or sum(len(p['text']) for p in self.parts)+len(text) > MAX_TEXT:
@@ -168,7 +169,9 @@ class Document:
         p = {'id': f'p{len(self.parts)}', 'text': text, 'location': location, 'target': target}
         if boxes is not None: p['boxes'] = boxes
         if asset is not None: p['asset'] = asset
+        if flow is not None: p['flow'] = flow
         self.parts.append(p)
+        return p
 
     def load(self):
         if self.kind not in SUPPORTED: raise FormatError('지원하지 않는 파일 형식입니다.')
@@ -186,7 +189,7 @@ class Document:
     def manifest(self):
         return {'parts': self.parts, 'assets': self.assets, 'warnings': list(dict.fromkeys(self.warnings)),
                 'blockers': list(dict.fromkeys(self.blockers)), 'coverage': self.coverage,
-                'calculation': self.calculation, 'kind': self.kind,
+                'calculation': self.calculation, 'tableSize': self.table_size, 'kind': self.kind,
                 'outputSuffix': '.png' if self.kind in {'.png', '.jpg', '.jpeg'} else self.kind}
 
     def read_text(self):
@@ -199,13 +202,16 @@ class Document:
         if self.kind in {'.csv', '.tsv'}:
             self.delimiter = '\t' if self.kind == '.tsv' else ','
             self.rows = list(csv.reader(io.StringIO(self.text, newline=''), delimiter=self.delimiter))
+            self.table_size={'rows':len(self.rows),'columns':max((len(row) for row in self.rows),default=0)}
             for r, row in enumerate(self.rows):
-                for c, value in enumerate(row): self.add(value, f'{r+1}행 · {c+1}열', {'kind': 'csv', 'row': r, 'col': c})
+                for c, value in enumerate(row):
+                    part=self.add(value, f'{r+1}행 · {c+1}열', {'kind': 'csv', 'row': r, 'col': c})
+                    if part is not None:part.update(sheet='데이터',row=r+1,column=c+1,cell=f'{r+1}행 · {c+1}열')
             self.warnings.append('CSV/TSV는 쉼표·탭 구분으로 읽고 UTF-8로 저장합니다. =, +, -, @로 시작하는 셀은 배포본에서 수식 실행 방지용 작은따옴표를 붙입니다.')
         else:
             # Split on line boundaries; never silently truncate.
             self.lines = self.text.splitlines(keepends=True)
-            for i, line in enumerate(self.lines): self.add(line, f'{i+1}행', {'kind': 'line', 'index': i})
+            for i, line in enumerate(self.lines): self.add(line, f'{i+1}행', {'kind': 'line', 'index': i},flow={'line':i+1})
         self.coverage = ['전체 텍스트', '행·열 위치', 'UTF-8 사본']
 
     def read_package(self):
@@ -239,7 +245,8 @@ class Document:
                     memo = any(local_name(a) in {'memo','memogroup'} for a in para.iterancestors()) or any(local_name(e)=='fieldBegin' and e.get('type')=='MEMO' for e in para.iter())
                     self.add(text, f'{label} · 문단 {node_ids[para]+1}'+(' · 삭제된 변경 기록' if deleted else ' · 메모' if memo else ''),
                              {'kind': 'xml', 'name': name, 'anchor': xml_anchor(tree, para), 'mode': 'paragraph',
-                              'slots': [{'node': node_ids[e], 'field': field} for e, field in slots]})
+                              'slots': [{'node': node_ids[e], 'field': field} for e, field in slots]},
+                             flow={'section':name,'order':node_ids[para]} if self.kind=='.hwpx' and re.fullmatch(r'Contents/section\d+\.xml',name) and not deleted and not memo else None)
                 for e, idx in node_ids.items():
                     ln = local_name(e)
                     string_property = name.startswith('docProps/') and ln in {'title','subject','creator','keywords','description','lastModifiedBy','category','contentStatus','identifier','Company','Manager','HyperlinkBase','lpstr','lpwstr'}
@@ -443,7 +450,7 @@ class Document:
         # JRE만 있는 설치판은 소스 실행(JDK 필요)을 못 하므로 미리 컴파일한 클래스를 우선 사용한다.
         entry = ['--class-path',os.pathsep.join([str(jar),str(compiled.parent)]),'HwpText'] if compiled.is_file() else ['--class-path',str(jar),str(ROOT/'backend'/'HwpText.java')]
         subprocess.run([java,'-Xmx256m',*entry,str(self.path),str(out)], timeout=45, check=True, stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
-        for i,line in enumerate(out.read_text(encoding='utf-8').splitlines()): self.add(line,f'추출 본문 {i+1}행',{'kind':'readonly'})
+        for i,line in enumerate(out.read_text(encoding='utf-8').splitlines()): self.add(line,f'추출 본문 {i+1}행',{'kind':'readonly'},flow={'line':i+1})
         self.blockers = ['HWP는 추출 본문 검사만 지원합니다. 메모·변경 기록·이미지 전체 검토와 수정 저장은 보장하지 않습니다. 한글에서 HWPX 사본으로 저장해 다시 검사해 주세요.']
         self.coverage = ['hwplib가 읽은 본문·표 텍스트 (추출 순서)']
         if not self.parts:

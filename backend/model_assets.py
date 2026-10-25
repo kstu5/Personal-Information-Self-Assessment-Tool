@@ -14,6 +14,9 @@ def model_manifest() -> dict:
     return json.loads(MANIFEST.read_text(encoding='utf-8'))
 
 
+MODEL_REPO = model_manifest()['repo']
+
+
 def matches_asset(path: Path, asset: dict) -> bool:
     if not path.is_file() or path.stat().st_size != asset['bytes']:
         return False

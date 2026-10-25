@@ -23,6 +23,8 @@
 
 아래 설명의 상세 응답·로그·수정 사본은 해당 PC에서 시험을 실행하면 생성됩니다. GitHub에서 내려받은 저장소에는 핵심 보고서만 포함합니다. 실제 개인정보를 넣어 시험할 때는 기존 가상 시험 입력을 덮어쓰지 말고 `local-only/` 아래에서 별도 작업하세요.
 
+직접 수정 입력란 표시의 재현·확인 절차는 `docs/verification/direct-edit-ui-2026-10-25.md`에 기록합니다. 보고서는 공유 대상이며 실제 화면 검증의 사본·다운로드 해시·화면 캡처는 로컬 전용 `qa/direct-edit-ui/`에 보관합니다.
+
 ## 시험 구성
 
 2026년 10월 25일 GitHub 커밋 `f1d424bb245cedc5c082ebb94ef91381bd2a2300`을 기준으로 만든 가상 문서 시험 모음입니다. HWPX tail·OOXML 부가 정보·Word 사본 검증을 수정한 현재 결과는 `results/`, 수정 전 결과는 `before-fix/`에 있습니다. 실제 개인정보를 사용하지 않았으며 이메일은 예약 도메인 `example.invalid`를 사용합니다.
@@ -44,7 +46,7 @@
 
 프로젝트 루트에서 실행합니다. 모델과 파일 도구가 준비된 Python 환경이 필요합니다.
 
-문서 화면과 부분 가림·전체 가림·직접 수정의 실제 연결은 `.venv/Scripts/python.exe -X utf8 test/check_visual_review.py`로 점검합니다. 가상 이력서 DOCX와 발표자료 PPTX를 실제 A 모델·인증 API로 검사하고 원본/사본 페이지, 저장 파일 내부, 사본 재생성 시 캐시 정리를 확인합니다. 결과는 로컬 전용 `qa/visual-review/api/`에 저장하며 핵심 결과는 위 검증 보고서에 기록합니다.
+문서 화면과 부분 가림·전체 가림·직접 수정의 실제 연결은 `.venv/Scripts/python.exe -X utf8 test/check_visual_review.py`로 점검합니다. 가상 이력서 DOCX와 발표자료 PPTX를 실제 atonlee/koelectra-ko-pii-ner·인증 API로 검사하고 원본/사본 페이지, 저장 파일 내부, 사본 재생성 시 캐시 정리를 확인합니다. 결과는 로컬 전용 `qa/visual-review/api/`에 저장하며 핵심 결과는 위 검증 보고서에 기록합니다.
 
 즉시 적용 미리보기의 원본 보존·반복 값의 위치별 변경·미설정/유지/취소·빈 내용과 영역 수정 우선 처리는 `node --test tests/document-draft.test.mjs tests/masking.test.mjs`로 확인합니다. 시험과 `docs/verification/file-draft-toggle-2026-10-25.md`는 공유 대상이며 화면 캡처는 `qa/visual-review/ui/`에만 보관합니다.
 
@@ -53,7 +55,7 @@
 .venv/Scripts/python.exe -X utf8 -u test/investigate_failures.py
 ```
 
-정규식 가짜 탐지기를 쓰지 않고 실제 A 모델과 ko-pii, 인증된 FastAPI 경로를 사용합니다. 파일 업로드, 상태 조회, 가림과 직접 수정, 사본 다운로드를 시험합니다. OS 파일 선택 창 조작은 시험하지 않습니다. `unique_names` 추가 시험은 내부 작업 관리자를 직접 호출합니다.
+정규식 가짜 탐지기를 쓰지 않고 실제 atonlee/koelectra-ko-pii-ner 모델과 ko-pii, 인증된 FastAPI 경로를 사용합니다. 파일 업로드, 상태 조회, 가림과 직접 수정, 사본 다운로드를 시험합니다. OS 파일 선택 창 조작은 시험하지 않습니다. `unique_names` 추가 시험은 내부 작업 관리자를 직접 호출합니다.
 
 이력서 DOCX·PDF의 기본 검출만 다시 확인하려면 `.venv/Scripts/python.exe -X utf8 test/check_resume_detection.py`를 실행합니다. 별도 정답 목록의 기본 개인정보 12곳을 비교하며 PDF는 OCR 중복을 빼고 글자층을 기준으로 집계합니다. 핵심 결과는 `resume-review/summary.json`, 상세 응답은 로컬 전용 `local-only/resume-detection/`에 저장합니다. 입력 수정이나 사본 생성은 하지 않습니다.
 
@@ -80,6 +82,8 @@
 HWP 수정 저장, 스캔 이미지의 OCR 성능, 암호화 문서, 전체 Office/한컴 버전 호환성, 대용량 처리 성능은 이번 결론에 포함하지 않습니다. HWPX는 패키지 구조와 텍스트 잔존을 확인했으며 한컴 화면에서 여는 시험은 수행하지 않았습니다.
 
 ## 지원 형식별 공유 문서 예시 12종
+
+기본 미리보기와 원본 배치의 차이·파일별 처리 방향은 [형식별 안내](../docs/features/file-preview-formats.md)에 정리했습니다. 실제 모델·API 확인 도구는 `check_format_previews.py`이며 상세 응답과 요약은 로컬 전용 `qa/format-previews/`에 저장합니다. 이 스크립트·`tests/test_format_previews.py`·`tests/file-preview.test.mjs`·핵심 안내는 공유 대상, 생성된 API 응답·스크린샷은 로컬 대상입니다.
 
 `format-document-examples/files/`에는 `.txt`, `.csv`, `.tsv`, `.docx`, `.pptx`, `.hwpx`, `.hwp`, `.xlsx`, `.pdf`, `.png`, `.jpg`, `.jpeg`가 하나씩 있습니다. 교육 메일·당첨자 명단·봉사자 배치표·추천서·운영 발표자료·공문·배송 명단·회의록·신청서·수령 확인서·현장 연락 명단으로 구성했습니다. 모두 가상 정보이며 기존 7개 예시와 별도입니다.
 

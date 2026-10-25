@@ -13,6 +13,7 @@ from pydantic import BaseModel, ConfigDict, StrictInt, StrictStr
 from starlette.concurrency import run_in_threadpool
 
 from backend.detection import Detector
+from backend.model_assets import MODEL_REPO
 from backend.file_review import FileReviewStore, MAX_UPLOAD
 from backend.documents import DocumentError, FileStore, MAX_BODY, MAX_TITLE, suggested_filename, validate_text
 
@@ -116,7 +117,7 @@ def create_app(port: int, *, desktop: Any = None, dist: Path | None = None) -> F
 
     @app.get('/')
     async def index():
-        boot = json.dumps({'token': token, 'desktop': desktop is not None, 'maxTitle': MAX_TITLE, 'maxBody': MAX_BODY}, ensure_ascii=True)
+        boot = json.dumps({'token': token, 'desktop': desktop is not None, 'maxTitle': MAX_TITLE, 'maxBody': MAX_BODY, 'model': MODEL_REPO}, ensure_ascii=True)
         html = (dist/'index.html').read_text(encoding='utf-8')
         # JSON is inert text in a meta attribute. No raw draft text is interpolated.
         import html as html_module

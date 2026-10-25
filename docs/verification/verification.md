@@ -1,6 +1,6 @@
 # 1차 구현 검증 기록
 
-> 이 문서는 모델 적용 전인 2026-10-16의 기록입니다. 2026-10-17 규칙 + A 모델 적용 후 검증은 [A 모델 적용 기록](../features/model-a-integration.md)을 참조하세요.
+> 이 문서는 모델 적용 전인 2026-10-16의 기록입니다. 2026-10-17 규칙 + atonlee/koelectra-ko-pii-ner 적용 후 검증은 [atonlee/koelectra-ko-pii-ner 적용 기록](../features/model-a-integration.md)을 참조하세요.
 
 확인일: 2026-10-16. 대상: 현재 Windows x64 PC. 구현은 `src`, `backend`, `run.py`이며 기존 HTML 시안과 구분한다.
 

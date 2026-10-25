@@ -1,4 +1,4 @@
-export const boot: {token: string; desktop: boolean; maxTitle: number; maxBody: number} = JSON.parse(
+export const boot: {token: string; desktop: boolean; maxTitle: number; maxBody: number; model?:string} = JSON.parse(
   document.querySelector('meta[name="app-boot"]')?.getAttribute('content') ||
   '{"token":"","desktop":false,"maxTitle":300,"maxBody":30000}',
 );

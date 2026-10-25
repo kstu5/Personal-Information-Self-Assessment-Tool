@@ -27,7 +27,9 @@ def test_security(client):
     assert c.get('/api/health',headers={'Host':'evil.example'}).status_code==403
     assert c.get('/api/health',headers={'Origin':'http://evil.example'}).status_code==403
     assert c.get('/',headers={'Sec-Fetch-Site':'cross-site'}).status_code==403
-    assert c.get('/').status_code==200
+    home=c.get('/')
+    assert home.status_code==200
+    assert 'atonlee/koelectra-ko-pii-ner' in home.text
     response=c.get('/api/health')
     assert response.headers['cache-control']=='no-store'
     assert 'access-control-allow-origin' not in response.headers
@@ -64,7 +66,7 @@ def test_real_detection_api(client):
     response=c.post('/api/check',json={'title':'연락처: 010-0000-0000','body':'😀 e\u0301 전화: 010-0000-0001\n다시: 010-0000-0001','revision':7})
     assert response.status_code==200,response.text
     result=response.json()
-    assert 'A 모델' in result['engine']
+    assert 'atonlee/koelectra-ko-pii-ner' in result['engine']
     pid = app.state.detector._process.pid
     assert result['revision']==7
     phones=[x for x in result['candidates'] if x['label']=='PHONE']

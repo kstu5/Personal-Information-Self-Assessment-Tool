@@ -1,6 +1,6 @@
 # Third party dependencies
 
-## Model A added 2026-10-17
+## atonlee/koelectra-ko-pii-ner added 2026-10-17
 
 `atonlee/koelectra-ko-pii-ner` is pinned at revision `1e75c01e707232401883cf364151bbe2e560c708`. Its model card declares Apache-2.0 for weights and attributes CC BY 4.0 training sources. The original model card is retained with the model. See [model attribution and integration details](features/model-a-integration.md#출처와-라이선스).
 

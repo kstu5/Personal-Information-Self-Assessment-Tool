@@ -1,6 +1,8 @@
 # 게시 전 개인정보 노출 자가진단 도구
 
-Windows PC에서 게시글의 제목과 본문을 검사하고, 개인정보 후보를 원문과 위험도별 목록으로 확인하는 도구입니다. React + TypeScript + Vite 화면과 Python + FastAPI를 사용합니다. **이름·주소는 A 모델(`atonlee/koelectra-ko-pii-ner`), 나머지 유형은 ko-pii 1.16.0 규칙이 검사합니다.** 기본 실행 방식은 pywebview와 WebView2를 사용하는 전용 프로그램 창입니다.
+Windows PC에서 게시글의 제목과 본문을 검사하고, 개인정보 후보를 원문과 위험도별 목록으로 확인하는 도구입니다. React + TypeScript + Vite 화면과 Python + FastAPI를 사용합니다. **이름·주소는 `atonlee/koelectra-ko-pii-ner`, 나머지 유형은 ko-pii 1.16.0 규칙이 검사합니다.** 기본 실행 방식은 pywebview와 WebView2를 사용하는 전용 프로그램 창입니다.
+
+파일 검사는 [형식별 미리보기 안내](docs/features/file-preview-formats.md)에 따라 Word·PPT 페이지, PDF·이미지, 표·셀, 읽기용 내용 화면을 제공합니다. HWP·HWPX의 내용 화면은 원래 한글 페이지 배치를 복원한 화면과 다릅니다.
 
 ## 한눈에 보기
 
@@ -8,7 +10,7 @@ Windows PC에서 게시글의 제목과 본문을 검사하고, 개인정보 후
 |---|---|
 | 목적 | 게시글이나 문서를 올리기 전에 이름·주소·전화번호 같은 개인정보가 들어 있는지 스스로 점검하고, 필요한 곳을 가려서 올릴 수 있게 돕습니다. |
 | 사용 방식 | 시작 화면에서 **게시글 검사**(제목·본문 입력) 또는 **파일 검사**(문서·이미지 열기)를 선택합니다. |
-| 탐지 | 이름·주소는 A 모델, 그 밖의 유형은 ko-pii 규칙입니다. 결과는 5단계 위험도(심각·높음·보통·낮음·참고)로 표시합니다. |
+| 탐지 | 이름·주소는 atonlee/koelectra-ko-pii-ner, 그 밖의 유형은 ko-pii 규칙입니다. 결과는 5단계 위험도(심각·높음·보통·낮음·참고)로 표시합니다. |
 | 개인정보 처리 | 모두 내 PC에서 처리합니다. 서버는 `127.0.0.1`에서만 실행하고 입력·결과를 외부로 보내지 않으며, 설치 후 검사에는 인터넷이 필요하지 않습니다. |
 | 기술 | React 19 + TypeScript + Vite 화면, Python + FastAPI 로컬 서버, pywebview(WebView2) 전용 창 |
 | 지원 환경 | Windows x64(검증), Linux x86_64(실험적, 브라우저 모드). macOS는 지원하지 않습니다. |
@@ -76,9 +78,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build/build_installe
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/setup.ps1
 ```
 
-Python이 명령으로 잡히지 않으면 `-Python`에 실행 파일 경로를 전달하세요. 이 스크립트는 `.venv` 가상환경을 만들고 모든 Python 패키지를 설치합니다. `.runtime/models/model-a`에 고정 버전의 A 모델을, `.runtime/file-tools`에 외부 도구(LibreOffice, Tesseract 등)를 준비합니다. 모델 파일은 SHA-256으로 확인합니다. 시스템 전체 패키지는 변경하지 않습니다. WebView2 런타임은 Windows 환경에 준비되어 있어야 합니다.
+Python이 명령으로 잡히지 않으면 `-Python`에 실행 파일 경로를 전달하세요. 이 스크립트는 `.venv` 가상환경을 만들고 모든 Python 패키지를 설치합니다. `.runtime/models/model-a`에 고정 버전의 atonlee/koelectra-ko-pii-ner 모델을, `.runtime/file-tools`에 외부 도구(LibreOffice, Tesseract 등)를 준비합니다. 모델 파일은 SHA-256으로 확인합니다. 시스템 전체 패키지는 변경하지 않습니다. WebView2 런타임은 Windows 환경에 준비되어 있어야 합니다.
 
-A 모델 가중치·토크나이저 등은 약 57 MB, 모델 실행 패키지는 현재 설치 기준 약 745 MB입니다. GPU는 사용하지 않습니다. 작성 PC에서 모델 준비는 약 4초, 준비 후 3만 자 검사는 약 2.6초였지만 다른 PC의 속도·메모리 여유는 별도 확인이 필요합니다. 실행 중인 구버전 창이 있다면 글을 저장하고 닫은 뒤 다시 실행하세요.
+atonlee/koelectra-ko-pii-ner 가중치·토크나이저 등은 약 57 MB, 모델 실행 패키지는 현재 설치 기준 약 745 MB입니다. GPU는 사용하지 않습니다. 작성 PC에서 모델 준비는 약 4초, 준비 후 3만 자 검사는 약 2.6초였지만 다른 PC의 속도·메모리 여유는 별도 확인이 필요합니다. 실행 중인 구버전 창이 있다면 글을 저장하고 닫은 뒤 다시 실행하세요.
 
 ### Linux에서 설치하기 (실험적)
 
@@ -113,7 +115,7 @@ python scripts/check/test_backend.py   # 자동 시험(pytest)
 npx pnpm run test:masking              # 마스킹 단위 시험
 ```
 
-설치 스크립트의 모델 단계(A 모델 내려받기)까지 끝났다면 모두 통과해야 합니다. 모델 단계를 마치지 못했다면 모델을 쓰는 시험 3개(`test_real_detection_api`, `test_pinned_assets_and_corruption`, `test_worker_reuse_timeout_recovery_and_close`)만 실패하고 나머지는 통과합니다(모델 없이 Linux에서 확인한 결과: 40개 통과, 3개 실패). 실패한 시험이 이 3개가 아니라면 설치를 다시 확인하세요.
+설치 스크립트의 모델 단계(atonlee/koelectra-ko-pii-ner 내려받기)까지 끝났다면 모두 통과해야 합니다. 모델 단계를 마치지 못했다면 모델을 쓰는 시험 3개(`test_real_detection_api`, `test_pinned_assets_and_corruption`, `test_worker_reuse_timeout_recovery_and_close`)만 실패하고 나머지는 통과합니다(모델 없이 Linux에서 확인한 결과: 40개 통과, 3개 실패). 실패한 시험이 이 3개가 아니라면 설치를 다시 확인하세요.
 
 ### 실행하기
 
@@ -151,7 +153,7 @@ npx pnpm run test:masking              # 마스킹 단위 시험
         ▼
  로컬 FastAPI 서버 (127.0.0.1, 자동 선택 포트)      run.py · backend/app.py
    ├─ /api/check ────────► 별도 프로세스에서 탐지      backend/detection.py · model_a.py
-   │                        ko-pii 규칙 + A 모델(이름·주소)
+   │                        ko-pii 규칙 + atonlee/koelectra-ko-pii-ner(이름·주소)
    ├─ /api/files/* ──────► .piipost 저장·불러오기       backend/documents.py · desktop.py
    └─ /api/documents/* ──► 파일 검사 작업 큐            backend/file_review.py
                               └─ 격리된 작업 프로세스    backend/file_worker.py · file_formats.py · image_ocr.py
@@ -166,7 +168,7 @@ npx pnpm run test:masking              # 마스킹 단위 시험
   |---|---|
   | `.venv/` | Python 가상환경 (모든 pip 패키지: FastAPI, ko-pii, pywebview, torch, transformers, PyMuPDF 등) |
   | `.runtime/file-tools/` | 외부 도구 (LibreOffice, Tesseract OCR 학습 데이터, hwplib jar) |
-  | `.runtime/models/model-a/` | 고정 버전의 A 모델 가중치 (SHA-256으로 검증) |
+  | `.runtime/models/model-a/` | 고정 버전의 atonlee/koelectra-ko-pii-ner 가중치 (SHA-256으로 검증) |
 
 API 계약, 입력 한도, 오류 처리, 수정할 때 주의할 점은 [상세 인수인계](docs/HANDOFF.md)의 6장에 있습니다.
 
@@ -232,7 +234,7 @@ npx pnpm run build
 | `run.py` | 서버·창 시작과 종료, Windows 중복 실행 방지 |
 | `backend/app.py` | API, 세션 토큰, Host·Origin 제한, 정적 화면 제공 |
 | `backend/detection.py` | ko-pii 호출, 원문 구간 검증, UTF-16 위치 변환, 검사 프로세스 |
-| `backend/model_a.py`, `backend/model_assets.py` | A 모델 추론, 고정 모델 파일 검증(불러오기 경로에 네트워크 접근 없음) |
+| `backend/model_a.py`, `backend/model_assets.py` | atonlee/koelectra-ko-pii-ner 추론, 고정 모델 파일 검증(불러오기 경로에 네트워크 접근 없음) |
 | `backend/documents.py` | `.piipost` 형식, 파일명 규칙, 파싱, 원자적 저장, 외부 수정 감지 |
 | `backend/file_review.py` | 파일 검사 작업 큐 (클라이언트에는 불투명 id만 전달) |
 | `backend/file_worker.py`, `file_formats.py`, `image_ocr.py` | 격리된 작업 프로세스, 형식별 어댑터, 로컬 OCR |
@@ -248,7 +250,7 @@ npx pnpm run build
 | [docs/features/file-inspection.md](docs/features/file-inspection.md) | 파일 검사 지원 형식·한도·도구 |
 | [docs/features/file-tools.md](docs/features/file-tools.md) | 파일 검사용 외부 도구의 받는 곳·놓을 위치·확인 방법 |
 | [docs/features/masking-ui-integration.md](docs/features/masking-ui-integration.md) | 가림 화면 적용 기록 |
-| [docs/features/model-a-integration.md](docs/features/model-a-integration.md) | A 모델 적용과 출처·라이선스 |
+| [docs/features/model-a-integration.md](docs/features/model-a-integration.md) | atonlee/koelectra-ko-pii-ner 적용과 출처·라이선스 |
 | [docs/design/](docs/design/) | 화면 설계와 수정 사본 제공 정책 |
 | [docs/verification/](docs/verification/) | 1차 구현 검증과 초기 탐지 평가 |
 | [docs/DEPENDENCIES.md](docs/DEPENDENCIES.md) | 의존성 라이선스 메타데이터 |

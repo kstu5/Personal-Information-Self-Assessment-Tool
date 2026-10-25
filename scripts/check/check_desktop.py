@@ -47,7 +47,7 @@ def main():
                 r=c.post('/api/files/open',json={});r.raise_for_status();assert r.json()['document']['body']=='한글 😀\n다음 줄'
                 r=c.post('/api/check',json={'title':'이름: 김하늘','body':'주소: 서울특별시 마포구 예시로 12, 302호','revision':1})
                 r.raise_for_status()
-                assert 'A 모델' in r.json()['engine']
+                assert 'atonlee/koelectra-ko-pii-ner' in r.json()['engine']
                 assert any(x['label']=='PERSON' and x['text']=='김하늘' for x in r.json()['candidates'])
                 assert any(x['label']=='ADDRESS' and x['text'].endswith('302호') for x in r.json()['candidates'])
                 model_pid=app.state.detector._process.pid
