@@ -97,7 +97,7 @@ def report():
         ('hwplib 1.1.11', (DEST/'hwplib-1.1.11.jar').exists(), 'HWP reading', '.runtime/file-tools/hwplib-1.1.11.jar'),
         ('Java (11 or later required; version not checked)', bool(java), 'HWP reading', 'java on PATH'),
     ]
-    print('File inspection tools (setup guide: docs/features/file-tools.md):')
+    print('File inspection tools (setup guide: README.md):')
     for name, ok, feature, where in checks:
         print(f'  [OK]      {name}' if ok else f'  [MISSING] {name} -> {feature} unavailable; expected at {where}')
     if all(ok for _, ok, _, _ in checks): print('All file inspection tools are ready.')
