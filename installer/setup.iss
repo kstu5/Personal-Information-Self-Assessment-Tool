@@ -50,20 +50,62 @@ Type: filesandordirs; Name: "{app}\.runtime"
 Type: files; Name: "{app}\install.log"
 
 [Run]
-Filename: "{app}\python\pythonw.exe"; Parameters: "-X utf8 ""{app}\run.py"""; WorkingDir: "{app}"; Description: "지금 실행하기"; Flags: nowait postinstall skipifsilent; Check: not IsVerificationInstall
+Filename: "{app}\python\pythonw.exe"; Parameters: "-X utf8 ""{app}\run.py"""; WorkingDir: "{app}"; Description: "지금 실행하기"; Flags: nowait postinstall skipifsilent; Check: CanLaunchApp
 
 [Code]
 const
   StepCount = 6;
+  MaxInstallPathLength = 100;
 
 var
   StepNames: array[0..5] of String;
   StepLabels: array[0..5] of String;
+  FailedStep: Integer;
 
 // Test the same EXE in a separate directory without changing an existing install.
 function IsVerificationInstall(): Boolean;
 begin
   Result := ExpandConstant('{param:VerifyInstall|0}') = '1';
+end;
+
+function CanLaunchApp(): Boolean;
+begin
+  Result := (not IsVerificationInstall()) and (FailedStep = 0);
+end;
+
+function InstallPathError(): String;
+begin
+  Result := '';
+  if Length(ExpandFileName(ExpandConstant('{app}'))) > MaxInstallPathLength then
+    Result := '설치 경로가 너무 깁니다. 폴더 전체 경로를 100자 이하로 선택해 주세요.' + #13#10 +
+      '기본 설치 위치 또는 더 짧은 경로를 사용하면 실행 구성요소의 설치 오류를 피할 수 있습니다.';
+end;
+
+function NextButtonClick(CurPageID: Integer): Boolean;
+var
+  Error: String;
+begin
+  Result := True;
+  if CurPageID <> wpSelectDir then Exit;
+  Error := InstallPathError();
+  if Error = '' then Exit;
+  SuppressibleMsgBox(Error, mbError, MB_OK, IDOK);
+  Result := False;
+end;
+
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+begin
+  Result := InstallPathError();
+end;
+
+function GetCustomSetupExitCode(): Integer;
+begin
+  Result := FailedStep;
+end;
+
+function ShouldSkipPage(PageID: Integer): Boolean;
+begin
+  Result := (FailedStep <> 0) and (PageID = wpFinished);
 end;
 
 procedure InitSteps();
@@ -100,11 +142,14 @@ begin
     WizardForm.ProgressGauge.Position := I;
     if not RunStep(I) then
     begin
-      MsgBox('설치 중 문제가 생겼습니다: ' + StepLabels[I] + #13#10#13#10 +
+      FailedStep := 10 + I;
+      Log('Runtime preparation failed: ' + StepNames[I]);
+      WizardForm.StatusLabel.Caption := '설치를 완료하지 못했습니다.';
+      SuppressibleMsgBox('설치 중 문제가 생겼습니다: ' + StepLabels[I] + #13#10#13#10 +
         '인터넷 연결을 확인한 뒤 설치 프로그램을 다시 실행해 주세요.' + #13#10 +
         '문제가 계속되면 아래 파일을 개발자에게 보내 주세요.' + #13#10 +
-        ExpandConstant('{app}\install.log'), mbError, MB_OK);
-      RaiseException('install step failed: ' + StepNames[I]);
+        ExpandConstant('{app}\install.log'), mbError, MB_OK, IDOK);
+      Exit;
     end;
   end;
   WizardForm.ProgressGauge.Position := StepCount;

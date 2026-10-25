@@ -8,6 +8,7 @@ if (-not $Components) { $Components = Join-Path $PSScriptRoot 'components.json' 
 $ProgressPreference = 'SilentlyContinue'
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $AppDir = (Resolve-Path -LiteralPath $AppDir).Path
+if ($AppDir.Length -gt 100) { throw '설치 경로가 너무 깁니다. 폴더 전체 경로를 100자 이하로 선택해 주세요.' }
 $log = Join-Path $AppDir 'install.log'
 $c = Get-Content -LiteralPath $Components -Raw -Encoding UTF8 | ConvertFrom-Json
 $py = Join-Path $AppDir 'python\python.exe'
