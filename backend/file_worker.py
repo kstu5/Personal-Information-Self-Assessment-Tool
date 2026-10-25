@@ -15,6 +15,12 @@ def main():
     job=Path(sys.argv[1]); spec=json.loads(job.read_text(encoding='utf-8'))
     work=job.parent; response=work/spec['response']
     try:
+        if spec['action']=='preview':
+            from backend.document_preview import create_preview
+            preview_work=work/spec['previewDirectory'];preview_work.mkdir(exist_ok=True)
+            manifest=create_preview(work/spec['source'],preview_work,spec['parts'],spec['candidates'])
+            response.write_text(json.dumps({'ok':True,'manifest':manifest},ensure_ascii=False),encoding='utf-8')
+            return
         doc=Document(work/spec['source'],work).load()
         if spec['action']=='export':
             output=work/spec['output']

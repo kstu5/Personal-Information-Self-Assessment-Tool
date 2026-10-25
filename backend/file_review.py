@@ -91,6 +91,7 @@ class FileReviewStore:
                  'hash':hashlib.sha256(data).hexdigest(),'original':Path(original).resolve() if original else None,
                  'revision':secrets.token_urlsafe(12),'cancel':threading.Event(),'process':None,'manifest':None,'candidates':[],
                  'output':None,'exportResult':None,'error':None}
+            job['previews']={}
             self.jobs[ident]=job
             self.pool.submit(self._inspect,job)
             return self._public(job)
@@ -245,6 +246,64 @@ class FileReviewStore:
         a=next((a for a in manifest['assets'] if a['id']==asset_id),None)
         if not a:raise DocumentError('미리보기 위치를 찾을 수 없습니다.')
         return job['work']/('verification' if output else '')/a['file']
+
+    def preview(self,ident,output=False,retry=False):
+        job=self._job(ident);key='output' if output else 'source'
+        self._check_cancel(job)
+        self._unchanged(job)
+        if output and job.get('exportResult'):self.output(ident)
+        with self.lock:
+            version=(job.get('exportResult') or {}).get('sha256') if output else job['hash']
+            cached=job['previews'].get(key)
+            if cached and cached['version']==version and not (retry and cached['state']=='error'):
+                return self._public_preview(cached)
+            if not version or job['state']!='ready':raise DocumentError('검사와 사본 생성이 끝난 뒤 문서 화면을 열어 주세요.')
+            if not job['manifest'] or job['manifest']['kind'] not in {'.docx','.pptx'}:
+                raise DocumentError('이 형식은 텍스트·셀 또는 이미지 화면에서 확인해 주세요.')
+            self._unchanged(job)
+            if cached and cached['state'] in {'ready','error'}:
+                previous=(job['work']/cached['directory']).resolve()
+                if previous.is_relative_to(job['work'].resolve()) and previous.name.startswith('preview-'):
+                    shutil.rmtree(previous,ignore_errors=True)
+            directory='preview-'+key+'-'+secrets.token_hex(6)
+            cached={'state':'queued','version':version,'directory':directory,'pages':[],'links':{},'warnings':[]}
+            job['previews'][key]=cached
+            self.pool.submit(self._preview,job,key,cached)
+            return self._public_preview(cached)
+
+    @staticmethod
+    def _public_preview(value):
+        return {k:copy.deepcopy(v) for k,v in value.items() if k not in {'directory'}} | {
+            'pages':[{k:v for k,v in p.items() if k!='file'} for p in value['pages']]}
+
+    def _preview(self,job,key,cached):
+        try:
+            self._check_cancel(job);self._unchanged(job)
+            output=key=='output'
+            if output and (job.get('exportResult') or {}).get('sha256')!=cached['version']:return
+            if output:self.output(job['id'])
+            manifest=job.get('outputManifest') if output else job['manifest']
+            candidates=job['exportResult']['candidates'] if output else job['candidates']
+            with self.lock:cached['state']='rendering'
+            value=self._adapter(job,'preview',source=job['output'] if output else job['source'],
+                previewDirectory=cached['directory'],parts=manifest['parts'],candidates=candidates)
+            self._check_cancel(job);self._unchanged(job)
+            if output:self.output(job['id'])
+            with self.lock:
+                if job['previews'].get(key) is cached:cached.update(value)
+        except Exception as e:
+            with self.lock:
+                cached.update(state='error',message=str(e) if isinstance(e,DocumentError) else '문서 화면을 만들지 못했습니다. 텍스트 · 위치에서 계속 검토해 주세요.')
+            if job['cancel'].is_set():self._cleanup(job)
+
+    def preview_asset(self,ident,page,output=False):
+        job=self._job(ident);self._check_cancel(job);self._unchanged(job)
+        if output:self.output(ident)
+        value=job['previews'].get('output' if output else 'source')
+        version=(job.get('exportResult') or {}).get('sha256') if output else job['hash']
+        if not value or value['state']!='ready' or value['version']!=version or type(page) is not int or not 0<=page<len(value['pages']):
+            raise DocumentError('문서 화면이 아직 준비되지 않았거나 바뀌었습니다. 다시 열어 주세요.')
+        return job['work']/value['directory']/value['pages'][page]['file']
 
     def export(self,ident,revision,choices,manual,text_edits=None):
         job=self._job(ident)

@@ -45,6 +45,11 @@ class ExportRequest(DocumentRef):
     textEdits: dict[str, StrictStr] = {}
 
 
+class PreviewRequest(DocumentRef):
+    output: bool = False
+    retry: bool = False
+
+
 def create_app(port: int, *, desktop: Any = None, dist: Path | None = None) -> FastAPI:
     store, detector = FileStore(), Detector()
     documents = FileReviewStore(detector)
@@ -190,6 +195,14 @@ def create_app(port: int, *, desktop: Any = None, dist: Path | None = None) -> F
     @app.post('/api/documents/export')
     async def export_document(payload: ExportRequest):
         return documents.export(payload.id, payload.revision, payload.choices, payload.regions, payload.textEdits)
+
+    @app.post('/api/documents/preview')
+    async def preview_document(payload: PreviewRequest):
+        return documents.preview(payload.id,payload.output,payload.retry)
+
+    @app.get('/api/documents/{ident}/preview/{page}')
+    async def preview_document_page(ident: str,page: int,output: bool=False):
+        return FileResponse(documents.preview_asset(ident,page,output),media_type='image/png')
 
     @app.post('/api/documents/cancel')
     async def cancel_document(payload: DocumentRef):
