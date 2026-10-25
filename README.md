@@ -92,3 +92,10 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build/build_installe
 결과는 `installer/out/`의 설치 EXE·예시 ZIP·`SHA256SUMS.txt`입니다. 설치 파일은 Git 소스에 넣지 않고 GitHub Releases에 배포합니다. 설치판에 포함하는 프런트엔드 구성요소의 라이선스는 설치 폴더의 `THIRD-PARTY-NOTICES.txt`, 내려받는 라이브러리·모델·외부 도구의 라이선스는 각 배포물의 고지를 확인하세요.
 
 공개 저장소에는 `src/`, `backend/`, 필수 설치·실행 스크립트와 의존성 설정, 사용 안내, 예시 12종을 관리합니다. 개발 메모·보고서·추가 시험 문서·자동 시험 코드·상세 결과·개인 자료는 공개 목록에서 제외합니다. 실행 환경·빌드 결과도 Git에서 제외합니다.
+
+## 개발 및 AI 활용
+
+- 프로젝트 기획·관리·배포: [kstu5](https://github.com/kstu5)
+- AI 개발 보조: **ChatGPT(OpenAI)**를 Codex 환경에서 활용하여 코드 작성·수정, 테스트, 문제 분석, UI 개선과 문서 정리를 진행했습니다.
+
+배포 프로그램의 개인정보 검사는 위에 안내한 로컬 탐지 모델·규칙·OCR로 수행합니다.
