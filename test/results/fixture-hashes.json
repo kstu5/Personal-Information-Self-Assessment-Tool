@@ -1,0 +1,23 @@
+{
+  "hancom_notes.hwpx": "2cbcb507b13956b3b8b9130aa133607be2caa506857c83a636742b143477147a",
+  "pdf_annotation.pdf": "cffc05abf613d943d78538bc51a212f1f137abf48a0b8f8665696dc584c84c77",
+  "pdf_text.pdf": "558566bfa4e6ad4a8ab461b81a48e2590886e3b7b69aac9d025926791547ce76",
+  "pptx_attributes.pptx": "6d9519965ddf0768cde43df2faf8ddd73997601009d9db738c38d54d7338bbd7",
+  "pptx_body.pptx": "2e89c5b846f1d4088979610cde9f7a957a2f6c10d77a0c884c07bbfe6da3c1c6",
+  "table_quoted.csv": "20a8cac1a05d0676b7f26179d5524f87c397f99980f8446ea841b773aa9af5b7",
+  "table_tabs.tsv": "5bcd07df4663898d88bb1a9b00de03e652d1041361f808c39ee9f7db70d11b1a",
+  "text_cp949.txt": "717b1e93876c2c4a5b62975db08f24074bb02fbcbdad3532bf7eac062a4acb35",
+  "text_negative.txt": "4f7e404fe75dbfc944950e8810b1719add5b240a5193096ed7d8fee75378137b",
+  "text_utf8.txt": "89aaa3cca10e312fb2f78a7b7d77f0ffaff1cdcfe75e3038f4342b2be164eaae",
+  "text_variants.txt": "2034712f814b8a69f53dd2594bda7344d7d928cd742c455875ec5c07a4cb339b",
+  "word_attributes.docx": "c75bf9c74002d6602b2b661ee3386270172fa844e3095614273ac88678f39693",
+  "word_footnotes.docx": "50c810ef36a3e576fb91c99dc55741e7b95a68f7bdeac078b086a76e4cd9093f",
+  "word_linebreak.docx": "036f8ed110f94f429afd211aed49b3329073e475e15981ceab36622c5e03c7e3",
+  "word_link.docx": "d7407e5e3c9aa072ab9f5451eb755f9ac845e4bb6ebe7b5dc8a51e3d41c751ee",
+  "word_repeated.docx": "044aae3806235fcfdaa97f206989d9b95ce6cf945876220838ac118fb61a99a6",
+  "word_structures.docx": "3cdd45738d424e856a1291822216f75c8216a1d0197195cf3c76416dfd7695f9",
+  "xlsx_blocked.xlsx": "2cb19842900893eefb78d55c73032aaafcade389bd80f7da7f1033edd8ab9f39",
+  "xlsx_formulas.xlsx": "2ef5200ebb96d9b1423e25205a3e1e34313e6277fd702cb5fe62ea83536595e0",
+  "xlsx_sheet_names.xlsx": "a5d85744ad1d50a6aa9c406926b911c14d15a29bf9a2a24dfcce0724322d69e8",
+  "xlsx_values.xlsx": "1a1eabb17f8dca50de601da2b0b80e9a90edda977dc69927f1f69cc6fa028b39"
+}

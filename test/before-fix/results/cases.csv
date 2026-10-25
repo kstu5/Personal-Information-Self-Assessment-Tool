@@ -1,0 +1,22 @@
+﻿file,expected,covered,copy,independent_audit
+text_utf8.txt,4,4,제공,알려진 원문 잔존 없음
+text_cp949.txt,4,4,제공,알려진 원문 잔존 없음
+table_quoted.csv,3,3,제공,알려진 원문 잔존 없음
+table_tabs.tsv,3,3,제공,알려진 원문 잔존 없음
+text_variants.txt,6,6,제공,알려진 원문 잔존 없음
+text_negative.txt,0,0,제공,알려진 원문 잔존 없음
+word_structures.docx,14,14,실패,저장한 사본의 수정 위치를 재확인하지 못했습니다. 파일을 제공하지 않습니다.
+word_repeated.docx,3,3,제공,알려진 원문 잔존 없음
+word_linebreak.docx,2,2,실패,저장한 사본의 수정 위치를 재확인하지 못했습니다. 파일을 제공하지 않습니다.
+word_link.docx,3,3,제공,알려진 원문 잔존 없음
+word_attributes.docx,3,0,제공,원문 잔존
+word_footnotes.docx,2,2,제공,알려진 원문 잔존 없음
+xlsx_values.xlsx,7,7,제공,알려진 원문 잔존 없음
+xlsx_formulas.xlsx,5,5,제공,알려진 원문 잔존 없음
+xlsx_blocked.xlsx,0,0,예정된 지원 제한,차단 확인
+xlsx_sheet_names.xlsx,9,9,실패,시트 이름은 중복되지 않는 1~31자여야 하며 []:*?/\ 문자를 사용할 수 없습니다.
+pptx_body.pptx,7,7,제공,알려진 원문 잔존 없음
+pptx_attributes.pptx,2,0,제공,원문 잔존
+hancom_notes.hwpx,8,7,제공,원문 잔존
+pdf_text.pdf,4,4,제공,알려진 원문 잔존 없음
+pdf_annotation.pdf,2,0,예정된 지원 제한,차단 확인

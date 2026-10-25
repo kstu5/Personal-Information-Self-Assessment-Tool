@@ -1,0 +1,553 @@
+{
+  "data_policy": "All identities and contact details are synthetic; example.invalid is a reserved domain. No real person is represented.",
+  "cases": [
+    {
+      "file": "text_utf8.txt",
+      "title": "일반 텍스트와 인코딩",
+      "checks": [
+        {
+          "text": "김민수",
+          "label": "PERSON",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "010-0000-1234",
+          "label": "PHONE",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "sample@example.invalid",
+          "label": "EMAIL",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "서울특별시 마포구 예시로 12, 302호",
+          "label": "ADDRESS",
+          "count": 1,
+          "scope": null
+        }
+      ]
+    },
+    {
+      "file": "text_cp949.txt",
+      "title": "일반 텍스트와 인코딩",
+      "checks": [
+        {
+          "text": "김민수",
+          "label": "PERSON",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "010-0000-1234",
+          "label": "PHONE",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "sample@example.invalid",
+          "label": "EMAIL",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "서울특별시 마포구 예시로 12, 302호",
+          "label": "ADDRESS",
+          "count": 1,
+          "scope": null
+        }
+      ]
+    },
+    {
+      "file": "table_quoted.csv",
+      "title": "구분자와 줄바꿈이 있는 표",
+      "checks": [
+        {
+          "text": "김민수",
+          "label": "PERSON",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "010-0000-1234",
+          "label": "PHONE",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "sample@example.invalid",
+          "label": "EMAIL",
+          "count": 1,
+          "scope": null
+        }
+      ],
+      "public": [
+        "쉼표, 줄\n바꿈",
+        "유지할 공개 문구"
+      ]
+    },
+    {
+      "file": "table_tabs.tsv",
+      "title": "구분자와 줄바꿈이 있는 표",
+      "checks": [
+        {
+          "text": "김민수",
+          "label": "PERSON",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "010-0000-1234",
+          "label": "PHONE",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "sample@example.invalid",
+          "label": "EMAIL",
+          "count": 1,
+          "scope": null
+        }
+      ],
+      "public": [
+        "쉼표, 줄\n바꿈",
+        "유지할 공개 문구"
+      ]
+    },
+    {
+      "file": "text_variants.txt",
+      "title": "띄어쓰기와 구분자 변형",
+      "checks": [
+        {
+          "text": "김 민 수",
+          "label": "PERSON",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "010 0000 1234",
+          "label": "PHONE",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "010.0000.5678",
+          "label": "PHONE",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "sample @ example.invalid",
+          "label": "EMAIL",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "서울특별시 마포구 예시로 12",
+          "label": "ADDRESS",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "302호",
+          "label": "ADDRESS",
+          "count": 1,
+          "scope": null
+        }
+      ],
+      "category": "challenge"
+    },
+    {
+      "file": "text_negative.txt",
+      "title": "개인정보 없는 대조 문서",
+      "checks": [],
+      "negative": true
+    },
+    {
+      "file": "word_structures.docx",
+      "title": "분리 서식 본문 표 머리말 꼬리말 메모 변경기록 속성",
+      "checks": [
+        {
+          "text": "김민수",
+          "label": "PERSON",
+          "count": 4,
+          "scope": null
+        },
+        {
+          "text": "010-0000-1234",
+          "label": "PHONE",
+          "count": 2,
+          "scope": null
+        },
+        {
+          "text": "sample@example.invalid",
+          "label": "EMAIL",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "서울특별시 마포구 예시로 12, 302호",
+          "label": "ADDRESS",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "이지은",
+          "label": "PERSON",
+          "count": 4,
+          "scope": null
+        },
+        {
+          "text": "010-0000-5678",
+          "label": "PHONE",
+          "count": 2,
+          "scope": null
+        }
+      ]
+    },
+    {
+      "file": "word_repeated.docx",
+      "title": "이모지 반복 위치 선택 수정",
+      "checks": [
+        {
+          "text": "김민수",
+          "label": "PERSON",
+          "count": 2,
+          "scope": null
+        },
+        {
+          "text": "010-0000-1234",
+          "label": "PHONE",
+          "count": 1,
+          "scope": null
+        }
+      ],
+      "actions": true,
+      "public": [
+        "공개 문구는 그대로 남아야 합니다."
+      ]
+    },
+    {
+      "file": "word_linebreak.docx",
+      "title": "문단 내부 강제 줄바꿈",
+      "checks": [
+        {
+          "text": "김민수",
+          "label": "PERSON",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "010-0000-1234",
+          "label": "PHONE",
+          "count": 1,
+          "scope": null
+        }
+      ],
+      "category": "challenge"
+    },
+    {
+      "file": "word_link.docx",
+      "title": "표시 글자와 실제 링크 주소",
+      "checks": [
+        {
+          "text": "sample@example.invalid",
+          "label": "EMAIL",
+          "count": 2,
+          "scope": null
+        },
+        {
+          "text": "김민수",
+          "label": "PERSON",
+          "count": 1,
+          "scope": null
+        }
+      ]
+    },
+    {
+      "file": "word_attributes.docx",
+      "title": "툴팁 문서 변수 대체 텍스트",
+      "checks": [
+        {
+          "text": "010-0000-1234",
+          "label": "PHONE",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "김민수",
+          "label": "PERSON",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "이지은",
+          "label": "PERSON",
+          "count": 1,
+          "scope": null
+        }
+      ],
+      "category": "coverage"
+    },
+    {
+      "file": "word_footnotes.docx",
+      "title": "각주에만 있는 개인정보",
+      "checks": [
+        {
+          "text": "김민수",
+          "label": "PERSON",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "010-0000-1234",
+          "label": "PHONE",
+          "count": 1,
+          "scope": null
+        }
+      ]
+    },
+    {
+      "file": "xlsx_values.xlsx",
+      "title": "숨김 시트 숨김 행 일반 메모",
+      "checks": [
+        {
+          "text": "김민수",
+          "label": "PERSON",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "010-0000-1234",
+          "label": "PHONE",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "sample@example.invalid",
+          "label": "EMAIL",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "이지은",
+          "label": "PERSON",
+          "count": 2,
+          "scope": null
+        },
+        {
+          "text": "010-0000-5678",
+          "label": "PHONE",
+          "count": 2,
+          "scope": null
+        }
+      ]
+    },
+    {
+      "file": "xlsx_formulas.xlsx",
+      "title": "이름 전화번호 파생 수식과 값 고정",
+      "checks": [
+        {
+          "text": "김민수",
+          "label": "PERSON",
+          "count": 2,
+          "scope": null
+        },
+        {
+          "text": "010-0000-1234",
+          "label": "PHONE",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "010-0000-5678",
+          "label": "PHONE",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "sample@example.invalid",
+          "label": "EMAIL",
+          "count": 1,
+          "scope": null
+        }
+      ]
+    },
+    {
+      "file": "xlsx_blocked.xlsx",
+      "title": "미지원 유효성 검사 차단",
+      "checks": [],
+      "expected_block": true
+    },
+    {
+      "file": "xlsx_sheet_names.xlsx",
+      "title": "개인 이름 시트의 일괄 전체 가림",
+      "checks": [
+        {
+          "text": "김민수",
+          "label": "PERSON",
+          "count": 2,
+          "scope": null
+        },
+        {
+          "text": "010-0000-1234",
+          "label": "PHONE",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "sample@example.invalid",
+          "label": "EMAIL",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "이지은",
+          "label": "PERSON",
+          "count": 3,
+          "scope": null
+        },
+        {
+          "text": "010-0000-5678",
+          "label": "PHONE",
+          "count": 2,
+          "scope": null
+        }
+      ],
+      "category": "challenge"
+    },
+    {
+      "file": "pptx_body.pptx",
+      "title": "슬라이드 본문 숨김 슬라이드 발표자 노트",
+      "checks": [
+        {
+          "text": "김민수",
+          "label": "PERSON",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "010-0000-1234",
+          "label": "PHONE",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "sample@example.invalid",
+          "label": "EMAIL",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "이지은",
+          "label": "PERSON",
+          "count": 2,
+          "scope": null
+        },
+        {
+          "text": "010-0000-5678",
+          "label": "PHONE",
+          "count": 2,
+          "scope": null
+        }
+      ]
+    },
+    {
+      "file": "pptx_attributes.pptx",
+      "title": "도형 대체 텍스트와 이름",
+      "checks": [
+        {
+          "text": "010-0000-9999",
+          "label": "PHONE",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "박서윤",
+          "label": "PERSON",
+          "count": 1,
+          "scope": null
+        }
+      ],
+      "category": "coverage"
+    },
+    {
+      "file": "hancom_notes.hwpx",
+      "title": "HWPX 본문 메모 작성자와 미리보기 제거",
+      "checks": [
+        {
+          "text": "김민수",
+          "label": "PERSON",
+          "count": 2,
+          "scope": null
+        },
+        {
+          "text": "이지은",
+          "label": "PERSON",
+          "count": 3,
+          "scope": null
+        },
+        {
+          "text": "010-0000-1234",
+          "label": "PHONE",
+          "count": 3,
+          "scope": null
+        }
+      ],
+      "template_source": "test/templates/hwpx_synthetic_base.hwpx"
+    },
+    {
+      "file": "pdf_text.pdf",
+      "title": "검색 가능한 PDF 글자층",
+      "checks": [
+        {
+          "text": "김민수",
+          "label": "PERSON",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "010-0000-1234",
+          "label": "PHONE",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "sample@example.invalid",
+          "label": "EMAIL",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "서울특별시 마포구 예시로 12, 302호",
+          "label": "ADDRESS",
+          "count": 1,
+          "scope": null
+        }
+      ]
+    },
+    {
+      "file": "pdf_annotation.pdf",
+      "title": "PDF 주석에만 있는 개인정보",
+      "checks": [
+        {
+          "text": "김민수",
+          "label": "PERSON",
+          "count": 1,
+          "scope": null
+        },
+        {
+          "text": "010-0000-1234",
+          "label": "PHONE",
+          "count": 1,
+          "scope": null
+        }
+      ],
+      "expected_block": true,
+      "category": "coverage"
+    }
+  ]
+}

@@ -7,6 +7,9 @@
 # The Windows launcher is UTF-16; never convert it.
 *.vbs -text
 
+# Audit fixtures are hashed as bytes, including CSV/TSV line endings and CP949.
+test/fixtures/** -text
+
 # Binary files (documents, images, archives, model weights).
 *.docx binary
 *.pptx binary

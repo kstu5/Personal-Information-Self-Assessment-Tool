@@ -1,0 +1,24 @@
+{
+  "files": 21,
+  "expectedBlockedFiles": 2,
+  "expectedBlocksObserved": 2,
+  "readyFiles": 19,
+  "exportedFiles": 16,
+  "originalsUnchanged": 21,
+  "targetCheckpoints": 89,
+  "fullyDetectedCheckpoints": 83,
+  "partiallyDetectedCheckpoints": 0,
+  "notExtractedCheckpoints": 6,
+  "filesWithIndependentResiduals": [
+    "word_attributes.docx",
+    "pptx_attributes.pptx",
+    "hancom_notes.hwpx"
+  ],
+  "zeroRescanButResiduals": [
+    "word_attributes.docx",
+    "pptx_attributes.pptx",
+    "hancom_notes.hwpx"
+  ],
+  "harnessErrors": [],
+  "overextendedExamples": 1
+}

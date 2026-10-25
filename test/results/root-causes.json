@@ -1,0 +1,21 @@
+[
+  {
+    "file": "word_structures.docx",
+    "adapterExportSucceeded": true,
+    "verificationTargetMismatches": []
+  },
+  {
+    "file": "word_linebreak.docx",
+    "adapterExportSucceeded": true,
+    "verificationTargetMismatches": []
+  },
+  {
+    "file": "hancom_notes__auto_full.hwpx",
+    "missedXMLTails": []
+  },
+  {
+    "file": "xlsx_sheet_names.xlsx",
+    "uniqueSheetNameWorkaround": true,
+    "error": null
+  }
+]
