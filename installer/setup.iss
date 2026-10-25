@@ -10,6 +10,8 @@ AppId={{6F0B2C7E-3A5D-4E88-9B44-0D1C5E7A9F21}
 AppName=개인정보 자가진단 도구
 AppVersion={#AppVersion}
 AppPublisher=개인정보 자가진단 도구
+AppSupportURL=https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/issues
+AppUpdatesURL=https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases
 DefaultDirName={localappdata}\Programs\BeforePost
 DefaultGroupName=개인정보 자가진단 도구
 PrivilegesRequired=lowest
@@ -23,6 +25,9 @@ SolidCompression=yes
 WizardStyle=modern
 UninstallDisplayName=개인정보 자가진단 도구
 CloseApplications=no
+SetupLogging=yes
+Uninstallable=not IsVerificationInstall
+CreateUninstallRegKey=not IsVerificationInstall
 
 [Languages]
 Name: "korean"; MessagesFile: "compiler:Languages\Korean.isl"
@@ -34,17 +39,16 @@ Name: "desktopicon"; Description: "바탕 화면에 바로가기 만들기"; Fla
 Source: "{#StageDir}\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs ignoreversion
 
 [Icons]
-Name: "{autoprograms}\개인정보 자가진단 도구"; Filename: "{app}\python\pythonw.exe"; Parameters: "-X utf8 ""{app}\run.py"""; WorkingDir: "{app}"
-Name: "{autodesktop}\개인정보 자가진단 도구"; Filename: "{app}\python\pythonw.exe"; Parameters: "-X utf8 ""{app}\run.py"""; WorkingDir: "{app}"; Tasks: desktopicon
+Name: "{autoprograms}\개인정보 자가진단 도구"; Filename: "{app}\python\pythonw.exe"; Parameters: "-X utf8 ""{app}\run.py"""; WorkingDir: "{app}"; Check: not IsVerificationInstall
+Name: "{autodesktop}\개인정보 자가진단 도구"; Filename: "{app}\python\pythonw.exe"; Parameters: "-X utf8 ""{app}\run.py"""; WorkingDir: "{app}"; Tasks: desktopicon; Check: not IsVerificationInstall
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}\python"
 Type: filesandordirs; Name: "{app}\.runtime"
 Type: files; Name: "{app}\install.log"
-Type: filesandordirs; Name: "{app}"
 
 [Run]
-Filename: "{app}\python\pythonw.exe"; Parameters: "-X utf8 ""{app}\run.py"""; WorkingDir: "{app}"; Description: "지금 실행하기"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\python\pythonw.exe"; Parameters: "-X utf8 ""{app}\run.py"""; WorkingDir: "{app}"; Description: "지금 실행하기"; Flags: nowait postinstall skipifsilent; Check: not IsVerificationInstall
 
 [Code]
 const
@@ -53,6 +57,12 @@ const
 var
   StepNames: array[0..5] of String;
   StepLabels: array[0..5] of String;
+
+// Test the same EXE in a separate directory without changing an existing install.
+function IsVerificationInstall(): Boolean;
+begin
+  Result := ExpandConstant('{param:VerifyInstall|0}') = '1';
+end;
 
 procedure InitSteps();
 begin

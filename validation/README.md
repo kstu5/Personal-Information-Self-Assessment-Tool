@@ -2,6 +2,8 @@
 
 사용자가 앱에 직접 넣을 가상 공유 문서는 [examples 안내](../examples/README.md)로 분리했습니다. 이 폴더는 문서 처리의 재현 도구·회귀 입력·핵심 결과를 보관합니다. 자동 단위·API 시험은 루트 `tests/`입니다. 아래 명령의 `validation/`은 프로젝트 루트 기준, `_build/`·`qa/` 표기는 이 폴더 기준입니다.
 
+완성 Windows 설치판의 검사는 `scripts/check/check_installed.py`로 수행합니다. 핵심 절차는 [설치판 안내](../installer/README.md), 설치 단계 로그·설치 사본은 로컬 전용 `local-only/outputs/installer-runtime-check/`·`installer-exe-check/`에 보관합니다. 배포 EXE·해시·개인 경로를 제외한 검사 요약은 Git 소스에 넣지 않고 Releases 첨부 파일로 배포합니다.
+
 ## GitHub 공유 대상과 로컬 보관 대상
 
 | 구분 | 경로와 내용 |

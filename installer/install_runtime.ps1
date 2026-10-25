@@ -16,6 +16,25 @@ $cache = Join-Path $AppDir '.runtime\download-cache'
 
 function Log($m) { Add-Content -LiteralPath $log -Value ('[{0}] [{1}] {2}' -f (Get-Date -Format 'HH:mm:ss'), $Step, $m) -Encoding UTF8 }
 
+function Assert-AppChild([string]$Path) {
+    $full = [IO.Path]::GetFullPath($Path)
+    $boundary = [IO.Path]::GetFullPath($AppDir).TrimEnd('\') + '\'
+    if (-not $full.StartsWith($boundary, [StringComparison]::OrdinalIgnoreCase)) { throw 'Runtime path must stay inside the application directory.' }
+    $cursor = $full
+    while ($cursor -and $cursor.Length -gt $boundary.Length) {
+        if ((Test-Path -LiteralPath $cursor) -and ((Get-Item -LiteralPath $cursor -Force).Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+            throw "Runtime path must not cross a junction or symbolic link: $cursor"
+        }
+        $cursor = Split-Path -Parent $cursor
+    }
+    return $full
+}
+
+function Remove-AppDirectory([string]$Path) {
+    $full = Assert-AppChild $Path
+    if (Test-Path -LiteralPath $full) { Remove-Item -LiteralPath $full -Recurse -Force }
+}
+
 function Get-Verified($item, $name) {
     New-Item -ItemType Directory -Force $cache | Out-Null
     $dest = Join-Path $cache $name
@@ -23,7 +42,7 @@ function Get-Verified($item, $name) {
     for ($try = 1; $try -le 3; $try++) {
         try {
             Log "download $($item.url) (try $try)"
-            Invoke-WebRequest -Uri $item.url -OutFile $dest -UseBasicParsing
+            Invoke-WebRequest -Uri $item.url -OutFile $dest -UseBasicParsing -TimeoutSec 180
             $actual = (Get-FileHash -LiteralPath $dest -Algorithm SHA256).Hash
             if ($actual -ne $item.sha256) { throw "체크섬이 다릅니다 ($name): 기대 $($item.sha256), 실제 $actual" }
             return $dest
@@ -52,7 +71,7 @@ try {
         'python' {
             $zip = Get-Verified $c.python 'python-embed.zip'
             $dir = Join-Path $AppDir 'python'
-            if (Test-Path -LiteralPath $dir) { Remove-Item -LiteralPath $dir -Recurse -Force }
+            Remove-AppDirectory $dir
             Expand-Archive -LiteralPath $zip -DestinationPath $dir -Force
             # 임베디드 Python은 ._pth가 있으면 환경변수·현재 폴더를 무시하므로 필요한 경로를 직접 적는다.
             $pth = Get-ChildItem -LiteralPath $dir -Filter 'python*._pth' | Select-Object -First 1
@@ -90,23 +109,25 @@ try {
         'jre' {
             $zip = Get-Verified $c.jre 'jre.zip'
             $tmp = Join-Path $cache 'jre-extract'
-            if (Test-Path -LiteralPath $tmp) { Remove-Item -LiteralPath $tmp -Recurse -Force }
+            Remove-AppDirectory $tmp
             Expand-Archive -LiteralPath $zip -DestinationPath $tmp -Force
             $root = Get-ChildItem -LiteralPath $tmp -Directory | Select-Object -First 1
             $dest = Join-Path $tools 'jre'
-            if (Test-Path -LiteralPath $dest) { Remove-Item -LiteralPath $dest -Recurse -Force }
+            Remove-AppDirectory $dest
             New-Item -ItemType Directory -Force $tools | Out-Null
-            Move-Item -LiteralPath $root.FullName -Destination $dest
-            Remove-Item -LiteralPath $tmp -Recurse -Force
+            $jreSource = Assert-AppChild $root.FullName
+            $jreTarget = Assert-AppChild $dest
+            Move-Item -LiteralPath $jreSource -Destination $jreTarget
+            Remove-AppDirectory $tmp
             if (-not (Test-Path -LiteralPath (Join-Path $dest 'bin\java.exe'))) { throw 'Java 실행 파일을 찾지 못했습니다.' }
         }
         'libreoffice' {
             $msi = Get-Verified $c.libreoffice 'libreoffice.msi'
             $dest = Join-Path $tools 'libreoffice'
-            if (Test-Path -LiteralPath $dest) { Remove-Item -LiteralPath $dest -Recurse -Force }
+            Remove-AppDirectory $dest
             New-Item -ItemType Directory -Force $tools | Out-Null
             # 관리 설치(/a)는 파일만 풀어 놓으며 레지스트리·시스템 폴더를 바꾸지 않는다.
-            $p = Start-Process msiexec.exe -ArgumentList '/a', "`"$msi`"", '/qn', "TARGETDIR=`"$dest`"" -Wait -PassThru
+            $p = Start-Process msiexec.exe -ArgumentList '/a', "`"$msi`"", '/qn', "TARGETDIR=`"$dest`"" -WindowStyle Hidden -Wait -PassThru
             if ($p.ExitCode -ne 0 -or -not (Test-Path -LiteralPath (Join-Path $dest 'program\soffice.com'))) {
                 throw "LibreOffice를 풀지 못했습니다 (종료 코드 $($p.ExitCode))."
             }
@@ -117,15 +138,15 @@ try {
             if ((Test-Path $key) -or (Test-Path $userKey)) { Log 'WebView2 already installed'; break }
             New-Item -ItemType Directory -Force $cache | Out-Null
             $exe = Join-Path $cache 'MicrosoftEdgeWebview2Setup.exe'
-            Invoke-WebRequest -Uri $c.webview2.url -OutFile $exe -UseBasicParsing
+            Invoke-WebRequest -Uri $c.webview2.url -OutFile $exe -UseBasicParsing -TimeoutSec 180
             $sig = Get-AuthenticodeSignature -LiteralPath $exe
             if ($sig.Status -ne 'Valid' -or $sig.SignerCertificate.Subject -notmatch 'O=Microsoft Corporation') { throw 'WebView2 설치 파일의 서명을 확인하지 못했습니다.' }
-            $p = Start-Process $exe -ArgumentList '/silent', '/install' -Wait -PassThru
+            $p = Start-Process $exe -ArgumentList '/silent', '/install' -WindowStyle Hidden -Wait -PassThru
             if ($p.ExitCode -ne 0) { throw "WebView2 설치에 실패했습니다 (종료 코드 $($p.ExitCode))." }
         }
     }
     # 마지막 단계까지 성공했을 때만 내려받은 설치 파일을 지운다(중간에 실패하면 재시도에 재사용).
-    if ($Step -eq 'webview2') { Remove-Item -LiteralPath $cache -Recurse -Force -ErrorAction SilentlyContinue }
+    if ($Step -eq 'webview2') { Remove-AppDirectory $cache }
     Log 'ok'
 } catch {
     Log "ERROR: $_"

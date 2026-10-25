@@ -34,7 +34,7 @@ def main():
                 raise RuntimeError(f"Model integrity check failed: {asset['file']}")
             staged.replace(target)
     verify_model()
-    print('A model ready: pinned revision and all file hashes verified.')
+    print(f"{manifest['repo']} ready: pinned revision and all file hashes verified.")
 
 
 if __name__ == '__main__':

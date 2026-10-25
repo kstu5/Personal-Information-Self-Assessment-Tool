@@ -29,7 +29,21 @@
 
 파일당 최대 **20MB**, 한 번에 **8개**를 엽니다. 큰 문서·복잡한 개체·암호화·지원하지 않는 구조는 검토나 저장이 제한될 수 있습니다. HWP/HWPX 내용 화면은 원래 쪽 배치·표·글꼴을 재현하지 않습니다. Word·PowerPoint 페이지 밖의 속성·메모·노트도 텍스트·위치 보기에서 검토해야 합니다. [형식별 상세 안내](docs/features/file-preview-formats.md), [수정 사본 정책](docs/design/file-review-copy-policy.md)을 참고하세요.
 
-## Windows에서 소스로 실행
+## Windows 설치 파일 다운로드
+
+일반 사용자는 소스를 내려받거나 설치 프로그램을 직접 만들 필요가 없습니다.
+
+**[Windows x64 설치 파일 다운로드 — v0.1.0](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.0/PrivacySelfAssessmentTool-Setup-0.1.0.exe)** · [최신 Release와 검사 결과](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/latest)
+
+1. EXE를 실행하고 인터넷에 연결한 상태로 설치가 끝날 때까지 기다립니다.
+2. 시작 메뉴의 **개인정보 자가진단 도구**를 실행합니다.
+3. 가상 예시로 먼저 검사·미리보기·수정 사본을 확인합니다.
+
+이 파일은 약 2.1MB의 **온라인 설치판**입니다. Python·탐지 라이브러리·모델·OCR·Java·LibreOffice 등을 설치 중 내려받으므로 전체 설치 용량은 더 큽니다. Python·Node.js·JDK의 별도 준비나 직접 빌드는 필요하지 않습니다. 설치 후 검사는 PC 안에서 수행합니다. 설치 실패 시 설치 폴더의 `install.log`와 실패 단계를 확인하세요.
+
+Release의 `SHA256SUMS.txt`로 다운로드 파일을 대조할 수 있습니다. 설치 파일에는 코드 서명을 적용하지 않았습니다. GitHub의 **Source code ZIP/TAR는 개발용 소스**이며 설치 프로그램과 다릅니다. 설치·제작·검증의 자세한 내용은 [설치판 안내](installer/README.md)를 확인하세요.
+
+## 개발자용 Windows 소스 실행
 
 Python 3.12, Node.js와 npm, Microsoft Edge WebView2가 필요합니다. HWP 읽기에는 Java 11 이상, DOCX/PPTX 페이지와 XLSX 재계산에는 LibreOffice가 필요합니다. 기본 준비 도구는 OCR 데이터·hwplib·탐지 모델을 준비하지만 새 PC에 LibreOffice와 Java를 모두 설치해 주는 것은 아닙니다. 경로·설치 방법은 [파일 도구 안내](docs/features/file-tools.md)를 확인하세요.
 
@@ -42,7 +56,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start.ps1
 
 다음부터는 루트의 **`개인정보 자가진단 도구 실행.vbs`**를 더블클릭해 실행할 수 있습니다. `.venv/`, `.runtime/`, `dist/`는 설치로 생성되는 로컬 폴더입니다. 실행 환경을 GitHub에 올릴 필요는 없습니다. 모델을 처음 불러오거나 문서를 페이지로 변환할 때 시간이 걸릴 수 있습니다.
 
-Windows 설치 프로그램의 소스와 제작 방법은 [installer 안내](installer/README.md)에 있습니다. 설치판은 실행 환경·Java·LibreOffice 등을 내려받는 별도 경로입니다. 이 저장소에 완성 설치 파일을 포함하지 않으며, 현재 PC 검증과 새 PC의 설치 완료 검증을 구분합니다. Linux용 `setup.sh`·`start.sh`도 있으나 Windows 전용 창과 동일한 파일 미리보기를 검증한 지원 환경은 아닙니다.
+완성 설치 EXE는 GitHub Releases에 배포하고 Git 소스에는 제작 코드만 관리합니다. 제작·설치 검증은 [installer 안내](installer/README.md)를 확인하세요. 별도 폴더의 설치 환경 확인과 모든 새 PC 구성의 호환성 검증은 구분합니다. Linux용 `setup.sh`·`start.sh`도 있으나 Windows 전용 창과 동일한 파일 미리보기를 검증한 지원 환경은 아닙니다.
 
 ## 예시로 확인하기
 

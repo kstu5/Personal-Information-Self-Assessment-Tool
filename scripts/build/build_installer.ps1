@@ -38,6 +38,16 @@ try {
     Copy-Item backend\*.py, backend\HwpText.java (Join-Path $stage 'backend')
     Copy-Item scripts\prepare\prepare_file_tools.py, scripts\prepare\prepare_model_a.py (Join-Path $stage 'scripts\prepare')
     Copy-Item installer\install_runtime.ps1, installer\components.json (Join-Path $stage 'installer')
+    Copy-Item installer\USER_GUIDE.txt (Join-Path $stage '사용안내.txt')
+    $notices = @('Frontend components included in this installer: React and React DOM.', '')
+    foreach ($package in 'react', 'react-dom', 'scheduler') {
+        $licensePath = Join-Path $root "node_modules\$package\LICENSE"
+        if (Test-Path -LiteralPath $licensePath) {
+            $notices += "--- $package ---"
+            $notices += Get-Content -LiteralPath $licensePath -Raw -Encoding UTF8
+        } elseif ($package -ne 'scheduler') { throw "Required frontend license missing: $package" }
+    }
+    $notices | Set-Content -LiteralPath (Join-Path $stage 'THIRD-PARTY-NOTICES.txt') -Encoding UTF8
 
     & javac --release 11 -encoding UTF-8 -cp $jar -d (Join-Path $stage 'backend') backend\HwpText.java
     if ($LASTEXITCODE -ne 0) { throw 'HwpText.java compile failed.' }
@@ -47,5 +57,9 @@ try {
     if (-not $iscc) { throw 'Inno Setup 6 (ISCC.exe) not found.' }
     & $iscc "/DAppVersion=$version" "/DStageDir=$stage" installer\setup.iss
     if ($LASTEXITCODE -ne 0) { throw 'Inno Setup compile failed.' }
-    Get-ChildItem installer\out\*.exe | ForEach-Object { '{0}  {1:N1} MB' -f $_.FullName, ($_.Length / 1MB) }
+    $artifact = Join-Path $root "installer\out\PrivacySelfAssessmentTool-Setup-$version.exe"
+    if (-not (Test-Path -LiteralPath $artifact)) { throw 'Expected installer output is missing.' }
+    $digest = (Get-FileHash -LiteralPath $artifact -Algorithm SHA256).Hash.ToLowerInvariant()
+    "$digest  $([IO.Path]::GetFileName($artifact))" | Set-Content -LiteralPath (Join-Path $root 'installer\out\SHA256SUMS.txt') -Encoding ASCII
+    '{0}  {1:N1} MB' -f $artifact, ((Get-Item -LiteralPath $artifact).Length / 1MB)
 } finally { Pop-Location }
