@@ -61,7 +61,7 @@ def main():
     add('word_repeated.docx','이모지 반복 위치 선택 수정',[check(NAME,'PERSON',2),check(PHONE,'PHONE')],actions=True,public=['공개 문구는 그대로 남아야 합니다.'])
 
     d=word_base('줄바꿈 입력 예시');p=d.add_paragraph('성명: 김');p.add_run().add_break();p.add_run('민수');p=d.add_paragraph('전화: 010-');p.add_run().add_break();p.add_run('0000-1234');d.save(F/'word_linebreak.docx')
-    add('word_linebreak.docx','문단 내부 강제 줄바꿈',[check(NAME,'PERSON'),check(PHONE,'PHONE')],category='challenge')
+    add('word_linebreak.docx','문단 내부 강제 줄바꿈',[check(NAME,'PERSON'),check(PHONE,'PHONE')],category='challenge',allow_line_breaks=True)
 
     d=word_base('링크가 있는 연락 안내');p=d.add_paragraph('문의 ')
     hl=OxmlElement('w:hyperlink');hl.set(qn('r:id'),d.part.relate_to('mailto:'+MAIL,RT.HYPERLINK,is_external=True));r=OxmlElement('w:r');t=OxmlElement('w:t');t.text=MAIL;r.append(t);hl.append(r);p._p.append(hl)

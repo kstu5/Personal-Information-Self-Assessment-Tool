@@ -62,8 +62,11 @@ def checkpoints(case,job):
             if gt.get('scope') and gt['scope'] not in p['location']:continue
             # PDF OCR duplicates the underlying native text. Prefer native text in scoring.
             if case['file'].endswith('.pdf') and 'PDF 글자층' not in p['location']:continue
-            for match in re.finditer(re.escape(gt['text']),p['text']):
-                a,b=u16(p['text'][:match.start()]),u16(p['text'][:match.end()]);locations.append(p['location'])
+            projection=[i for i,ch in enumerate(p['text']) if not case.get('allow_line_breaks') or ch not in '\r\n']
+            searchable=''.join(p['text'][i] for i in projection)
+            for match in re.finditer(re.escape(gt['text']),searchable):
+                left,right=projection[match.start()],projection[match.end()-1]+1
+                a,b=u16(p['text'][:left]),u16(p['text'][:right]);locations.append(p['location'])
                 overlap=[c for c in cs if c['part']==p['id'] and c['start']<b and c['end']>a]
                 covered=[c for c in overlap if c['label']==gt['label'] and c['start']<=a and c['end']>=b]
                 example={'location':p['location'],'expected':gt['text'],'candidates':[{'text':c['text'],'label':c['label'],'start':c['start'],'end':c['end']} for c in overlap]}
@@ -76,7 +79,12 @@ def checkpoints(case,job):
     return out
 
 def main():
-    manifest=json.loads((HERE/'manifest.json').read_text('utf-8'));results=HERE/'results';results.mkdir(exist_ok=True);reviewed=HERE/'reviewed';reviewed.mkdir(exist_ok=True)
+    import argparse
+    parser=argparse.ArgumentParser();parser.add_argument('--output-dir',type=Path)
+    args=parser.parse_args()
+    output=args.output_dir.resolve() if args.output_dir else HERE
+    if not output.is_relative_to(HERE):raise ValueError('Audit output must stay within the test directory')
+    manifest=json.loads((HERE/'manifest.json').read_text('utf-8'));results=output/'results';results.mkdir(parents=True,exist_ok=True);reviewed=output/'reviewed';reviewed.mkdir(parents=True,exist_ok=True)
     commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
     env={'commit':commit,'python':sys.version,'platform':platform.platform(),'testedAt':'2026-10-25 Asia/Seoul','packages':{}}
     for p in ('torch','transformers','ko-pii','lxml','openpyxl','tesserocr','PyMuPDF','fastapi','python-docx'):

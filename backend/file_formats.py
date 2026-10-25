@@ -62,7 +62,11 @@ def text_slots(node):
 
 def paragraph_slots(para):
     for node in para.iter():
-        if local_name(node) not in {'t', 'delText', 'instrText'}:
+        ln = local_name(node)
+        word_separator = ln in {'br', 'cr', 'tab'} and E.QName(node).namespace in {
+            'http://schemas.openxmlformats.org/wordprocessingml/2006/main',
+            'http://purl.oclc.org/ooxml/wordprocessingml/main'}
+        if ln not in {'t', 'delText', 'instrText'} and not word_separator:
             continue
         ancestors = list(node.iterancestors())
         owner = next((a for a in ancestors if local_name(a) == 'p'), None)
@@ -71,7 +75,29 @@ def paragraph_slots(para):
         # A text element containing another text element is traversed only once.
         if any(local_name(a) in {'t', 'delText', 'instrText'} for a in ancestors[:ancestors.index(para)]):
             continue
-        yield from text_slots(node)
+        if word_separator:
+            yield node, 'separator'
+        else:
+            yield from text_slots(node)
+
+
+def slot_value(node, field):
+    if field == 'separator':
+        return '\t' if local_name(node) == 'tab' else '\n' if local_name(node) in {'br', 'cr'} else node.text or ''
+    return getattr(node, field) or ''
+
+
+def set_slot_value(node, field, value):
+    if field == 'separator':
+        if value == slot_value(node, field):
+            return
+        # Word breaks and tabs live inside a run, where a text element is also
+        # valid. Converting in place keeps node indices stable for later edits.
+        node.tag = '{' + E.QName(node).namespace + '}t'
+        node.attrib.clear()
+        node.text = value
+    else:
+        setattr(node, field, value)
 
 
 def xml_anchor(tree, node):
@@ -208,7 +234,7 @@ class Document:
                     slots = list(paragraph_slots(para))
                     if not slots: continue
                     selected.update(e for e, field in slots)
-                    text = ''.join(getattr(e, field) or '' for e, field in slots)
+                    text = ''.join(slot_value(e, field) for e, field in slots)
                     deleted = any(local_name(a) == 'del' for e, field in slots for a in e.iterancestors()) or any(local_name(e) in {'deleteBegin', 'deleteEnd'} for e, field in slots)
                     memo = any(local_name(a) in {'memo','memogroup'} for a in para.iterancestors()) or any(local_name(e)=='fieldBegin' and e.get('type')=='MEMO' for e in para.iter())
                     self.add(text, f'{label} · 문단 {node_ids[para]+1}'+(' · 삭제된 변경 기록' if deleted else ' · 메모' if memo else ''),
@@ -220,7 +246,7 @@ class Document:
                     if e not in selected and e.text and (ln in {'t', 'delText', 'instrText', 'text','meta','metaTag'} or ln=='stringParam' and e.get('name')=='Author' or string_property):
                         slots = list(text_slots(e))
                         selected.update(node for node, field in slots)
-                        self.add(''.join(getattr(node, field) or '' for node, field in slots), f'{label} · {ln}',
+                        self.add(''.join(slot_value(node, field) for node, field in slots), f'{label} · {ln}',
                                  {'kind': 'xml', 'name': name, 'anchor': xml_anchor(tree, e), 'mode': 'element',
                                   'slots': [{'node': node_ids[node], 'field': field} for node, field in slots]})
                     for attr, value in e.attrib.items():
@@ -445,7 +471,7 @@ class Document:
         if target['kind'] == 'attr':
             return node.get(target['attr'])
         slots = paragraph_slots(node) if target['mode'] == 'paragraph' else text_slots(node)
-        return ''.join(getattr(e, field) or '' for e, field in slots)
+        return ''.join(slot_value(e, field) for e, field in slots)
 
     def edit_part(self, part, new):
         t=part['target']; kind=t['kind']
@@ -460,7 +486,7 @@ class Document:
                 edits=[(a,b,new[c:d]) for op,a,b,c,d in difflib.SequenceMatcher(a=old,b=new,autojunk=False).get_opcodes() if op!='equal']
                 offsets=[]; pos=0
                 for slot in t['slots']:
-                    value=getattr(nodes[slot['node']],slot['field']) or ''
+                    value=slot_value(nodes[slot['node']],slot['field'])
                     offsets.append((slot,pos,pos+len(value)));pos+=len(value)
                 for a,b,value in reversed(edits):
                     first=True
@@ -468,13 +494,13 @@ class Document:
                         if a==b:
                             if not(start<=a<=end): continue
                         elif end<=a or start>=b: continue
-                        node=nodes[slot['node']];field=slot['field'];text=getattr(node,field) or ''
+                        node=nodes[slot['node']];field=slot['field'];text=slot_value(node,field)
                         lo=max(a-start,0);hi=min(b-start,len(text))
-                        setattr(node,field,text[:lo]+(value if first else '')+text[hi:])
-                        owner=node if field=='text' else node.getparent()
+                        set_slot_value(node,field,text[:lo]+(value if first else '')+text[hi:])
+                        owner=node if field in {'text','separator'} else node.getparent()
                         owner.set('{http://www.w3.org/XML/1998/namespace}space','preserve');first=False
                         if a==b: break
-                if ''.join(getattr(nodes[s['node']],s['field']) or '' for s in t['slots'])!=new: raise FormatError('문서의 글자 위치가 일치하지 않아 저장하지 않았습니다.')
+                if ''.join(slot_value(nodes[s['node']],s['field']) for s in t['slots'])!=new: raise FormatError('문서의 글자 위치가 일치하지 않아 저장하지 않았습니다.')
         elif kind=='property': setattr(self.workbook.properties,t['key'],new)
         elif kind=='header': getattr(getattr(self.workbook.worksheets[t['sheet']],t['field']),t['side']).text=new
         elif kind=='sheet_name':

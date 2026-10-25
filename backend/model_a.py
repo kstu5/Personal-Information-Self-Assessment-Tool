@@ -101,5 +101,7 @@ class HybridDetector:
     def detect(self, text: str):
         from ko_pii import detect_all
         from ko_pii.integrations.hybrid import MergeMode, merge_detections
-        return merge_detections(detect_all(text), self.model.detect(text),
-                                mode=MergeMode.ROLE_SPLIT, role_split_labels=DELEGATED_LABELS)
+        from backend.detection_context import refine_detections
+        merged = merge_detections(detect_all(text), self.model.detect(text),
+                                  mode=MergeMode.ROLE_SPLIT, role_split_labels=DELEGATED_LABELS)
+        return refine_detections(text, merged)

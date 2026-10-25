@@ -2,6 +2,7 @@ archive/
 _build/*
 !_build/*.mjs
 !_build/*.py
+!_build/*.java
 qa/
 __pycache__/
 
@@ -28,3 +29,11 @@ before-fix/results/*
 
 additional-review/*
 !additional-review/REPORT.md
+
+resume-review/*
+!resume-review/REPORT.md
+!resume-review/summary.json
+
+context-review/*
+!context-review/REPORT.md
+!context-review/summary.json

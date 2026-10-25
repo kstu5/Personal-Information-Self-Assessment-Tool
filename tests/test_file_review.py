@@ -341,3 +341,35 @@ def test_empty_xml_edits_are_verified_but_missing_or_wrong_fields_are_rejected(t
     with pytest.raises(FormatError):verify_text_edits(original,saved,edits)
     saved=Document(out,tmp_path).load();node=next(e for e in saved.trees['word/document.xml'].iter() if e.tag.endswith('}t'));node.text='변조된 내용'
     with pytest.raises(FormatError):verify_text_edits(original,saved,edits)
+
+
+@pytest.mark.parametrize('new_text', ['😀 담당 [삭제]\n직책 과장\t연락 확인', '😀 담당 [삭제] 직책 과장 연락 확인'])
+def test_word_line_breaks_and_tabs_keep_context_and_support_direct_replacement(tmp_path,new_text):
+    from docx import Document as Word
+    from backend.file_formats import verify_text_edits
+    source=tmp_path/'separators.docx';w=Word()
+    w.add_paragraph('😀 담당 윤지후\n직책 과장\t연락 확인')
+    w.add_paragraph('공개 문구 유지');w.save(source)
+    original=Document(source,tmp_path,verify=True).load()
+    part=next(p for p in original.parts if p['text'].startswith('😀'))
+    second=next(p for p in original.parts if p['text']=='공개 문구 유지')
+    assert part['text']=='😀 담당 윤지후\n직책 과장\t연락 확인'
+    edits={part['id']:new_text,second['id']:'공개 문구 보존'}
+    out=tmp_path/'out.docx';original.export(out,edits,[])
+    reread=Document(out,tmp_path,verify=True).load();verify_text_edits(original,reread,edits)
+    result=Word(out)
+    assert result.paragraphs[0].text==new_text and result.paragraphs[1].text=='공개 문구 보존'
+
+
+def test_line_break_audit_maps_normalized_gold_back_to_exact_source_offsets():
+    import importlib.util
+    spec=importlib.util.spec_from_file_location('audit_scoring',ROOT/'test/run_document_audit.py')
+    mod=importlib.util.module_from_spec(spec);spec.loader.exec_module(mod)
+    text='😀 성명 김\n민수';start=len('😀 성명 '.encode('utf-16-le'))//2
+    job={'manifest':{'parts':[{'id':'p0','text':text,'location':'본문'}]},
+         'candidates':[{'part':'p0','text':'김\n민수','label':'PERSON','start':start,'end':start+4}]}
+    case={'file':'break.docx','allow_line_breaks':True,'checks':[{'text':'김민수','label':'PERSON','count':1}]}
+    assert mod.checkpoints(case,job)[0]['fullyDetected']==1
+    job['candidates'][0]['end']=start+1
+    assert mod.checkpoints(case,job)[0]['fullyDetected']==0
+    assert mod.checkpoints(case,job)[0]['partiallyDetected']==1

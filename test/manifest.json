@@ -247,7 +247,8 @@
           "scope": null
         }
       ],
-      "category": "challenge"
+      "category": "challenge",
+      "allow_line_breaks": true
     },
     {
       "file": "word_link.docx",
