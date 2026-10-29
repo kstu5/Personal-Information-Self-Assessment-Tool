@@ -10,6 +10,7 @@ import {OfficePreview,CandidateOverlay} from './OfficePreview';
 import {draftChunks,draftStatus,fileReplacement as replacement} from './documentDraft';
 import {previewView,readingParts,contentPage} from './filePreview';
 import {revealFileEditor} from './fileEditor';
+import {createFileDropHandlers} from './fileDrop';
 import './file-review.css';
 import './document-preview.css';
 
@@ -122,8 +123,9 @@ export function FileReview({active,onWorkChange}:{active:boolean;onWorkChange:(w
   const [jobs,setJobs]=useState<DocumentJob[]>([]),[id,setId]=useState(''),[states,setStates]=useState<Record<string,FileSelection>>({});
   const [error,setError]=useState(''),[notice,setNotice]=useState(''),[uploading,setUploading]=useState(false),[removeId,setRemoveId]=useState('');
   const [partEdit,setPartEdit]=useState<{id:string;text:string}|null>(null);
+  const [fileDragging,setFileDragging]=useState(false);
   const [previews,setPreviews]=useState<Record<string,DocumentPreview>>({});
-  const input=useRef<HTMLInputElement>(null),polling=useRef(false),jobsRef=useRef(jobs);jobsRef.current=jobs;
+  const input=useRef<HTMLInputElement>(null),polling=useRef(false),uploadLock=useRef(false),jobsRef=useRef(jobs);jobsRef.current=jobs;
   const job=jobs.find(j=>j.id===id),s=states[id]||EMPTY_SELECTION;
   const working=!!job&&ACTIVE.has(job.state),locked=working||!job||job.state!=='ready'||!!job.manifest?.blockers.length;
   function selectState(patch:Partial<FileSelection>){setStates(old=>({...old,[id]:{...(old[id]||EMPTY_SELECTION),...patch}}));}
@@ -158,17 +160,40 @@ export function FileReview({active,onWorkChange}:{active:boolean;onWorkChange:(w
       }}catch(e){if(!stop)setError(message(e));}finally{polling.current=false;}}
     const timer=setInterval(()=>void poll(),1000);return()=>{stop=true;clearInterval(timer);};
   },[]);
-  async function addFiles(files?:FileList|null){setError('');setNotice('');setUploading(true);
+  useEffect(()=>{
+    if(!active)return;
+    const drop=createFileDropHandlers({
+      canAdd:()=>!uploadLock.current&&jobsRef.current.length<8,
+      onFiles:files=>{void addFiles(files);},onHover:setFileDragging,
+      onBlocked:()=>setError(uploadLock.current?'파일 추가가 끝난 뒤 다시 놓아 주세요.':'파일 8개까지 열 수 있습니다. 일부 파일을 제거하고 추가해 주세요.'),
+      onEmpty:()=>setError('파일을 읽지 못했습니다. 폴더 대신 검사할 파일을 놓거나 파일 추가 버튼을 사용해 주세요.'),
+    });
+    const escape=(event:KeyboardEvent)=>{if(event.key==='Escape')drop.reset();};
+    window.addEventListener('dragenter',drop.enter);window.addEventListener('dragover',drop.over);
+    window.addEventListener('dragleave',drop.leave);window.addEventListener('drop',drop.drop);
+    window.addEventListener('dragend',drop.reset);window.addEventListener('blur',drop.reset);window.addEventListener('keydown',escape);
+    return()=>{
+      window.removeEventListener('dragenter',drop.enter);window.removeEventListener('dragover',drop.over);
+      window.removeEventListener('dragleave',drop.leave);window.removeEventListener('drop',drop.drop);
+      window.removeEventListener('dragend',drop.reset);window.removeEventListener('blur',drop.reset);window.removeEventListener('keydown',escape);drop.reset();
+    };
+  },[active]);
+  async function addFiles(files?:FileList|File[]|null){
+    if(uploadLock.current){setError('파일 추가가 끝난 뒤 다시 시도해 주세요.');return;}
+    if(jobsRef.current.length>=8){setError('파일 8개까지 열 수 있습니다. 일부 파일을 제거하고 추가해 주세요.');return;}
+    uploadLock.current=true;setError('');setNotice('');setUploading(true);
     try{
       const added:DocumentJob[]=[];
       if(boot.desktop&&!files){const result=await api<{files:DocumentJob[]}>('documents/open',{});for(const j of result.files){if(j.state==='rejected')setError(`${j.name}: ${j.error}`);else added.push(j);}}
       else if(files){for(const f of Array.from(files)){
         if(jobsRef.current.length+added.length>=8){setError('파일 8개까지 열 수 있습니다. 일부 파일을 제거하고 추가해 주세요.');break;}
+        if(!accept.split(',').some(ext=>f.name.toLowerCase().endsWith(ext))){setError(`${f.name}: 지원하지 않는 형식입니다. 폴더 대신 지원하는 문서·이미지 파일을 추가해 주세요.`);continue;}
+        if(!f.size){setError(`${f.name}: 비어 있는 파일은 검사할 수 없습니다.`);continue;}
         if(f.size>20*1024*1024){setError(`${f.name}: 20MB를 넘는 파일입니다.`);continue;}
         try{const r=await binary(`upload?filename=${encodeURIComponent(f.name)}`,{method:'POST',headers:{'Content-Type':'application/octet-stream'},body:f});added.push(await r.json());}catch(e){setError(`${f.name}: ${message(e)}`);}
       }}
       if(added.length){setJobs(old=>[...old,...added]);setId(added[0].id);}
-    }catch(e){setError(message(e));}finally{setUploading(false);if(input.current)input.current.value='';}
+    }catch(e){setError(message(e));}finally{uploadLock.current=false;setUploading(false);if(input.current)input.current.value='';}
   }
   async function remove(){if(!removeId)return;try{await api('documents/remove',{id:removeId});setJobs(old=>old.filter(j=>j.id!==removeId));if(id===removeId)setId(jobs.find(j=>j.id!==removeId)?.id||'');setStates(old=>{const n={...old};delete n[removeId];return n;});}catch(e){setError(message(e));}finally{setRemoveId('');}}
   function choose(c:FileCandidate,editor=false){const part=job?.manifest?.parts.find(p=>p.id===c.part),link=previews[`${id}:source`]?.links[c.id];const view=c.asset?'images':part?.sheet?'sheet':part?.flow?'content':c.part in s.textEdits?'text':link?.hits.length?'pages':'text';selectState({focus:c.id,showOutput:false,view,previewPage:link?.hits[0]?.page||0,asset:c.asset||s.asset,sheet:part?.sheet||s.sheet,gridRow:Math.floor(((part?.row||1)-1)/30),gridColumn:Math.floor(((part?.column||1)-1)/10),page:view==='content'?contentPage(job?.manifest?.parts||[],c.part):Math.floor((job?.manifest?.parts.findIndex(p=>p.id===c.part)||0)/25)});requestAnimationFrame(()=>{const custom=editor||s.choices[c.id]?.mode==='custom';if(custom||window.matchMedia('(max-width:800px)').matches)revealFileEditor(document.getElementById('file-choice-editor'),custom);else if(view==='text'||view==='content')document.getElementById(`file-part-${c.part}`)?.scrollIntoView({block:'nearest',behavior:'smooth'});});}
@@ -203,6 +228,10 @@ export function FileReview({active,onWorkChange}:{active:boolean;onWorkChange:(w
   }
   return <main className="file-review" hidden={!active}>
     <div className="page-heading"><div><span className="eyebrow">파일 개인정보 검토</span><h1>원본은 그대로, 배포는 사본으로.</h1><p>문서와 이미지를 오가며 확인하고, 수정 사본을 다시 검사해 저장하세요.</p></div><button className="primary" disabled={uploading||jobs.length>=8} onClick={()=>boot.desktop?void addFiles():input.current?.click()}>{uploading?'파일 추가 중…':'+ 파일 추가'}</button><input ref={input} type="file" multiple accept={accept} hidden onChange={e=>void addFiles(e.target.files)}/></div>
+    <section className={`file-dropzone ${fileDragging?'dragging':''} ${uploading||jobs.length>=8?'unavailable':''}`} aria-label="파일 드래그 앤 드롭">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M12 16V3m-4 4 4-4 4 4M4 14v5a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/></svg>
+      <div><strong role="status">{uploading?'파일을 추가하고 있어요':jobs.length>=8?'파일 8개가 열려 있어요':fileDragging?'여기에 놓으면 검사를 시작합니다':'검사할 파일을 이 화면에 끌어 놓으세요'}</strong><p>{jobs.length>=8?'목록에서 파일을 제거한 뒤 추가해 주세요.':uploading?'추가가 끝난 뒤 다른 파일을 놓아 주세요.':'문서·이미지 여러 개를 함께 추가할 수 있어요. 파일당 20MB · 최대 8개'}</p></div><span>{jobs.length}/8개</span>
+    </section>
     <p className="file-model-attribution">이름·주소 검출: <strong>{boot.model||'KoELECTRA 개인정보 인식 모델'}</strong> · 그 밖의 유형: ko-pii 규칙</p>
     {error&&<div className="error" role="alert">{error}<button onClick={()=>setError('')} aria-label="오류 닫기">×</button></div>}
     {notice&&<div className="notice" role="status">{notice}</div>}
