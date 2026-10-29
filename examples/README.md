@@ -4,7 +4,7 @@
 
 [예시 12종 ZIP 다운로드](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.0/PrivacySelfAssessmentTool-Examples-0.1.0.zip) · [프로그램 사용법](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool#readme)
 
-드래그 앤 드롭은 최신 소스에 추가된 기능입니다. 현재 배포된 0.1.0 설치판에서는 **파일 추가** 버튼을 사용하세요.
+**2026-10-30에 갱신한 0.1.0 설치판**은 드래그 앤 드롭을 지원합니다. 이전 설치판을 사용 중이면 최신 설치 파일로 다시 설치하거나 **파일 추가** 버튼을 사용하세요.
 
 | 형식 | 파일 | 상황 |
 |---|---|---|

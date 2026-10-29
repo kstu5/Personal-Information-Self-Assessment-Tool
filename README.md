@@ -4,7 +4,7 @@
 
 **PNG·JPG·JPEG 이미지의 개인정보도 부분 가림·비공개 표시·직접 문구 수정이 가능합니다.** 원본과 적용 미리보기를 비교한 뒤 수정 사본을 PNG로 저장합니다.
 
-최신 소스에는 **파일 드래그 앤 드롭**을 추가했습니다. 이 기능은 다음 설치판 반영 예정이며, 현재 배포된 **0.1.0 설치판에서는 파일 추가 버튼**을 사용하세요.
+**0.1.0 설치판을 2026-10-30에 갱신해 파일 드래그 앤 드롭을 반영했습니다.** 이전 0.1.0을 설치했다면 작업을 저장하고 앱을 종료한 뒤, 위 설치 파일을 새로 받아 다시 설치하세요. 같은 버전이라도 Release의 최신 `SHA256SUMS.txt`로 파일을 확인하세요.
 
 **[Windows 설치 파일 다운로드](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.0/PrivacySelfAssessmentTool-Setup-0.1.0.exe)** · **[예시 문서 12종 ZIP 다운로드](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.0/PrivacySelfAssessmentTool-Examples-0.1.0.zip)** · [Release 0.1.0](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/tag/v0.1.0)
 
