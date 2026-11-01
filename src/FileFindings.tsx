@@ -58,7 +58,7 @@ export function FileFindings({ candidates, selection: s, locked, onState, onSele
 
     {overview!=='only'&&<section className="file-findings-panel" aria-labelledby="file-findings-title">
       <div className="file-findings-heading">
-        <div><h3 id="file-findings-title">{output?'사본의 남은 후보':'검출 목록'} <span>{filtered.length}<small> / {candidates.length}개</small></span></h3><p>{output?'수정 사본에서 다시 찾은 후보입니다. 유지한 정보·부분 가림·오탐이 포함될 수 있어요.':'원본에서 찾은 후보를 위험도가 높은 순서로 보여줍니다. 항목을 누르면 원문 위치로 이동해요.'}</p></div>
+        <div><h3 id="file-findings-title">{output?'사본의 남은 후보':'검출 목록'} <span>{filtered.length}<small> / {candidates.length}개</small></span></h3><p>{output?'수정 사본에서 다시 찾은 후보입니다. 유지한 정보·부분 가림·오탐이 포함될 수 있어요.':'개인정보 후보를 위험도가 높은 순서로 보여줍니다. 항목을 누르면 원문 위치로 이동해요.'}</p></div>
         <label className="file-findings-search"><span className="sr-only">검출 목록 검색</span><input value={s.search} onChange={e => onState({ search: e.target.value })} placeholder="내용·유형·위치 검색"/></label>
       </div>
       <div className="file-findings-filter"><span>{s.filter === 'all' ? '전체 위험도' : `${RISKS.find(r => r.key === s.filter)?.name} 위험도`}{s.search.trim() ? ` · “${s.search.trim()}” 검색` : ''}</span><button onClick={reset} disabled={s.filter === 'all' && !s.search}>전체 목록 보기</button></div>
@@ -78,7 +78,7 @@ export function FileFindings({ candidates, selection: s, locked, onState, onSele
               <input type="checkbox" aria-label={`${c.location} ${c.text} 선택`} disabled={locked} checked={selected.has(c.id)} onChange={e => onState({ selected: e.target.checked ? [...s.selected, c.id] : s.selected.filter(key => key !== c.id) })}/>
               <button className="file-finding-content" aria-label={`${c.labelName} ${c.text} 원문 위치 확인`} onClick={() => onSelect(c)}>
                 <span className="file-finding-meta"><span className="file-finding-type">{c.labelName}</span><span className={`file-finding-status ${changed||choice ? 'has-choice' : ''}`}>{output?'재검출':edited ? '✓ 영역 직접 수정' : choice ? `✓ ${MODE_NAMES[choice.mode]} 지정` : '미설정'}</span></span>
-                <strong>{c.text}</strong><span className="file-finding-location">{c.location}</span>
+                <strong>{c.text}</strong>{c.readingMethod&&<span className="file-finding-reading">{c.readingMethod==='native'?'원문 텍스트':'이미지에서 읽음 · OCR'}</span>}<span className="file-finding-location">{c.location}</span>
                 {choice && choice.mode !== 'keep' && !edited && <span className="file-finding-result">변경 예정 <b>{c.asset&&!c.imageTextEditable ? '선택한 이미지 영역 가림' : formatReplacement(c, choice) || '(빈 내용)'}</b></span>}
               </button>
               <div className="file-finding-actions">{!output&&<select aria-label={`${c.text} 가림 방법`} disabled={locked || edited} value={choice?.mode || ''} onChange={e => onApply(e.target.value as MaskMode, [c.id])}>

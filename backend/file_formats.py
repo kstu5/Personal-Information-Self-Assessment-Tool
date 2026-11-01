@@ -40,6 +40,32 @@ def local_name(node):
     return E.QName(node).localname if isinstance(node.tag, str) else ''
 
 
+def word_table_cells(tree):
+    """Coordinates for direct Word cell paragraphs, without guessing layout.
+
+    Nested tables get their own identity. Vertical merges and paragraphs in
+    text boxes are deliberately not used as field-label evidence.
+    """
+    ns='{http://schemas.openxmlformats.org/wordprocessingml/2006/main}'
+    result={}
+    for table_id,table in enumerate(tree.iter(ns+'tbl')):
+        for row_index,row in enumerate(table.findall(ns+'tr')):
+            before=row.find(ns+'trPr/'+ns+'gridBefore')
+            value=before.get(ns+'val','0') if before is not None else '0'
+            if not value.isdecimal():continue
+            column=int(value)
+            for cell in row.findall(ns+'tc'):
+                prop=cell.find(ns+'tcPr/'+ns+'gridSpan')
+                value=prop.get(ns+'val','1') if prop is not None else '1'
+                if not value.isdecimal() or not 1<=int(value)<=1000:break
+                span=int(value)
+                if cell.find(ns+'tcPr/'+ns+'vMerge') is None:
+                    for para in cell.findall(ns+'p'):
+                        result[para]={'table':table_id,'row':row_index,'column':column,'columnSpan':span}
+                column+=span
+    return result
+
+
 def parse_xml(raw):
     if b'<!DOCTYPE' in raw.upper() or b'<!ENTITY' in raw.upper():
         raise FormatError('외부 엔터티가 포함된 문서는 처리할 수 없습니다.')
@@ -166,7 +192,8 @@ class Document:
         if not text.strip(): return
         if len(text) > 30000 or len(self.parts) >= MAX_PARTS or sum(len(p['text']) for p in self.parts)+len(text) > MAX_TEXT:
             raise FormatError('검사 분량이 한도를 넘었습니다. 문서를 나누어 검사해 주세요. (18만 자·4천 영역)')
-        p = {'id': f'p{len(self.parts)}', 'text': text, 'location': location, 'target': target}
+        p = {'id': f'p{len(self.parts)}', 'text': text, 'location': location, 'target': target,
+             'readingMethod': 'ocr' if target.get('kind')=='raster' else 'native'}
         if boxes is not None: p['boxes'] = boxes
         if asset is not None: p['asset'] = asset
         if flow is not None: p['flow'] = flow
@@ -233,6 +260,7 @@ class Document:
                     safe = local_name(tree)=='Sources' and len(tree)==0 or local_name(tree)=='datastoreItem' and all(local_name(e) in {'datastoreItem','schemaRefs','schemaRef'} for e in tree.iter())
                     if not safe:self.blockers.append('사용자 지정 XML 데이터가 있어 사본 저장을 지원하지 않습니다.')
                 node_ids = {e: i for i, e in enumerate(tree.iter())}
+                table_cells = word_table_cells(tree) if self.kind == '.docx' else {}
                 label = self.package_location(name)
                 selected = set()
                 for para in tree.iter():
@@ -243,10 +271,12 @@ class Document:
                     text = ''.join(slot_value(e, field) for e, field in slots)
                     deleted = any(local_name(a) == 'del' for e, field in slots for a in e.iterancestors()) or any(local_name(e) in {'deleteBegin', 'deleteEnd'} for e, field in slots)
                     memo = any(local_name(a) in {'memo','memogroup'} for a in para.iterancestors()) or any(local_name(e)=='fieldBegin' and e.get('type')=='MEMO' for e in para.iter())
-                    self.add(text, f'{label} · 문단 {node_ids[para]+1}'+(' · 삭제된 변경 기록' if deleted else ' · 메모' if memo else ''),
+                    part = self.add(text, f'{label} · 문단 {node_ids[para]+1}'+(' · 삭제된 변경 기록' if deleted else ' · 메모' if memo else ''),
                              {'kind': 'xml', 'name': name, 'anchor': xml_anchor(tree, para), 'mode': 'paragraph',
                               'slots': [{'node': node_ids[e], 'field': field} for e, field in slots]},
                              flow={'section':name,'order':node_ids[para]} if self.kind=='.hwpx' and re.fullmatch(r'Contents/section\d+\.xml',name) and not deleted and not memo else None)
+                    if part is not None and para in table_cells and not deleted and not memo:
+                        part['tableContext']={'name':name,**table_cells[para]}
                 for e, idx in node_ids.items():
                     ln = local_name(e)
                     string_property = name.startswith('docProps/') and ln in {'title','subject','creator','keywords','description','lastModifiedBy','category','contentStatus','identifier','Company','Manager','HyperlinkBase','lpstr','lpwstr'}
@@ -399,25 +429,17 @@ class Document:
         if use_ocr:
             try:
                 from backend.image_ocr import read_image
-                for line in read_image(im,'tessdata'):
-                    self.add(line['text'],location+' · OCR',{'kind':'raster','asset':aid},boxes=line['boxes'],asset=aid)
-                    self.parts[-1]['ocrConfidences']=line['confidences']
+                for line in read_image(im,TOOLS/'tessdata'):
+                    part=self.add(line['text'],location+' · OCR',{'kind':'raster','asset':aid},boxes=line['boxes'],asset=aid)
+                    if part is not None:part['ocrConfidences']=line['confidences']
             except Exception:
                 self.warnings.append(location+': OCR를 읽지 못했습니다. 이미지에서 가릴 영역을 직접 지정해 주세요.')
-        self.warnings.append('이미지 OCR은 글자를 놓치거나 잘못 읽을 수 있습니다. 각 이미지를 열어 영역을 확인하고 필요하면 드래그해 직접 가려 주세요.')
+        if use_ocr:self.warnings.append('이미지 OCR은 글자를 놓치거나 잘못 읽을 수 있습니다. 각 이미지를 열어 영역을 확인하고 필요하면 드래그해 직접 가려 주세요.')
         return asset
-
-    def pdf_lines(self, page, location, target, asset=None, scale=(1,1)):
-        for block in page.get_text('rawdict')['blocks']:
-            for line in block.get('lines', []):
-                chars = [c for span in line['spans'] for c in span['chars']]
-                if not chars: continue
-                text = ''.join(c['c'] for c in chars)
-                boxes = [[c['bbox'][0]*scale[0],c['bbox'][1]*scale[1],c['bbox'][2]*scale[0],c['bbox'][3]*scale[1]] for c in chars]
-                self.add(text, location, target.copy(), boxes=boxes, asset=asset)
 
     def read_pdf(self):
         import pymupdf as fitz
+        from backend.pdf_reading import page_reading_plan,ocr_page_regions
         self.pdf = fitz.open(self.path)
         if self.pdf.needs_pass: raise FormatError('암호화된 PDF는 먼저 암호를 해제한 사본이 필요합니다.')
         if len(self.pdf) > 40: raise FormatError('PDF는 파일당 40쪽까지 검사할 수 있습니다.')
@@ -434,10 +456,30 @@ class Document:
             if page.first_annot: self.blockers.append('주석이 있는 PDF는 검사만 지원합니다. 주석 내용을 별도로 검토하고 제거한 사본이 필요합니다.')
             if page.get_links(): self.blockers.append('링크가 있는 PDF는 검사만 지원합니다. 링크를 제거한 사본이 필요합니다.')
             pix = page.get_pixmap(matrix=fitz.Matrix(1.5,1.5), alpha=False)
-            asset = self.image(pix.tobytes('png'), f'{p+1}쪽', {'kind':'pdfpage','page':p,'pageWidth':page.rect.width,'pageHeight':page.rect.height}, use_ocr=not self.verify)
-            self.pdf_lines(page, f'{p+1}쪽 · PDF 글자층', {'kind':'pdftext','page':p}, asset=asset['id'], scale=(asset['width']/page.rect.width,asset['height']/page.rect.height))
-        self.coverage = ['PDF 글자층', '페이지 전체 이미지 OCR', '선택 위치의 글자·이미지 픽셀 삭제', '사본의 기본 문서 속성·목차 제거 (첨부·양식·주석 등은 저장 제한)']
-        self.warnings.append('PDF는 가린 페이지를 새 PDF에 복사해 저장합니다. 목차·문서 속성·접근성 태그·서명 등 문서 부가 기능은 보존하지 않습니다. 이미지와 글자층 후보가 같은 위치에 겹칠 수 있습니다.')
+            asset = self.image(pix.tobytes('png'), f'{p+1}쪽', {'kind':'pdfpage','page':p,'pageWidth':page.rect.width,'pageHeight':page.rect.height}, use_ocr=False)
+            plan=page_reading_plan(page,(asset['width'],asset['height']))
+            for line in plan['lines']:
+                part=self.add(line['text'],f'{p+1}쪽 · PDF 글자층'+(' · 원문 확인 필요' if line['uncertain'] else ''),
+                              {'kind':'pdftext','page':p},asset=asset['id'],boxes=line['boxes'])
+                if part is not None:
+                    part['pdfContext']={k:line[k] for k in ('block','line','horizontal') if k in line}
+                if part is not None:part['textLayerUncertain']=line['uncertain']
+            if plan['uncertain'] or plan['broken']:
+                self.warnings.append(f'{p+1}쪽: 숨겨지거나 겹친 글자, 읽기 어려운 글자층이 있어 해당 부분을 OCR로도 확인합니다. 저장된 글자와 화면이 다를 수 있습니다.')
+            if plan['regions'] and not self.verify:
+                try:
+                    with Image.open(self.work/asset['file']) as image:
+                        lines=ocr_page_regions(image,plan,TOOLS/'tessdata')
+                    for line in lines:
+                        part=self.add(line['text'],f'{p+1}쪽 · 이미지 영역 OCR',{'kind':'raster','asset':asset['id']},asset=asset['id'],boxes=line['boxes'])
+                        if part is not None:part['ocrConfidences']=line['confidences']
+                    self.warnings.append('이미지 OCR은 글자를 놓치거나 잘못 읽을 수 있습니다. 각 이미지를 열어 영역을 확인하고 필요하면 드래그해 직접 가려 주세요.')
+                except Exception as e:
+                    if isinstance(e,FormatError):raise
+                    self.warnings.append(f'{p+1}쪽: 이미지 영역의 글자를 읽지 못했습니다. 이 부분은 이미지 화면에서 직접 확인해 주세요.')
+        self.coverage = ['PDF 글자층 직접 추출', '이미지·읽기 어려운 영역만 OCR (스캔 페이지는 전체 OCR)', '선택 위치의 글자·이미지 픽셀 삭제', '사본의 기본 문서 속성·목차 제거 (첨부·양식·주석 등은 저장 제한)']
+        self.warnings.append('PDF는 정상 글자층을 우선 사용하고 이미지와 읽기 어려운 영역만 OCR로 보완합니다. 숨은 글자층이나 겹친 내용은 별도로 남겨 확인하며 후보가 중복될 수 있습니다.')
+        self.warnings.append('PDF는 가린 페이지를 새 PDF에 복사해 저장합니다. 목차·문서 속성·접근성 태그·서명 등 문서 부가 기능은 보존하지 않습니다.')
         self.warnings.append('가림 경계와 겹친 주변 문자·도형도 삭제될 수 있습니다. 저장할 실제 사본에서 범위와 배치를 확인해 주세요.')
 
     def read_hwp(self):

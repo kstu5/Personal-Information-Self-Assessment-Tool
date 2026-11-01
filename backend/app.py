@@ -117,7 +117,11 @@ def create_app(port: int, *, desktop: Any = None, dist: Path | None = None) -> F
 
     @app.get('/')
     async def index():
-        boot = json.dumps({'token': token, 'desktop': desktop is not None, 'maxTitle': MAX_TITLE, 'maxBody': MAX_BODY, 'model': MODEL_REPO}, ensure_ascii=True)
+        from backend.qwen_runtime import selected_secondary
+        qwen = selected_secondary() == 'qwen3.5-0.8b'
+        boot = json.dumps({'token': token, 'desktop': desktop is not None, 'maxTitle': MAX_TITLE, 'maxBody': MAX_BODY, 'model': MODEL_REPO,
+                           'secondaryModel': 'Qwen3.5-0.8B' if qwen else 'KoELECTRA',
+                           'checkTimeoutMs': 370000 if qwen else 90000}, ensure_ascii=True)
         html = (dist/'index.html').read_text(encoding='utf-8')
         # JSON is inert text in a meta attribute. No raw draft text is interpolated.
         import html as html_module

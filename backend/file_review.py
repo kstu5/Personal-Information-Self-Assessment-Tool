@@ -18,6 +18,8 @@ import threading
 import time
 
 from backend.documents import DocumentError
+from backend.detection_context import table_date_fields, schedule_date_field, birth_date_field, date_field_role
+from backend.file_context import FileContext
 from backend.model_assets import MODEL_REPO
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -155,6 +157,15 @@ class FileReviewStore:
 
     def _scan(self,job,manifest,phase):
         found=[];parts=manifest['parts']; batches=[];current=[];count=0
+        date_fields=table_date_fields(parts)
+        # Kept only in this call. Reinspection derives fresh hints from the
+        # edited copy, and no other file/job/model receives the vocabulary.
+        context=FileContext(parts)
+        for part_id,label in context.pdf_labels.items():
+            if date_field_role(label):date_fields[part_id]=label
+        from backend.secondary_review import FileReviewContexts
+        review_contexts=FileReviewContexts(parts,context,date_fields)
+        initial_check=getattr(self.detector,'check_initial',self.detector.check)
         # Batch short cells/paragraphs to avoid one model call per cell. Offsets are mapped back exactly.
         for p in parts:
             if current and count+len(p['text'])+2>6000:batches.append(current);current=[];count=0
@@ -170,33 +181,94 @@ class FileReviewStore:
             deadline=time.monotonic()+90
             while True:
                 self._check_cancel(job)
-                try:result=self.detector.check('',text);break
+                try:result=initial_check('',text);break
                 except DocumentError as e:
                     if e.code!='busy' or time.monotonic()>deadline:raise
                     job['cancel'].wait(.25)
             offsets=[];pos=0
             for p in batch:offsets.append((pos,pos+utf16(p['text']),p));pos+=utf16(p['text'])+2
-            if any(not any(a<=c['start']<c['end']<=b for a,b,p in offsets) for c in result['candidates']):
+            bridges=[c for c in result['candidates'] if not any(a<=c['start']<c['end']<=b for a,b,p in offsets)]
+            if bridges:
                 # Context across independent cells/metadata can produce a single span. Reinspect each
                 # original target, rather than drop/clip the span or apply it across unrelated nodes.
-                safe=[]
+                if any(not 0<=c['start']<c['end']<=utf16(text) for c in bridges):
+                    raise DocumentError('검출 위치가 원문과 일치하지 않습니다.')
+                affected={p['id'] for a,b,p in offsets if any(a<c['end'] and c['start']<b for c in bridges)}
+                if not affected:raise DocumentError('독립된 문서 영역 사이에 걸친 검출이 있어 위치를 지정하지 못했습니다.')
+                # Keep valid results from other targets: rerunning every cell
+                # would remove the context of unrelated anchored identifiers.
+                safe=[c for c in result['candidates'] if any(p['id'] not in affected and a<=c['start']<c['end']<=b for a,b,p in offsets)]
                 for offset,_,part in offsets:
+                    if part['id'] not in affected:continue
                     self._check_cancel(job)
                     deadline=time.monotonic()+90
                     while True:
-                        try:single=self.detector.check('',part['text']);break
+                        try:single=initial_check('',part['text']);break
                         except DocumentError as e:
                             if e.code!='busy' or time.monotonic()>deadline:raise
                             self._check_cancel(job);job['cancel'].wait(.25)
                     safe.extend({**c,'start':offset+c['start'],'end':offset+c['end']} for c in single['candidates'])
                 result={'candidates':safe}
+            grouped={p['id']:[] for _,_,p in offsets};unmapped=[]
+            for candidate in result['candidates']:
+                for a,b,part in offsets:
+                    if a<=candidate['start']<candidate['end']<=b:
+                        grouped[part['id']].append({**candidate,'start':candidate['start']-a,'end':candidate['end']-a})
+                        break
+                else:unmapped.append(candidate)
+            refined=list(unmapped)
+            for offset,_,part in offsets:
+                refined.extend({**c,'start':offset+c['start'],'end':offset+c['end']}
+                               for c in context.refine(part,grouped[part['id']]))
+            result={'candidates':refined}
+            # Per-part retries can lose a DOB label stored in a different cell.
+            # Recover only valid dates with explicit structural field evidence,
+            # using original offsets and without overriding another type.
+            for offset,_,part in offsets:
+                span=birth_date_field(part['text'],date_fields.get(part['id']))
+                if span is None:continue
+                lo,hi=span;start=offset+utf16(part['text'][:lo]);end=offset+utf16(part['text'][:hi])
+                overlaps=[c for c in result['candidates'] if start<c['end'] and c['start']<end]
+                if any(c['label']!='DT_BIRTH' for c in overlaps):continue
+                if len(overlaps)==1 and overlaps[0]['start']==start and overlaps[0]['end']==end:continue
+                result['candidates']=[c for c in result['candidates'] if c not in overlaps]
+                result['candidates'].append({'id':f'field-birth-{start}-{end}','source':'body','start':start,'end':end,
+                    'text':part['text'][lo:hi],'label':'DT_BIRTH','labelName':'생년월일','risk':'HIGH'})
+            result['candidates'].sort(key=lambda c:(c['start'],c['end']))
+            # Run a separate candidate-centred model pass after original field
+            # and table boundaries have been restored. Do not ask the user to
+            # supply the context that the file already contains.
+            if hasattr(self.detector,'review') and result['candidates']:
+                self._update(job,progress=f'{phase} · {index+1}/{len(batches)} 구간 · 주변 문맥 2차 검토 중')
+                deadline=time.monotonic()+90
+                while True:
+                    self._check_cancel(job)
+                    try:
+                        scopes=review_contexts.scopes(offsets)
+                        cancellable=getattr(self.detector,'review_cancellable',None)
+                        result=cancellable(text,result['candidates'],scopes,job['cancel']) if cancellable else self.detector.review(text,result['candidates'],scopes)
+                        break
+                    except DocumentError as e:
+                        if e.code!='busy' or time.monotonic()>deadline:raise
+                        job['cancel'].wait(.25)
             for c in result['candidates']:
                 for a,b,p in offsets:
                     if a<=c['start']<c['end']<=b:
                         start,end=c['start']-a,c['end']-a
                         lo,hi=py_offset(p['text'],start),py_offset(p['text'],end)
                         if p['text'][lo:hi]!=c['text']:raise DocumentError('검출 위치가 원문과 일치하지 않습니다.')
-                        item={**c,'id':f"{p['id']}:{start}:{end}:{c['label']}",'part':p['id'],'start':start,'end':end,'location':p['location']}
+                        if c['label']=='DT_BIRTH' and schedule_date_field(p['text'],date_fields.get(p['id'])):
+                            break
+                        item={**c,'id':f"{p['id']}:{start}:{end}:{c['label']}",'part':p['id'],'start':start,'end':end,'location':p['location'],
+                              'readingMethod':p.get('readingMethod','ocr' if p.get('asset') and p.get('target',{}).get('kind')=='raster' else 'native')}
+                        if c['label']=='DT_BIRTH' and birth_date_field(p['text'],date_fields.get(p['id'])):
+                            item['contextReview']={**c.get('contextReview',{}),'state':'supported','reason':'표의 생년월일 항목과 연결된 날짜입니다.'}
+                        if c['label']=='PERSON' and c.get('contextReview',{}).get('state')=='uncertain':
+                            if any(f.role=='person' and utf16(p['text'][:f.start])<=start<end<=utf16(p['text'][:f.end]) for f in context.fields[p['id']]):
+                                # An organization/model conflict remains ambiguous; a short
+                                # name in a structurally explicit person cell is supported.
+                                if c['contextReview'].get('basis')=='short_name':
+                                    item['contextReview']={**c.get('contextReview',{}),'state':'supported','reason':'표의 성명 항목과 연결된 이름입니다.'}
                         item['partialText']=replacement(c['text'],c['label'],{'mode':'partial'})
                         item['imageTextEditable']=manifest['kind'] in {'.png','.jpg','.jpeg'} and bool(p.get('asset'))
                         if p.get('asset'):
@@ -288,7 +360,8 @@ class FileReviewStore:
             candidates=job['exportResult']['candidates'] if output else job['candidates']
             with self.lock:cached['state']='rendering'
             value=self._adapter(job,'preview',source=job['output'] if output else job['source'],
-                previewDirectory=cached['directory'],parts=manifest['parts'],candidates=candidates)
+                previewDirectory=cached['directory'],parts=manifest['parts'],candidates=candidates,
+                assets=manifest['assets'],assetDirectory='verification' if output else '')
             self._check_cancel(job);self._unchanged(job)
             if output:self.output(job['id'])
             with self.lock:

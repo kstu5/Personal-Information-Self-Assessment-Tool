@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 from pathlib import Path
+import os
+import re
 import numpy as np
 from PIL import Image, ImageOps
 
@@ -86,8 +88,74 @@ def _inside(box, rect):
     return area>0 and (overlap/area>.8 or a<=(x0+x1)/2<=c and b<=(y0+y1)/2<=d)
 
 
+def _email_spacing(line):
+    # Only virtual zero-width OCR spaces beside email separators. Keep real
+    # glyph coordinates and do not substitute ambiguous letters/digits.
+    keep=[];text=line['text']
+    for i,c in enumerate(text):
+        box=line['boxes'][i]
+        virtual=c.isspace() and box[0]==box[2]
+        adjacent=(text[i-1:i] in {'@','.'} or text[i+1:i+2] in {'@','.'})
+        if not virtual or not adjacent:keep.append(i)
+    return {k:''.join(v[i] for i in keep) if k=='text' else [v[i] for i in keep] for k,v in line.items()}
+
+
+def _retry_latin_fields(gray, lines, tessdata):
+    """Re-read bounded typed value regions, using the original raster pixels.
+
+    English is more useful than mixed-language recognition for email strings
+    and cm/kg units. A second read is accepted only with a valid whole field.
+    Korean names/addresses/document-code words are never guessed or rewritten.
+    """
+    from tesserocr import PyTessBaseAPI, PSM
+    from backend.identifier_rules import FIELD_LABELS, NUMERIC_LABELS, field_detection
+    labels={re.sub(r'\s+','',v).casefold():k for k,values in FIELD_LABELS.items() for v in values}
+    eligible=NUMERIC_LABELS | {'EMAIL','URL','IP','PASSPORT','HEIGHT','WEIGHT'}
+    requests=[]
+    for index,line in enumerate(lines):
+        match=re.match(r'^([^:：]{1,30})[:：][ \t]*',line['text'])
+        if not match:continue
+        label=labels.get(re.sub(r'\s+','',match[1]).casefold())
+        if label not in eligible:continue
+        start=match.end();value=line['text'][start:]
+        if not value or len(value)>160:continue
+        confidences=[v for v in line['confidences'][start:] if v is not None]
+        # Leave successful number reads intact. Email always benefits from a
+        # language-specific read; units retry when their current value is invalid.
+        if label!='EMAIL' and field_detection(value,label) is not None and confidences and min(confidences)>=70:continue
+        boxes=[b for b in line['boxes'][start:] if b[2]>b[0] and b[3]>b[1]]
+        if not boxes:continue
+        rect=(max(0,int(min(b[0] for b in boxes))-8),max(0,int(min(b[1] for b in boxes))-6),
+              min(gray.width,int(max(b[2] for b in boxes))+8),min(gray.height,int(max(b[3] for b in boxes))+6))
+        if rect[2]<=rect[0] or rect[3]<=rect[1]:continue
+        requests.append((index,label,start,rect))
+    if not requests:return lines
+    # Cap added work per image; no language model or network dependency is added.
+    with PyTessBaseAPI(path=str(Path(tessdata)),lang='eng',psm=PSM.SINGLE_LINE) as api:
+        for index,label,start,rect in requests[:16]:
+            choices=[]
+            for scale in (1,2):
+                crop=gray.crop(rect)
+                if scale==2:crop=crop.resize((crop.width*2,crop.height*2),Image.Resampling.LANCZOS)
+                options=_recognize(api,crop,rect,gray.size,PSM.SINGLE_LINE)
+                if len(options)!=1:continue
+                option=_email_spacing(options[0]) if label=='EMAIL' else options[0]
+                if field_detection(option['text'],label) is None:continue
+                scores=[v for v in option['confidences'] if v is not None]
+                if not scores or min(scores)<60:continue
+                choices.append((sum(scores)/len(scores),option))
+            if not choices:continue
+            best=max(choices,key=lambda item:item[0])[1];original=lines[index]
+            lines[index]={key:original[key][:start]+best[key] for key in ('text','boxes','confidences')}
+    return lines
+
+
 def read_image(image, tessdata):
     from tesserocr import PyTessBaseAPI, PSM
+    # Some Windows Tesseract builds cannot open an absolute Korean path. The
+    # worker already owns a fixed tools cwd; use a relative path without chdir.
+    try:tessdata=os.path.relpath(Path(tessdata).resolve())
+    except ValueError:tessdata=str(Path(tessdata).resolve())
     gray=ImageOps.grayscale(image)
     if np.median(np.asarray(gray))<128:gray=ImageOps.invert(gray)
     gray=ImageOps.autocontrast(gray,cutoff=.5)
@@ -110,4 +178,8 @@ def read_image(image, tessdata):
                     if line['text'][start:i].strip():result.append({key:value[start:i] for key,value in line.items()})
                     start=None
         result.sort(key=lambda line:(min(b[1] for b in line['boxes']),min(b[0] for b in line['boxes'])))
-        return result
+        try:
+            return _retry_latin_fields(gray,result,tessdata)
+        except Exception:
+            # An optional precision pass must not erase a successful primary OCR.
+            return result

@@ -1,0 +1,17 @@
+{
+  "repo": "unsloth/Qwen3.5-0.8B-GGUF",
+  "model": "Qwen/Qwen3.5-0.8B",
+  "revision": "6ab461498e2023f6e3c1baea90a8f0fe38ab64d0",
+  "filename": "Qwen3.5-0.8B-Q4_K_M.gguf",
+  "bytes": 532517120,
+  "sha256": "bd258782e35f7f458f8aced1adc053e6e92e89bc735ba3be89d38a06121dc517",
+  "license": "Apache-2.0",
+  "runtime": {
+    "repo": "ggml-org/llama.cpp",
+    "revision": "b11960",
+    "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11960/llama-b11960-bin-win-cpu-x64.zip",
+    "bytes": 24407745,
+    "sha256": "73f962f82850d244db47eaacb9d913637027b82399124324298576d58c5f4287",
+    "license": "MIT"
+  }
+}

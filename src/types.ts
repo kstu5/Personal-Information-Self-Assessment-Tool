@@ -3,6 +3,7 @@ export type Risk = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'INFO';
 export type Candidate = {
   id: string; source: 'title' | 'body'; start: number; end: number;
   text: string; label: string; labelName: string; risk: Risk;
+  contextReview?: { state: 'supported' | 'uncertain'; reason: string; secondary?: boolean; decision?: 'retain' };
 };
 export type CheckResult = { candidates: Candidate[]; revision: number; engine: string; elapsedMs: number };
 export type PostDocument = Draft & { format: 'before-post-document'; version: 1; savedAt: string };

@@ -23,7 +23,11 @@ def main():
     parser.add_argument('--headless', action='store_true')
     parser.add_argument('--port', type=int, default=0)
     parser.add_argument('--ready-file', type=Path)
+    parser.add_argument('--secondary-model', choices=['koelectra', 'qwen3.5-0.8b'])
     args = parser.parse_args()
+    if args.secondary_model:
+        import os
+        os.environ['PII_SECONDARY_MODEL'] = args.secondary_model
     if not (ROOT/'dist'/'index.html').exists():
         raise RuntimeError('화면 빌드가 필요합니다. 먼저 설치 안내를 확인해 주세요.')
     mutex = None

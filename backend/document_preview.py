@@ -1,10 +1,12 @@
 """Read-only Office page previews. Preview coordinates never become edit targets."""
 from pathlib import Path
+from itertools import islice
 import posixpath
 import re
 import subprocess
 from lxml import etree as E
 from backend.file_formats import FormatError, TOOLS, read_zip, parse_xml, local_name
+from backend.preview_snapshot import display_snapshot
 
 
 def compact(value):
@@ -62,7 +64,7 @@ def locate(parts,candidates,stream,refs,dimensions,slides):
     for p in parts:
         target=p['target'];name=target.get('name','')
         visible=target.get('kind')=='xml' and target.get('mode')=='paragraph' and (
-            name=='word/document.xml' or name in slides)
+            name=='word/document.xml' or re.fullmatch(r'word/(?:header|footer)\d*\.xml',name) or name in slides)
         if visible:groups.setdefault(name,[]).append(p)
     index={p['id']:(name,i,items) for name,items in groups.items() for i,p in enumerate(items)}
     links={}
@@ -72,6 +74,26 @@ def locate(parts,candidates,stream,refs,dimensions,slides):
             name,i,items=item;part=items[i];units=part['text'].encode('utf-16-le')
             lo=len(units[:c['start']*2].decode('utf-16-le'));hi=len(units[:c['end']*2].decode('utf-16-le'))
             value=compact(part['text'][lo:hi]);prefix=len(compact(part['text'][:lo]))
+            margin=re.fullmatch(r'word/(header|footer)\d*\.xml',name)
+            if margin:
+                # Verify the literal label/prefix too. A page field after the
+                # candidate can display a different number on every page.
+                context=compact(part['text'][:hi]) if prefix>=3 else compact(part['text'])
+                duplicates=any(p['id']!=part['id'] and compact(p['text']).startswith(context)
+                               for group in groups.values() for p in group)
+                found=[]
+                for start in matches(stream,context):
+                    end=start+len(context)-1
+                    if refs[start][0]!=refs[end][0]:continue
+                    page=refs[start][0];ph=dimensions[page][3]
+                    boxes=[rect for _,rect in refs[start:end+1]]
+                    in_margin=max(r[3] for r in boxes)<ph*.22 if margin[1]=='header' else min(r[1] for r in boxes)>ph*.78
+                    offset=start+prefix
+                    if in_margin and value and stream[offset:offset+len(value)]==value:
+                        found.extend(refs[offset:offset+len(value)])
+                if found:link={'state':'ambiguous' if duplicates else 'linked','hits':hit_boxes(found,dimensions)}
+                links[c['id']]=link
+                continue
             allowed_page=slides.get(name)
             def found_in(value):
                 return [a for a in matches(stream,value) if allowed_page is None or
@@ -95,43 +117,86 @@ def locate(parts,candidates,stream,refs,dimensions,slides):
     return links
 
 
-def create_preview(source,work,parts,candidates):
+def link_images(pdf,assets,asset_root,candidates,dimensions,entries):
+    """Link exact image pixels to uncropped, axis-aligned page placements."""
+    import hashlib
+    from PIL import Image
+    root=Path(asset_root).resolve();by_digest={};links={};cropped=set()
+    for name,raw in entries.items():
+        if not name.endswith('.xml'):continue
+        tree=parse_xml(raw)
+        rel_name=posixpath.join(posixpath.dirname(name),'_rels',posixpath.basename(name)+'.rels')
+        rels=parse_xml(entries[rel_name]) if rel_name in entries else []
+        targets={r.get('Id'):posixpath.normpath(posixpath.join(posixpath.dirname(name),r.get('Target',''))).lstrip('/') for r in rels}
+        for container in tree.iter():
+            if local_name(container) not in {'pic','blipFill'}:continue
+            if any(local_name(n)=='srcRect' and any(v not in {'0',''} for v in n.attrib.values()) for n in container.iter()):
+                for n in container.iter():
+                    if local_name(n)=='blip':
+                        cropped.update(targets.get(v) for k,v in n.attrib.items() if E.QName(k).localname=='embed')
+    for asset in assets:
+        if asset.get('target',{}).get('name') in cropped:continue
+        path=(root/asset.get('file','')).resolve()
+        if not path.is_relative_to(root) or not path.is_file():continue
+        try:
+            with Image.open(path) as im:
+                if im.mode not in {'RGB','L'}:continue
+                rgb=im.convert('RGB');digest=hashlib.md5(rgb.tobytes()).digest()
+                by_digest.setdefault((digest,rgb.width,rgb.height),[]).append(asset)
+        except (OSError,ValueError):continue
+    for page_no,page in enumerate(islice(pdf,len(dimensions))):
+        width,height,pw,ph=dimensions[page_no]
+        for info in page.get_image_info(hashes=True):
+            options=by_digest.get((info.get('digest'),info['width'],info['height']),[])
+            if len(options)!=1:continue
+            asset=options[0];a,b,c,d,e,f=info['transform']
+            # Rotated, clipped, altered or duplicate source images remain in
+            # the original-image view; no guessed page mask is shown.
+            if abs(b)>1e-5 or abs(c)>1e-5 or a<=0 or d<=0:continue
+            if e<0 or f<0 or e+a>pw+.1 or f+d>ph+.1:continue
+            for candidate in candidates:
+                if candidate.get('asset')!=asset['id']:continue
+                boxes=[]
+                for x0,y0,x1,y1 in candidate.get('boxes',[]):
+                    if not 0<=x0<x1<=asset['width'] or not 0<=y0<y1<=asset['height']:continue
+                    boxes.append([(e+a*x0/asset['width'])*width/pw,(f+d*y0/asset['height'])*height/ph,
+                                  (e+a*x1/asset['width'])*width/pw,(f+d*y1/asset['height'])*height/ph])
+                if boxes:
+                    links.setdefault(candidate['id'],{'state':'linked','hits':[]})['hits'].append({'page':page_no,'boxes':boxes})
+    return links
+
+
+def create_preview(source,work,parts,candidates,assets=None,asset_root=None):
     import pymupdf as fitz
-    source=Path(source);work=Path(work)
+    source=Path(source).resolve();work=Path(work).resolve();work.mkdir(parents=True,exist_ok=True)
     if source.suffix not in {'.docx','.pptx'}:raise FormatError('이 형식은 텍스트·셀 또는 이미지 화면에서 확인해 주세요.')
     exe=TOOLS/'libreoffice/program/soffice.com'
     if not exe.is_file():raise FormatError('문서 화면을 만드는 도구가 없습니다. 텍스트 · 위치에서 계속 검토할 수 있습니다.')
     entries=read_zip(source)
-    for name,raw in entries.items():
-        if any(s in name.lower() for s in ('/embeddings/','vbaproject','/activex/','/charts/','/diagrams/')):
-            raise FormatError('내장 문서·차트·추가 개체가 있는 파일은 텍스트 · 위치에서 확인해 주세요.')
-        if name.endswith(('.xml','.rels')):
-            tree=parse_xml(raw)
-            if name.startswith('customXml/') and not name.endswith('.rels'):
-                safe=local_name(tree)=='Sources' and len(tree)==0 or local_name(tree)=='datastoreItem' and all(local_name(e) in {'datastoreItem','schemaRefs','schemaRef'} for e in tree.iter())
-                if not safe:raise FormatError('추가 데이터가 있는 파일은 텍스트 · 위치에서 확인해 주세요.')
-            if any(local_name(e).lower() in {'altchunk','oleobject','fldsimple'} or local_name(e)=='instrText' for e in tree.iter()):
-                raise FormatError('필드·연결 개체가 있는 문서는 텍스트 · 위치에서 확인해 주세요.')
-            if name.endswith('.rels') and any(e.get('TargetMode')=='External' and not e.get('Type','').endswith('/hyperlink') for e in tree):
-                raise FormatError('외부 그림·문서 연결이 있어 문서 화면을 만들지 않았습니다. 텍스트 · 위치에서 확인해 주세요.')
+    display=work/('display'+source.suffix)
+    notices=display_snapshot(entries,display)
     slides=slide_order(entries) if source.suffix=='.pptx' else {}
-    profile=work.parent/'preview-office-profile';(profile/'user').mkdir(parents=True,exist_ok=True)
-    (profile/'user/registrymodifications.xcu').write_text('''<?xml version="1.0"?><oor:items xmlns:oor="http://openoffice.org/2001/registry"><item oor:path="/org.openoffice.Office.Common/Security/Scripting"><prop oor:name="MacroSecurityLevel" oor:op="fuse"><value>3</value></prop></item></oor:items>''',encoding='utf-8')
+    profile=work/'office-profile';(profile/'user').mkdir(parents=True,exist_ok=True)
+    (profile/'user/registrymodifications.xcu').write_text('''<?xml version="1.0"?><oor:items xmlns:oor="http://openoffice.org/2001/registry"><item oor:path="/org.openoffice.Office.Common/Security/Scripting"><prop oor:name="MacroSecurityLevel" oor:op="fuse"><value>3</value></prop></item><item oor:path="/org.openoffice.Office.Writer/Content/Update"><prop oor:name="Link" oor:op="fuse"><value>2</value></prop><prop oor:name="Field" oor:op="fuse"><value>false</value></prop><prop oor:name="Chart" oor:op="fuse"><value>false</value></prop></item></oor:items>''',encoding='utf-8')
     result=subprocess.run([str(exe),'-env:UserInstallation='+profile.as_uri(),'--headless','--norestore','--nodefault',
-                           '--convert-to','pdf','--outdir',str(work),str(source)],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,
+                           '--convert-to','pdf','--outdir',str(work),str(display)],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,
                           timeout=90,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
-    pdf_path=work/(source.stem+'.pdf')
+    pdf_path=work/(display.stem+'.pdf')
     if result.returncode or not pdf_path.exists():raise FormatError('문서 화면을 만들지 못했습니다. 텍스트 · 위치에서 계속 검토해 주세요.')
     pages=[];dimensions=[]
     with fitz.open(pdf_path) as pdf:
-        if len(pdf)>40:raise FormatError('문서 화면은 40쪽까지 지원합니다. 문서를 나누어 확인해 주세요.')
+        if len(pdf)>40:notices.append(f'전체 {len(pdf)}쪽 중 처음 40쪽을 화면으로 보여줍니다. 나머지 내용은 텍스트 · 위치에서 확인해 주세요.')
         for i,page in enumerate(pdf):
+            if i>=40:break
             if page.rect.width*page.rect.height*2.25>20000000:raise FormatError('페이지가 너무 커서 문서 화면을 만들지 않았습니다.')
             pix=page.get_pixmap(matrix=fitz.Matrix(1.5,1.5),alpha=False)
             filename=f'page-{i+1}.png';pix.save(work/filename)
             pages.append({'id':str(i),'location':f'{i+1}쪽','width':pix.width,'height':pix.height,'file':filename})
             dimensions.append((pix.width,pix.height,page.rect.width,page.rect.height))
-        stream,refs=pdf_stream(pdf)
+        stream,refs=pdf_stream(islice(pdf,40))
         links=locate(parts,candidates,stream,refs,dimensions,slides)
+        if assets:
+            links.update(link_images(pdf,assets,asset_root or source.parent,candidates,dimensions,entries))
     return {'state':'ready','pages':pages,'links':links,
-            'warnings':['변환한 문서 화면은 원래 프로그램의 배치와 다를 수 있습니다. 메모·노트·문서 속성은 텍스트 · 위치에서도 확인하세요.']}
+            'notices':notices,
+            'warnings':notices+['변환한 문서 화면은 원래 프로그램의 배치와 다를 수 있습니다. 메모·노트·문서 속성은 텍스트 · 위치에서도 확인하세요.']}

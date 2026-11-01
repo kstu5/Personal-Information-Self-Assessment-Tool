@@ -6,10 +6,18 @@ source offsets, preserve ambiguous birth dates, and never join document fields.
 from __future__ import annotations
 
 from dataclasses import replace
+from datetime import date
 import re
 
 _BIRTH = re.compile(r'생년월일|생일|출생(?:연월일|일)?|태어난|DOB|date\s+of\s+birth|birth\s*date', re.I)
 _OTHER_DATE = re.compile(r'(?:작성|발표|배포|발송|배송|접수|등록|신청|회의|행사|면접|제출|발급|결재|시행|계약|입사|퇴사|졸업|수료|교육|개최|신청마감|마감)[ \t]*(?:예정[ \t]*)?(?:일시|일자|일|날짜|기간)|(?:회의|행사|면접|교육|개최)[ \t]*일시|(?:일시|작성일|발송예정일|기준일)')
+_TABLE_DATE_VALUE = re.compile(
+    r'(?P<date>\d{4}(?:[-./]\d{1,2}[-./]\d{1,2}\.?|년\s*\d{1,2}월\s*\d{1,2}일))'
+    r'(?:[ T]\d{1,2}:\d{2}(?::\d{2}(?:\.\d+)?)?)?')
+_SCHEDULE_DATE_EN = re.compile(r'(?:shipping|delivery|dispatch|ship|event|application|issue)(?:scheduled)?date', re.I)
+_DATE_FIELD_BOUNDARY = re.compile(
+    r'생년|생일|출생|날짜|일자|일시|기간|기한|일$|date|birthday|DOB|'
+    r'^(?:성명|이름|Name|연락처|전화번호|휴대전화|이메일|주소|기관명|항목|비고|메모|설명)$', re.I)
 _SIGNATURE = re.compile(r'^[ \t]*(?:지원자|작성자|작성인|신청인|서명)(?=[ \t:：]|$)')
 _ADDRESS_UNIT = r'(?:동|호|층)(?![가-힣A-Za-z0-9])'
 _ADDRESS_TAIL = re.compile(rf'(?:{_ADDRESS_UNIT})?(?:[ \t]*,?[ \t]*\d+(?:-\d+)?[ \t]*{_ADDRESS_UNIT}){{0,4}}')
@@ -29,6 +37,102 @@ _ANCHORED_ADDRESS = re.compile(
 
 def _last(pattern, text):
     return max((m.start() for m in pattern.finditer(text)), default=-1)
+
+
+def date_field_role(label):
+    """Only an explicit, complete field label can establish a date role."""
+    if not isinstance(label, str) or len(label) > 80:
+        return None
+    label = re.sub(r'\s+', '', label).strip(':：')
+    label = re.sub(r'\((?:YYYY[-./]MM[-./]DD|연월일)\)$', '', label, flags=re.I)
+    if _BIRTH.fullmatch(label) or label.lower() == 'dateofbirth':
+        return 'birth'
+    if _OTHER_DATE.fullmatch(label) or _SCHEDULE_DATE_EN.fullmatch(label):
+        return 'schedule'
+    return None
+
+
+def table_date_fields(parts):
+    """Associate table date values with explicit row or column labels.
+
+    No text is prepended to detector input, so offsets and edit targets stay
+    intact. Table/sheet boundaries, gaps and new field labels stop propagation.
+    Replaced DOB values keep their schema; schedule hints stop at unknown text.
+    Conflicting row/column labels are left undecided.
+    """
+    tables = {}
+    for part in parts:
+        target = part.get('target', {})
+        if target.get('kind') == 'csv':
+            table = ('csv', None)
+            row, column = target.get('row'), target.get('col')
+        elif target.get('kind') == 'cell':
+            table = ('xlsx', target.get('sheet'))
+            row, column = part.get('row'), part.get('column')
+        elif part.get('tableContext'):
+            context = part['tableContext']
+            table = ('word', context['name'], context['table'])
+            row, column = context['row'], context['column']
+        else:
+            continue
+        if not isinstance(row, int) or not isinstance(column, int):
+            continue
+        tables.setdefault(table, {}).setdefault(row, {}).setdefault(column, []).append(part)
+    result = {}
+    for rows in tables.values():
+        headers = {}; previous = None
+        for row, cells in sorted(rows.items()):
+            if previous is not None and (row != previous + 1 or not headers.keys() & cells.keys()):
+                headers.clear()
+            previous = row
+            row_label = None
+            for column, cell_parts in sorted(cells.items()):
+                text = '\n'.join(part['text'] for part in cell_parts).strip()
+                span = cell_parts[0].get('tableContext', {}).get('columnSpan', 1)
+                if span > 1:
+                    for covered in range(column, column + span):headers.pop(covered, None)
+                role = date_field_role(text)
+                if role:
+                    row_label = text
+                    if span == 1:headers[column] = text
+                elif _TABLE_DATE_VALUE.fullmatch(text):
+                    labels = [label for label in (headers.get(column), row_label) if label]
+                    if labels and len({date_field_role(label) for label in labels}) == 1:
+                        for part in cell_parts:
+                            if _TABLE_DATE_VALUE.fullmatch(part['text'].strip()):
+                                result[part['id']] = labels[-1]
+                else:
+                    # A redacted/replaced DOB value does not change the schema
+                    # for the remaining participants. A new field-like label
+                    # does. Schedule hints always stop at unknown text because
+                    # they can suppress a sensitive candidate.
+                    boundary = bool(_DATE_FIELD_BOUNDARY.search(text))
+                    if date_field_role(headers.get(column)) != 'birth' or boundary:
+                        headers.pop(column, None)
+                    if date_field_role(row_label) != 'birth' or boundary:
+                        row_label = None
+    return result
+
+
+def schedule_date_field(text, label):
+    """A known schedule column may suppress a date heuristic, never a DOB hint."""
+    return date_field_role(label) == 'schedule' and bool(_TABLE_DATE_VALUE.fullmatch(text.strip()))
+
+
+def birth_date_field(text, label):
+    """Return an exact calendar-date span only with explicit table DOB evidence."""
+    if date_field_role(label) != 'birth':
+        return None
+    match = _TABLE_DATE_VALUE.fullmatch(text.strip())
+    if not match:
+        return None
+    try:
+        date(*map(int, re.findall(r'\d+', match['date'])))
+    except (ValueError, TypeError):
+        return None
+    start = len(text) - len(text.lstrip())
+    lo, hi = match.span('date')
+    return start + lo, start + hi
 
 
 def _ordinary_date(text, start, end):
@@ -53,9 +157,15 @@ def _ordinary_date(text, start, end):
     return birth < 0 and bool(_SIGNATURE.match(text[end:end + 50]))
 
 
-def refine_detections(text, detections):
+def refine_detections(text, detections, *, model_spans=()):
     from ko_pii.core.overlap import resolve_overlaps
-    detections = list(detections)
+    from backend.file_context import refine_result_fields
+    detections = refine_result_fields(text, list(detections))
+    # A complete structured document id is stronger evidence than a fuzzy NAME
+    # tag contained inside it, even when the form omits a literal field label.
+    identifiers = [d for d in detections if d.label == 'DOC_ID']
+    detections = [d for d in detections if d.label != 'PERSON' or not any(
+        p.start <= d.start < d.end <= p.end for p in identifiers)]
     for match in _ANCHORED_ADDRESS.finditer(text):
         start, end = match.span('address')
         fragments = [d for d in detections if d.label == 'ADDRESS' and start <= d.start < d.end <= end]
@@ -71,6 +181,11 @@ def refine_detections(text, detections):
     for detection in detections:
         # A number followed by 세트 is a quantity, not a person's age.
         if detection.label == 'AGE' and re.fullmatch(r'\d+[ \t]*세',detection.text) and re.match(r'트(?=$|[\s.,/()·:;]|[씩를을이가은는와과])',text[detection.end:]):
+            continue
+        if detection.label == 'AGE' and re.fullmatch(r'\d+[ \t]*세',detection.text) and text[detection.end:detection.end+1]=='기':
+            continue
+        if detection.label == 'AGE' and detection.text.endswith('대') and re.search(
+                r'(?:차량|자동차|컴퓨터|노트북|프린터|장비|기기|서버)[ \t]*$',text[max(0,detection.start-30):detection.start]):
             continue
         if detection.label == 'DT_BIRTH' and _ordinary_date(text, detection.start, detection.end):
             continue
@@ -95,4 +210,6 @@ def refine_detections(text, detections):
         result.append(detection)
     # An extended address may meet another candidate. Keep the same upstream
     # risk-first overlap policy, so phone/ID candidates cannot be swallowed.
-    return resolve_overlaps(result)
+    from backend.candidate_context import assess_candidates
+    from backend.nonpersonal_context import filter_nonpersonal
+    return resolve_overlaps(assess_candidates(text, filter_nonpersonal(text,result), model_spans))

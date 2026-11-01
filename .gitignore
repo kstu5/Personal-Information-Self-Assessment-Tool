@@ -39,6 +39,7 @@ runtime.local.json
 # --- 대용량 바이너리 안전망 (GitHub 파일당 100MB 제한) ---
 *.safetensors
 *.onnx
+*.gguf
 *.msi
 *.dll
 *.zip

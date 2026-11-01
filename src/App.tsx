@@ -109,8 +109,8 @@ export function App() {
     if(checking || ioRef.current || !valid)return;
     const current=revision.current;const snapshot={...draftRef.current};
     setChecking(true);setResult(null);setChoices({});setError('');setNotice('');
-    // Allow the first model load (60s), inference (20s), and worker cleanup.
-    const controller=new AbortController();const timer=window.setTimeout(()=>controller.abort(),90000);
+    // Include startup, the selected local review model's budget, and cleanup.
+    const controller=new AbortController();const timer=window.setTimeout(()=>controller.abort(),boot.checkTimeoutMs||90000);
     try {
       const next=await api<CheckResult>('check',{...snapshot,revision:current},controller.signal);
       if(revision.current!==current){setNotice('검사 중 글이 변경되었습니다. 현재 내용을 다시 검사해 주세요.');return;}

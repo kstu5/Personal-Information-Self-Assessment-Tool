@@ -41,7 +41,7 @@ try {
     Copy-Item -LiteralPath 'examples\README.md' -Destination (Join-Path $stage 'examples\README.md')
     New-Item -ItemType Directory -Force (Join-Path $stage 'backend'), (Join-Path $stage 'scripts\prepare'), (Join-Path $stage 'installer') | Out-Null
     Copy-Item backend\*.py, backend\HwpText.java (Join-Path $stage 'backend')
-    Copy-Item scripts\prepare\prepare_file_tools.py, scripts\prepare\prepare_model_a.py (Join-Path $stage 'scripts\prepare')
+    Copy-Item scripts\prepare\prepare_file_tools.py, scripts\prepare\prepare_model_a.py, scripts\prepare\prepare_qwen_review.py (Join-Path $stage 'scripts\prepare')
     Copy-Item installer\install_runtime.ps1, installer\components.json (Join-Path $stage 'installer')
     Copy-Item installer\USER_GUIDE.txt (Join-Path $stage '사용안내.txt')
     $notices = @('Frontend components included in this installer: React and React DOM.', '')

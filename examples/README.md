@@ -2,9 +2,9 @@
 
 각 지원 확장자별로 실제 공유할 법한 문서를 구성했습니다. 인적사항·기관명은 합성 정보이며 이메일은 `example.invalid`를 사용합니다. 실제 개인의 자료를 수집한 문서가 아닙니다.
 
-[예시 12종 ZIP 다운로드](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.0/PrivacySelfAssessmentTool-Examples-0.1.0.zip) · [프로그램 사용법](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool#readme)
+[예시 12종 ZIP 다운로드](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.1/PrivacySelfAssessmentTool-Examples-0.1.1.zip) · [프로그램 사용법](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool#readme)
 
-**2026-10-30에 갱신한 0.1.0 설치판**은 드래그 앤 드롭을 지원합니다. 이전 설치판을 사용 중이면 최신 설치 파일로 다시 설치하거나 **파일 추가** 버튼을 사용하세요.
+**0.1.1 설치판**은 드래그 앤 드롭, 문서 페이지 이동과 문맥 보정을 제공합니다. 예시 12종은 기존과 같은 합성 자료이며, 후보 수 감소가 정확도 향상을 뜻하지는 않습니다. 현재도 오탐·누락이 발생하므로 원문 위치와 수정 사본을 함께 확인하세요.
 
 | 형식 | 파일 | 상황 |
 |---|---|---|
