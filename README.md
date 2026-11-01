@@ -1,4 +1,4 @@
-# 개인정보 자가진단 도구
+﻿# 개인정보 자가진단 도구
 
 공유하기 전 게시글과 문서에서 개인정보 후보를 찾고, 사용자가 위치와 문맥을 확인해 가리거나 수정하는 **Windows용 로컬 프로그램**입니다. 현재 배포 버전은 **0.1.1**입니다.
 
@@ -8,16 +8,24 @@
 
 **현재도 오탐과 누락이 발생합니다.** 일반 단어·항목 기호가 이름으로, 동작 표현이 학교 약칭·학력으로 검출될 수 있습니다. 검출 결과는 확정 판정이 아닌 후보이며, 세부 내용은 아래 [확인된 오탐과 남은 제한](#확인된-오탐과-남은-제한)을 확인하세요.
 
-**[Windows 설치 파일 다운로드](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.1/PrivacySelfAssessmentTool-Setup-0.1.1.exe)** · **[예시 문서 12종 ZIP 다운로드](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.1/PrivacySelfAssessmentTool-Examples-0.1.1.zip)** · [Release 0.1.1](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/tag/v0.1.1)
+**[Windows 설치 파일 다운로드](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.1/PrivacySelfAssessmentTool-Setup-0.1.1.exe)** · **[전체 예시 ZIP 다운로드](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.1/PrivacySelfAssessmentTool-Examples-0.1.1.zip)** · **[게시글 예시 10개 ZIP 다운로드](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.1/PrivacySelfAssessmentTool-Posts-0.1.1.zip)** · [Release 0.1.1](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/tag/v0.1.1)
 
 ### 0.1.1에서 달라진 점
 
-- 성명·기관명·일반 단어와 생년월일·일정의 문맥 보정을 개선했습니다. 문서 안의 항목명과 표 머리글을 해당 파일의 검토에 활용합니다.
-- 목록 기호·모집군·항목 구분을 이름으로 판단하는 일부 오탐을 줄였습니다. 모든 한 글자 표현을 일괄 제외하는 방식은 아닙니다.
-- PDF의 정상 글자층을 우선 사용하고 이미지·문제 구간을 OCR로 보완합니다. 문서번호와 이름 후보의 겹침 및 번호 정규화도 보완했습니다.
-- DOCX·PPTX의 필드·연결 개체가 있어도 표시용 사본으로 페이지를 만들고, 머리말·바닥글 및 확인 가능한 내장 이미지 위치를 연결합니다.
-- 이전·다음 페이지 버튼과 단계형 검사 진행 화면을 제공합니다.
-- **Qwen3.5-0.8B 2차 문맥 검토**를 시험용 선택 기능으로 제공합니다. 기본값은 기존 KoELECTRA 방식이며 추가 모델을 자동으로 내려받거나 활성화하지 않습니다.
+**편의성**
+
+- 문서·PDF·이미지의 이전·다음 페이지 이동을 제공합니다.
+- 단계형 검사 진행 화면과 작업 취소를 보완했습니다.
+- 불러오기용 `.piipost` 합성 게시글 10개를 추가했습니다. 기존 문서 12종과 함께 설치 폴더·시작 메뉴·예시 ZIP에서 제공합니다.
+- README·설치 안내에 사용법과 오탐·누락이 남아 있는 맥락을 정리했습니다.
+
+**개선사항**
+
+- 문서 안의 항목명·표 머리글·같은 행을 활용해 성명·기관명·일반 표현과 생년월일·일정의 문맥 보정을 개선했습니다.
+- 목록 기호·모집군·항목 구분의 일부 이름 오탐, 문서번호와 이름 후보의 겹침, 번호 정규화를 보완했습니다.
+- PDF의 정상 글자층을 우선 사용하고 이미지·문제 구간을 OCR로 보완합니다.
+- DOCX·PPTX의 필드·연결 개체는 표시용 사본으로 페이지를 만들고, 머리말·바닥글 및 확인 가능한 내장 이미지 위치를 연결합니다.
+- **시험용 선택 기능:** Qwen3.5-0.8B 2차 문맥 검토를 추가했습니다. 기본값은 기존 KoELECTRA 방식이며 추가 모델을 자동으로 내려받거나 활성화하지 않습니다.
 
 ## 설치와 실행
 
@@ -30,7 +38,7 @@
 
 기본 설치 위치는 `%LOCALAPPDATA%\Programs\BeforePost`이고 설치 화면에서 바꿀 수 있습니다. 실행 구성요소의 긴 경로 오류를 피하도록 **설치 폴더의 전체 경로는 100자 이하**로 제한하며, 너무 길면 설치 전에 다른 위치를 선택하도록 안내합니다. 폴더 이름의 BeforePost는 기존 설치와의 호환성을 위한 내부 이름입니다. 실패하면 설치 폴더의 `install.log`에서 실패 단계를 확인하세요. 로그를 공유할 때는 개인 경로 등 불필요한 정보를 지우세요.
 
-설치 EXE에는 코드 서명을 적용하지 않았습니다. Release의 `SHA256SUMS.txt`로 다운로드한 EXE와 예시 ZIP의 해시를 대조할 수 있습니다. GitHub의 **Source code ZIP/TAR는 개발용 소스**이며 설치 프로그램이 아닙니다. 설치 파일은 내려받은 버전의 Release 해시를 기준으로 확인하세요.
+설치 EXE에는 코드 서명을 적용하지 않았습니다. Release의 `SHA256SUMS.txt`로 다운로드한 EXE·전체 예시 ZIP·게시글 예시 ZIP의 해시를 대조할 수 있습니다. GitHub의 **Source code ZIP/TAR는 개발용 소스**이며 설치 프로그램이 아닙니다. 설치 파일은 내려받은 버전의 Release 해시를 기준으로 확인하세요.
 
 ## 사용 방법
 
@@ -89,9 +97,11 @@ DOCX·PPTX 문서 화면과 **PDF 페이지** 화면의 **이전 / 다음** 버�
 
 반복 머리말·바닥글과 정확한 원본 이미지 배치를 확인한 내장 이미지의 후보도 페이지에서 표시합니다. 잘림·회전·동일 이미지 중복 등으로 배치를 확정하지 못한 이미지는 **이미지** 화면에서 검토하세요. 이미지의 저장 전 수정 모습은 이미지 화면에서 확인하고, 페이지에서는 사본 생성 후 실제 결과를 확인하세요. 메모·노트·속성은 본문 페이지 밖에도 있으므로 **텍스트 · 위치**를 함께 확인하세요. 페이지 변환이 실패해도 이 탭에서 검토를 계속할 수 있습니다. CSV·TSV 사본은 수식 실행 방지를 위해 `=`, `+`, `-`, `@`로 시작하는 셀에 작은따옴표를 덧붙일 수 있어 원문과 달라질 수 있습니다.
 
-## 예시 문서 12종으로 확인하기
+## 예시 문서 12종과 게시글 10개로 확인하기
 
 [예시 목록과 사용 안내](examples/README.md)에서 파일을 하나씩 받거나 위 ZIP으로 한 번에 받을 수 있습니다. 설치 폴더의 `examples/formats/files/`와 시작 메뉴의 **개인정보 자가진단 도구 예시 문서**에도 같은 12종을 제공합니다.
+
+게시글 예시는 `examples/posts/`와 시작 메뉴의 **개인정보 자가진단 도구 게시글 예시**에서 찾을 수 있습니다. **게시글 검사 → 저장한 글 불러오기**에서 `.piipost` 하나를 선택하면 제목과 본문을 그대로 불러옵니다. 이 파일은 **파일 검사**에 추가하는 문서가 아닙니다. 모임 안내·당첨자 발표·배송 요청·채용 공고 등 10가지 상황을 구성했습니다. 수정한 글은 다른 이름으로 저장해 이어서 사용할 수 있습니다.
 
 TXT·CSV·TSV·DOCX·PPTX·HWPX·HWP·XLSX·PDF·PNG·JPG·JPEG를 실제 공유 상황의 문서로 구성했습니다. 모든 인적사항·기관명은 합성 정보입니다. 한 번에 8개까지 열 수 있으므로 12종은 두 묶음으로 검사하세요. 후보 수뿐 아니라 실제 위치, 메모·숨김 영역, 수정 사본에 남은 정보와 보존할 내용을 함께 비교하세요.
 
@@ -163,7 +173,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build/build_installe
 
 결과는 `installer/out/`의 설치 EXE·예시 ZIP·`SHA256SUMS.txt`입니다. 설치 파일은 Git 소스에 넣지 않고 GitHub Releases에 배포합니다. 설치판에 포함하는 프런트엔드 구성요소의 라이선스는 설치 폴더의 `THIRD-PARTY-NOTICES.txt`, 내려받는 라이브러리·모델·외부 도구의 라이선스는 각 배포물의 고지를 확인하세요.
 
-공개 저장소에는 `src/`, `backend/`, 필수 설치·실행 스크립트와 의존성 설정, 사용 안내, 예시 12종을 관리합니다. 개발 메모·보고서·추가 시험 문서·자동 시험 코드·상세 결과·개인 자료는 공개 목록에서 제외합니다. 실행 환경·빌드 결과도 Git에서 제외합니다.
+공개 저장소에는 `src/`, `backend/`, 필수 설치·실행 스크립트와 의존성 설정, 사용 안내, 문서 예시 12종과 게시글 예시 10개를 관리합니다. 개발 메모·보고서·추가 시험 문서·자동 시험 코드·상세 결과·개인 자료는 공개 목록에서 제외합니다. 실행 환경·빌드 결과도 Git에서 제외하며, 예시 폴더 밖의 일반 `.piipost` 작업 파일도 제외합니다.
 
 ## 개발 및 AI 활용
 

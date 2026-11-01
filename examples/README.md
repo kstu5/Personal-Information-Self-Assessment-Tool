@@ -1,10 +1,31 @@
-# 검사에 사용할 예시 문서 12종
+# 검사에 사용할 문서 12종과 게시글 10개
 
 각 지원 확장자별로 실제 공유할 법한 문서를 구성했습니다. 인적사항·기관명은 합성 정보이며 이메일은 `example.invalid`를 사용합니다. 실제 개인의 자료를 수집한 문서가 아닙니다.
 
-[예시 12종 ZIP 다운로드](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.1/PrivacySelfAssessmentTool-Examples-0.1.1.zip) · [프로그램 사용법](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool#readme)
+[전체 예시 ZIP 다운로드](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.1/PrivacySelfAssessmentTool-Examples-0.1.1.zip) · [게시글 10개 ZIP 다운로드](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.1/PrivacySelfAssessmentTool-Posts-0.1.1.zip) · [프로그램 사용법](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool#readme)
 
-**0.1.1 설치판**은 드래그 앤 드롭, 문서 페이지 이동과 문맥 보정을 제공합니다. 예시 12종은 기존과 같은 합성 자료이며, 후보 수 감소가 정확도 향상을 뜻하지는 않습니다. 현재도 오탐·누락이 발생하므로 원문 위치와 수정 사본을 함께 확인하세요.
+**0.1.1 설치판**은 드래그 앤 드롭, 문서 페이지 이동과 문맥 보정을 제공합니다. 문서 12종은 기존과 같은 합성 자료이며 게시글 예시 10개를 추가했습니다. 후보 수 감소가 정확도 향상을 뜻하지는 않습니다. 현재도 오탐·누락이 발생하므로 원문 위치와 수정 사본을 함께 확인하세요.
+
+## 게시글 예시 불러오기
+
+**게시글 검사 → 저장한 글 불러오기**에서 `posts/`의 `.piipost` 하나를 선택하세요. 제목과 본문을 불러온 뒤 개인정보 검사를 실행할 수 있습니다. 설치 폴더의 `examples/posts/`와 시작 메뉴의 **개인정보 자가진단 도구 게시글 예시**에도 같은 파일을 제공합니다. `.piipost`는 파일 검사에 추가하는 형식이 아닙니다. 수정한 글은 다른 이름으로 저장해 사용하세요.
+
+| 게시글 예시 | 상황 |
+|---|---|
+| [01_독서모임_참가안내](posts/01_독서모임_참가안내.piipost) | 공개 일정과 담당자 연락처가 함께 있는 모임 안내 |
+| [02_추첨당첨자_발표](posts/02_추첨당첨자_발표.piipost) | 당첨자 이름과 연락처가 포함된 발표 초안 |
+| [03_배송지_변경요청](posts/03_배송지_변경요청.piipost) | 수령인·전화·상세 주소를 전달하는 요청 |
+| [04_중고물품_거래안내](posts/04_중고물품_거래안내.piipost) | 작성자 연락처와 방문 장소를 포함한 게시글 |
+| [05_직원채용_공고](posts/05_직원채용_공고.piipost) | 접수 일정과 채용 담당자의 문의 정보 |
+| [06_외부교육_참가추천](posts/06_외부교육_참가추천.piipost) | 참가자의 생년월일·학력·업무 정보를 담은 내부 공유 |
+| [07_봉사활동_참가명단](posts/07_봉사활동_참가명단.piipost) | 활동 일정과 참가자별 연락 정보를 담은 명단 |
+| [08_프로젝트_회의공유](posts/08_프로젝트_회의공유.piipost) | 담당자와 회의 일정·자료 주소가 있는 회의 결과 |
+| [09_공동구매_환불안내](posts/09_공동구매_환불안내.piipost) | 환불 신청인의 연락처와 가상 계좌가 섞인 안내 |
+| [10_공개행사_안내](posts/10_공개행사_안내.piipost) | 공개 일정과 일반 안내를 중심으로 작성한 게시글 |
+
+개인정보 값과 인물·기관의 관계는 합성했으며 실제 송금·연락·신청에 사용하지 않습니다. 이 예시는 오탐·누락을 함께 살펴보기 위한 자료로 정답 목록이나 정확도 보증을 제공하지 않습니다.
+
+## 파일 검사 예시 12종
 
 | 형식 | 파일 | 상황 |
 |---|---|---|

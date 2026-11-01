@@ -42,6 +42,7 @@ Source: "{#StageDir}\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdir
 [Icons]
 Name: "{autoprograms}\개인정보 자가진단 도구"; Filename: "{app}\python\pythonw.exe"; Parameters: "-X utf8 ""{app}\run.py"""; WorkingDir: "{app}"; Check: not IsVerificationInstall
 Name: "{autoprograms}\개인정보 자가진단 도구 예시 문서"; Filename: "{app}\examples\formats\files"; Check: not IsVerificationInstall
+Name: "{autoprograms}\개인정보 자가진단 도구 게시글 예시"; Filename: "{app}\examples\posts"; Check: not IsVerificationInstall
 Name: "{autodesktop}\개인정보 자가진단 도구"; Filename: "{app}\python\pythonw.exe"; Parameters: "-X utf8 ""{app}\run.py"""; WorkingDir: "{app}"; Tasks: desktopicon; Check: not IsVerificationInstall
 
 [UninstallDelete]

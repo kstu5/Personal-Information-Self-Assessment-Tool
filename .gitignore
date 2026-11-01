@@ -17,6 +17,7 @@ list.txt
 # --- 로컬 설정 / 시험 데이터 ---
 runtime.local.json
 *.piipost
+!/examples/posts/*.piipost
 
 # --- 공개 저장소에는 실행 코드·필수 설치 자료·예시 12종만 포함 ---
 /local-only/

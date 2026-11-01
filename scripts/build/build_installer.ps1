@@ -38,6 +38,10 @@ try {
     if ($examples.Count -ne 12) { throw 'Expected exactly twelve example documents.' }
     New-Item -ItemType Directory -Force (Join-Path $stage 'examples\formats\files') | Out-Null
     foreach ($example in $examples) { Copy-Item -LiteralPath $example.FullName -Destination (Join-Path $stage 'examples\formats\files') }
+    $postExamples = @(Get-ChildItem -LiteralPath 'examples\posts' -File -Filter '*.piipost')
+    if ($postExamples.Count -ne 10) { throw 'Expected exactly ten synthetic post examples.' }
+    New-Item -ItemType Directory -Force (Join-Path $stage 'examples\posts') | Out-Null
+    foreach ($example in $postExamples) { Copy-Item -LiteralPath $example.FullName -Destination (Join-Path $stage 'examples\posts') }
     Copy-Item -LiteralPath 'examples\README.md' -Destination (Join-Path $stage 'examples\README.md')
     New-Item -ItemType Directory -Force (Join-Path $stage 'backend'), (Join-Path $stage 'scripts\prepare'), (Join-Path $stage 'installer') | Out-Null
     Copy-Item backend\*.py, backend\HwpText.java (Join-Path $stage 'backend')
@@ -71,7 +75,10 @@ try {
     if (Test-Path -LiteralPath $exampleZip) { Remove-Item -LiteralPath $exampleZip -Force }
     Add-Type -AssemblyName System.IO.Compression.FileSystem
     [IO.Compression.ZipFile]::CreateFromDirectory((Join-Path $stage 'examples'), $exampleZip, [IO.Compression.CompressionLevel]::Optimal, $false, [Text.Encoding]::UTF8)
-    $sums = foreach ($releaseFile in @($artifact,$exampleZip)) {
+    $postZip = Join-Path $root "installer\out\PrivacySelfAssessmentTool-Posts-$version.zip"
+    if (Test-Path -LiteralPath $postZip) { Remove-Item -LiteralPath $postZip -Force }
+    [IO.Compression.ZipFile]::CreateFromDirectory((Join-Path $stage 'examples\posts'), $postZip, [IO.Compression.CompressionLevel]::Optimal, $false, [Text.Encoding]::UTF8)
+    $sums = foreach ($releaseFile in @($artifact,$exampleZip,$postZip)) {
         $digest = (Get-FileHash -LiteralPath $releaseFile -Algorithm SHA256).Hash.ToLowerInvariant()
         "$digest  $([IO.Path]::GetFileName($releaseFile))"
     }
