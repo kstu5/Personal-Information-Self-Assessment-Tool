@@ -38,6 +38,7 @@ def replacement(text,label,choice):
     mode=choice.get('mode','keep')
     if mode=='keep': return text
     if mode=='full': return '█████'
+    if label in {'API_KEY','PASSWORD'} and mode=='partial':return '█████'
     if mode=='custom':
         value=choice.get('text')
         if not isinstance(value,str) or len(value)>2000 or any(0xd800<=ord(c)<=0xdfff or ord(c)<32 and c not in '\n\t\r' for c in value): raise DocumentError('직접 수정 내용은 2,000자 이하의 텍스트여야 합니다.')
@@ -221,6 +222,33 @@ class FileReviewStore:
                 refined.extend({**c,'start':offset+c['start'],'end':offset+c['end']}
                                for c in context.refine(part,grouped[part['id']]))
             result={'candidates':refined}
+            # Stage 2: scan every original part, including cells whose credential
+            # label is in a different row/column. Never join independent values.
+            from backend.credentials import merge_credentials, LABEL_NAMES, CREDENTIAL_LABELS
+            from ko_pii.core.types import DetectionResult, RiskLevel
+            self._update(job,progress=f'{phase} · {index+1}/{len(batches)} 구간 · API 키·인증 토큰·비밀번호 검사 중')
+            if any(not any(a<=c['start']<c['end']<=b for a,b,_ in offsets) for c in result['candidates']):
+                raise DocumentError('검출 위치를 원본 문서 영역과 연결하지 못했습니다.')
+            keyed=[]
+            for offset,_,part in offsets:
+                self._check_cancel(job)
+                originals={};ds=[]
+                for c in result['candidates']:
+                    if not offset<=c['start']<c['end']<=offset+utf16(part['text']):continue
+                    a,b=py_offset(part['text'],c['start']-offset),py_offset(part['text'],c['end']-offset)
+                    originals[(a,b,c['label'])]=c
+                    ds.append(DetectionResult(c['label'],c['text'],a,b,RiskLevel[c['risk']],.9,
+                              extra={k:c[k] for k in ('credential','contextReview') if c.get(k)}))
+                fields=[(f.start,f.end,f.role) for f in context.fields[part['id']] if f.role.startswith('credential')]
+                for d in merge_credentials(part['text'],ds,fields):
+                    original=originals.get((d.start,d.end,d.label))
+                    if d.label not in CREDENTIAL_LABELS:
+                        keyed.append(original);continue
+                    start=offset+utf16(part['text'][:d.start]);end=offset+utf16(part['text'][:d.end])
+                    keyed.append({**(original or {}),'id':f'credential-{start}-{end}','source':'body',
+                        'start':start,'end':end,'text':d.text,'label':d.label,'labelName':LABEL_NAMES[d.label],
+                        'risk':d.risk_level.name,'credential':d.extra['credential']})
+            result={'candidates':keyed}
             # Per-part retries can lose a DOB label stored in a different cell.
             # Recover only valid dates with explicit structural field evidence,
             # using original offsets and without overriding another type.
@@ -239,7 +267,7 @@ class FileReviewStore:
             # and table boundaries have been restored. Do not ask the user to
             # supply the context that the file already contains.
             if hasattr(self.detector,'review') and result['candidates']:
-                self._update(job,progress=f'{phase} · {index+1}/{len(batches)} 구간 · 주변 문맥 2차 검토 중')
+                self._update(job,progress=f'{phase} · {index+1}/{len(batches)} 구간 · 유형별 주변 문맥 검토 중')
                 deadline=time.monotonic()+90
                 while True:
                     self._check_cancel(job)
@@ -400,7 +428,7 @@ class FileReviewStore:
                     if is_image:
                         if c.get('imageTextEditable'):
                             from backend.image_edit import validate_text,ImageEditError
-                            new='비공개' if choice['mode']=='full' else new
+                            new='비공개' if choice['mode']=='full' or c['label'] in {'API_KEY','PASSWORD'} and choice['mode']=='partial' else new
                             try:validate_text(new)
                             except ImageEditError as e:raise DocumentError(str(e))
                             image_edits.append({'asset':p['asset'],'box':c['maskBoxes']['full'][0],'text':new,'originalText':c['text']})

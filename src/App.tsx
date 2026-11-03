@@ -4,7 +4,7 @@ import { api, boot } from './api';
 import { cancelled, filenameFromTitle, openDocument, saveDocument } from './files';
 import type { CheckResult, Draft, SavedFile } from './types';
 import { PrivacyReview } from './PrivacyReview';
-import { maskedDraft, validateCandidates } from './masking';
+import { defaultChoices, maskedDraft, validateCandidates } from './masking';
 import type { MaskChoices } from './masking';
 import { FileReview } from './FileReview';
 
@@ -116,7 +116,7 @@ export function App() {
       if(revision.current!==current){setNotice('검사 중 글이 변경되었습니다. 현재 내용을 다시 검사해 주세요.');return;}
       if(next.revision!==current)throw new Error('검사 결과와 원문이 일치하지 않습니다. 다시 검사해 주세요.');
       validateCandidates(snapshot,next.candidates);
-      setResult(next);setView('results');setNotice('');window.scrollTo({top:0});
+      setResult(next);setChoices(defaultChoices(next.candidates));setView('results');setNotice('');window.scrollTo({top:0});
     }catch(e){if(revision.current===current){setError(cancelled(e)?'검사 시간이 초과되었습니다. 잠시 후 다시 검사해 주세요.':e instanceof Error?e.message:'검사에 실패했습니다.');}}
     finally{clearTimeout(timer);setChecking(false);}
   }

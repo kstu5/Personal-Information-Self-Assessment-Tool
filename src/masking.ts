@@ -10,12 +10,23 @@ export type MaskChoices = Record<string, MaskChoice>;
 export const MODE_NAMES: Record<MaskMode,string> = {
   partial:'부분 가림', full:'전체 가림', keep:'가리지 않음', custom:'직접 수정',
 };
+export const isCredential = (c:Pick<Candidate,'label'>):boolean => ['API_KEY','PASSWORD'].includes(c.label);
+const DEFAULT_MODES:Readonly<Record<string,'partial'|'full'>>={
+  API_KEY:'full',PASSWORD:'full',
+  RRN:'partial',FRN:'partial',DRIVER_LICENSE:'partial',PASSPORT:'partial',
+};
+export const defaultChoices = (candidates:Candidate[]):MaskChoices => Object.fromEntries(
+  candidates.filter(c=>Object.hasOwn(DEFAULT_MODES,c.label)).map(c=>[c.id,{mode:DEFAULT_MODES[c.label]}]),
+);
+export const candidateSummary = (c:Candidate):string => isCredential(c)
+  ? `${c.credential?.provider||'인증정보'} · ${Array.from(c.text).length}자` : c.text;
 const segments = new Intl.Segmenter('ko', {granularity:'grapheme'});
 const chars = (s:string) => Array.from(segments.segment(s), x=>x.segment);
 
 /** Every partial mask hides at least one character; full masking has a fixed length. */
 export function partialMask(candidate: Pick<Candidate,'text'|'label'>): string {
   const {text,label}=candidate;
+  if(isCredential(candidate)) return '█████';
   const digitCount=(text.match(/\d/g)||[]).length;
   function digits(keepStart:number,keepEnd:number) {
     let i=0;

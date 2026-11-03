@@ -20,6 +20,9 @@ _GROUP=re.compile(r'(?<![가-힣])[가나다][ \t]*군(?=$|[^가-힣]|으로|에
 _ADMISSION=re.compile(r'모집|전형|정시|수능|군별|원서|입학|지원[ \t]*구분')
 _ELIGIBILITY=re.compile(r'만학도|지원[ \t]*자격|모집[ \t]*대상|연령[ \t]*(?:기준|제한)|응시[ \t]*자격|입학[ \t]*전형')
 _ACTUAL_AGE=re.compile(r'(?:실제|현재|본인)[ \t]*(?:나이|연령)|(?:나이|연령)[ \t]*(?:는|은|:|：)')
+# A generated full mask in an explicit auth header is not a person's name.
+# Keep the literal source span and never exclude a bare name or an actual token.
+_MASKED_AUTH=re.compile(r'''(?<![A-Za-z0-9_])(?i:authorization)["']?[ \t]*[:=：][ \t]*["']?(?P<value>(?i:bearer)[ \t]+█████)(?=$|[ \t\r\n"',;.])''')
 
 
 def filter_nonpersonal(text,detections):
@@ -27,6 +30,7 @@ def filter_nonpersonal(text,detections):
     from backend.candidate_context import _person_field,birth_evidence
     fields=FileContext([{'id':'body','text':text,'target':{'kind':'text'}}]).fields['body']
     ranges=[m.span('word') for m in _DRAFT.finditer(text)]
+    ranges.extend(m.span('value') for m in _MASKED_AUTH.finditer(text))
     ranges.extend(m.span() for pattern in (_CATEGORY,_MARKER,_PAREN_MARKER,_ENUM) for m in pattern.finditer(text))
     for match in _SPACED_ENUM.finditer(text):
         lo=text.rfind('\n',0,match.start())+1;hi=text.find('\n',match.end())

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { PointerEvent } from 'react';
 import { api, boot } from './api';
-import { MODE_NAMES, RISKS, partialMask } from './masking';
+import { candidateSummary, defaultChoices, MODE_NAMES, RISKS, partialMask } from './masking';
 import type { MaskChoice, MaskMode } from './masking';
 import type { Box, DocumentJob, DocumentPreview, FileAsset, FileCandidate, FilePart, FileSelection, Region, TableSize } from './documentTypes';
 import { EMPTY_SELECTION } from './documentTypes';
@@ -13,6 +13,7 @@ import {draftChunks,draftStatus,fileReplacement as replacement} from './document
 import {previewView,readingParts,contentPage} from './filePreview';
 import {revealFileEditor} from './fileEditor';
 import {createFileDropHandlers} from './fileDrop';
+import {pickInspectionFiles} from './filePicker';
 import './file-review.css';
 import './document-preview.css';
 
@@ -126,6 +127,8 @@ export function FileReview({active,onWorkChange}:{active:boolean;onWorkChange:(w
   const [error,setError]=useState(''),[notice,setNotice]=useState(''),[uploading,setUploading]=useState(false),[removeId,setRemoveId]=useState('');
   const [partEdit,setPartEdit]=useState<{id:string;text:string}|null>(null);
   const [fileDragging,setFileDragging]=useState(false);
+  const [picking,setPicking]=useState(false);
+  const pickerLock=useRef(false);
   const [previews,setPreviews]=useState<Record<string,DocumentPreview>>({});
   const input=useRef<HTMLInputElement>(null),polling=useRef(false),uploadLock=useRef(false),jobsRef=useRef(jobs);jobsRef.current=jobs;
   const job=jobs.find(j=>j.id===id),s=states[id]||EMPTY_SELECTION;
@@ -142,7 +145,7 @@ export function FileReview({active,onWorkChange}:{active:boolean;onWorkChange:(w
       if(stop||!result.files.length)return;
       setJobs(old=>[...old,...result.files.filter(j=>!old.some(v=>v.id===j.id))]);
       setId(old=>old||result.files[0].id);
-      setStates(old=>{const next={...old};for(const j of result.files)if(!next[j.id])next[j.id]={...EMPTY_SELECTION,showOutput:!!j.exportResult,view:previewView(j.manifest?.kind)};return next;});
+      setStates(old=>{const next={...old};for(const j of result.files)if(!next[j.id])next[j.id]={...EMPTY_SELECTION,choices:defaultChoices(j.candidates),showOutput:!!j.exportResult,view:previewView(j.manifest?.kind)};return next;});
       setNotice('현재 앱에 열려 있던 파일을 다시 연결했습니다. 화면을 새로 열기 전의 저장하지 않은 가림 선택은 복원되지 않으므로 확인해 주세요.');
     }).catch(e=>{if(!stop)setError(message(e));});
     return()=>{stop=true;};
@@ -157,7 +160,7 @@ export function FileReview({active,onWorkChange}:{active:boolean;onWorkChange:(w
         if(stop)return;
         if(!jobsRef.current.some(v=>v.id===j.id))continue;
         setJobs(old=>old.map(v=>v.id===j.id?next:v));
-        if(next.state==='ready'&&ACTIVE.has(j.state)&&j.state!=='exporting')setStates(old=>({...old,[j.id]:{...(old[j.id]||EMPTY_SELECTION),view:previewView(next.manifest?.kind)}}));
+        if(next.state==='ready'&&ACTIVE.has(j.state)&&j.state!=='exporting')setStates(old=>({...old,[j.id]:{...(old[j.id]||EMPTY_SELECTION),choices:defaultChoices(next.candidates),view:previewView(next.manifest?.kind)}}));
         if(next.state==='ready'&&j.state==='exporting'&&next.exportResult)setStates(old=>({...old,[j.id]:{...(old[j.id]||EMPTY_SELECTION),view:previewView(next.manifest?.kind),showOutput:true,exportDirty:false,verified:false}}));
       }}catch(e){if(!stop)setError(message(e));}finally{polling.current=false;}}
     const timer=setInterval(()=>void poll(),1000);return()=>{stop=true;clearInterval(timer);};
@@ -180,6 +183,17 @@ export function FileReview({active,onWorkChange}:{active:boolean;onWorkChange:(w
       window.removeEventListener('dragend',drop.reset);window.removeEventListener('blur',drop.reset);window.removeEventListener('keydown',escape);drop.reset();
     };
   },[active]);
+  async function chooseFiles(){
+    if(pickerLock.current||uploadLock.current||jobsRef.current.length>=8)return;
+    if(boot.desktop){await addFiles();return;}
+    pickerLock.current=true;setPicking(true);setError('');
+    try{
+      const files=await pickInspectionFiles(window.showOpenFilePicker?.bind(window));
+      if(files===undefined)input.current?.click();
+      else if(files?.length)await addFiles(files);
+    }catch(e){setError(message(e));}
+    finally{pickerLock.current=false;setPicking(false);}
+  }
   async function addFiles(files?:FileList|File[]|null){
     if(uploadLock.current){setError('파일 추가가 끝난 뒤 다시 시도해 주세요.');return;}
     if(jobsRef.current.length>=8){setError('파일 8개까지 열 수 있습니다. 일부 파일을 제거하고 추가해 주세요.');return;}
@@ -194,7 +208,7 @@ export function FileReview({active,onWorkChange}:{active:boolean;onWorkChange:(w
         if(f.size>20*1024*1024){setError(`${f.name}: 20MB를 넘는 파일입니다.`);continue;}
         try{const r=await binary(`upload?filename=${encodeURIComponent(f.name)}`,{method:'POST',headers:{'Content-Type':'application/octet-stream'},body:f});added.push(await r.json());}catch(e){setError(`${f.name}: ${message(e)}`);}
       }}
-      if(added.length){setJobs(old=>[...old,...added]);setId(added[0].id);}
+      if(added.length){setJobs(old=>[...old,...added]);setId(added[0].id);setStates(old=>{const next={...old};for(const j of added)next[j.id]={...EMPTY_SELECTION,choices:defaultChoices(j.candidates),view:previewView(j.manifest?.kind)};return next;});}
     }catch(e){setError(message(e));}finally{uploadLock.current=false;setUploading(false);if(input.current)input.current.value='';}
   }
   async function remove(){if(!removeId)return;try{await api('documents/remove',{id:removeId});setJobs(old=>old.filter(j=>j.id!==removeId));if(id===removeId)setId(jobs.find(j=>j.id!==removeId)?.id||'');setStates(old=>{const n={...old};delete n[removeId];return n;});}catch(e){setError(message(e));}finally{setRemoveId('');}}
@@ -229,12 +243,12 @@ export function FileReview({active,onWorkChange}:{active:boolean;onWorkChange:(w
     else {const masked=Array.from(c.partialText||partialMask(c)),original=Array.from(c.text);(c.boxes||[]).forEach((b,i)=>{if(mode==='full'||masked[i]!==original[i])changingBoxes.push(b);});}
   }
   return <main className="file-review" hidden={!active}>
-    <div className="page-heading"><div><span className="eyebrow">파일 개인정보 검토</span><h1>원본은 그대로, 배포는 사본으로.</h1><p>문서와 이미지를 오가며 확인하고, 수정 사본을 다시 검사해 저장하세요.</p></div><button className="primary" disabled={uploading||jobs.length>=8} onClick={()=>boot.desktop?void addFiles():input.current?.click()}>{uploading?'파일 추가 중…':'+ 파일 추가'}</button><input ref={input} type="file" multiple accept={accept} hidden onChange={e=>void addFiles(e.target.files)}/></div>
+    <div className="page-heading"><div><span className="eyebrow">파일 개인정보 검토</span><h1>원본은 그대로, 배포는 사본으로.</h1><p>문서와 이미지를 오가며 확인하고, 수정 사본을 다시 검사해 저장하세요.</p></div><button className="primary" disabled={uploading||picking||jobs.length>=8} onClick={()=>void chooseFiles()}>{picking?'파일 선택 중…':uploading?'파일 추가 중…':'+ 파일 추가'}</button><input ref={input} type="file" multiple accept={accept} hidden onChange={e=>void addFiles(e.target.files)}/></div>
     <section className={`file-dropzone ${fileDragging?'dragging':''} ${uploading||jobs.length>=8?'unavailable':''}`} aria-label="파일 드래그 앤 드롭">
       <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M12 16V3m-4 4 4-4 4 4M4 14v5a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/></svg>
       <div><strong role="status">{uploading?'파일을 추가하고 있어요':jobs.length>=8?'파일 8개가 열려 있어요':fileDragging?'여기에 놓으면 검사를 시작합니다':'검사할 파일을 이 화면에 끌어 놓으세요'}</strong><p>{jobs.length>=8?'목록에서 파일을 제거한 뒤 추가해 주세요.':uploading?'추가가 끝난 뒤 다른 파일을 놓아 주세요.':'문서·이미지 여러 개를 함께 추가할 수 있어요. 파일당 20MB · 최대 8개'}</p></div><span>{jobs.length}/8개</span>
     </section>
-    <p className="file-model-attribution">이름·주소 검출: <strong>{boot.model||'KoELECTRA 개인정보 인식 모델'}</strong> · 그 밖의 유형: ko-pii 규칙 · 2차 문맥 검토: <strong>{boot.secondaryModel||'KoELECTRA'}</strong></p>
+    <p className="file-model-attribution">이름·주소: <strong>{boot.model||'KoELECTRA 개인정보 인식 모델'}</strong> · 번호 등: ko-pii 규칙 · API 키·비밀번호: 형식·항목 규칙 · 최종 문맥 검토: <strong>{boot.secondaryModel||'KoELECTRA'}</strong> + 유형별 규칙</p>
     {error&&<div className="error" role="alert">{error}<button onClick={()=>setError('')} aria-label="오류 닫기">×</button></div>}
     {notice&&<div className="notice" role="status">{notice}</div>}
     {!jobs.length?<section className="file-empty"><div className="file-empty-icon">▤</div><h2>검사할 파일을 추가해 주세요</h2><p>DOCX · HWPX · XLSX · PPTX · PDF · CSV · TXT<br/>PNG · JPG 이미지와 HWP 본문 검사도 지원해요.</p><div className="file-flow"><span>1. 사본에서 검사</span><b>→</b><span>2. 위치별 가림 선택</span><b>→</b><span>3. 재검사 후 저장</span></div><p className="muted">파일당 20MB · 최대 8개 · PDF 최대 40쪽 · 내장 이미지 최대 40개<br/>수식이 있는 엑셀은 지원 수식을 재계산한 값 전용 사본으로 제공합니다.</p></section>:
@@ -259,6 +273,7 @@ export function FileReview({active,onWorkChange}:{active:boolean;onWorkChange:(w
       </div><aside className="file-controls" aria-label="개인정보 선택과 처리">
       {!s.showOutput&&focus&&<section className="file-choice-editor" id="file-choice-editor" aria-label="선택한 개인정보 처리">
         <div><span className={`risk-${focus.risk}`}>{riskName(focus.risk)} · {focus.labelName}</span><small>{focus.location}</small><button aria-label="선택 편집 닫기" onClick={()=>selectState({focus:null})}>×</button></div><strong>{focus.text}</strong>
+        {focus.credential&&<p>인증정보 · {focus.credential.provider} · {focus.credential.reason}</p>}
         {focus.ocrConfidence!==undefined&&<p className="ocr-reading-note">{focus.ocrConfidence<80?'글자 인식이 불확실합니다.':'이미지에서 읽은 글자입니다.'} 원문과 다르게 읽혔거나 개인정보가 아니면 ‘가리지 않음’을 선택하세요.</p>}
         <div className={`file-choice-state ${draftStatus(focus,s)!=='unset'?'assigned':''}`} role="status">{focus.part in s.textEdits?'✓ 영역 직접 수정 지정':s.choices[focus.id]?`✓ ${MODE_NAMES[s.choices[focus.id].mode]} 지정`:'처리 방법 미설정'}</div>
         <div className="file-choice-buttons">{(['partial','full','keep','custom'] as MaskMode[]).map(mode=><button key={mode} disabled={locked||focus.part in s.textEdits||!!focus.asset&&!focus.imageTextEditable&&mode==='custom'} aria-pressed={!(focus.part in s.textEdits)&&s.choices[focus.id]?.mode===mode} onClick={()=>apply(mode,[focus.id])}>{focus.imageTextEditable&&mode==='full'?'비공개 표시':MODE_NAMES[mode]}</button>)}</div>
@@ -269,7 +284,7 @@ export function FileReview({active,onWorkChange}:{active:boolean;onWorkChange:(w
       </section>}
       <FileFindings overview="hidden" output={s.showOutput} candidates={shownCandidates} selection={shownSelection} locked={locked||s.showOutput} onState={selectState} onSelect={chooseShown} onApply={apply} formatReplacement={replacement}/>
       </aside></div>
-      <div className="file-applied-columns">{(['partial','full','custom'] as const).map(mode=><section key={mode}><h3>{MODE_NAMES[mode]} 적용 목록 <small>{all.filter(c=>s.choices[c.id]?.mode===mode).length}곳</small></h3><div>{all.filter(c=>s.choices[c.id]?.mode===mode).map(c=><article key={c.id}><button onClick={()=>choose(c)}><small>{c.labelName} · {c.location}</small><span>{c.text} → {c.asset&&!c.imageTextEditable?'영역 가림':replacement(c,s.choices[c.id])}</span></button><select aria-label={`${c.text} 적용 변경`} disabled={locked} value={mode} onChange={e=>apply(e.target.value as MaskMode,[c.id])}><option value="partial">부분</option><option value="full">전체</option><option value="custom" disabled={!!c.asset&&!c.imageTextEditable}>수정</option></select><button disabled={locked||!!c.asset&&!c.imageTextEditable} onClick={()=>apply('custom',[c.id])}>편집</button><button disabled={locked} onClick={()=>clearChoice(c.id)}>취소</button></article>)}</div></section>)}</div>
+      <div className="file-applied-columns">{(['partial','full','custom'] as const).map(mode=><section key={mode}><h3>{MODE_NAMES[mode]} 적용 목록 <small>{all.filter(c=>s.choices[c.id]?.mode===mode).length}곳</small></h3><div>{all.filter(c=>s.choices[c.id]?.mode===mode).map(c=><article key={c.id}><button onClick={()=>choose(c)}><small>{c.labelName} · {c.location}</small><span>{candidateSummary(c)} → {c.asset&&!c.imageTextEditable?'영역 가림':replacement(c,s.choices[c.id])}</span></button><select aria-label={`${c.text} 적용 변경`} disabled={locked} value={mode} onChange={e=>apply(e.target.value as MaskMode,[c.id])}><option value="partial">부분</option><option value="full">전체</option><option value="custom" disabled={!!c.asset&&!c.imageTextEditable}>수정</option></select><button disabled={locked||!!c.asset&&!c.imageTextEditable} onClick={()=>apply('custom',[c.id])}>편집</button><button disabled={locked} onClick={()=>clearChoice(c.id)}>취소</button></article>)}</div></section>)}</div>
       <section className="file-export"><div><h3>수정 사본 만들기</h3><p>선택한 위치를 처리한 뒤 새 파일을 다시 열어 검사합니다.<br/>원본에는 덮어쓰지 않으며, 선택하지 않은 정보는 그대로 남습니다.</p></div><button className="primary" disabled={locked||!!m.blockers.length} onClick={()=>void generate()}>{job.state==='exporting'?'사본 처리 중…':'사본 생성 · 재검사'}</button>
       {exported&&!s.exportDirty&&<div className="file-export-result"><strong>재검사 완료 · 남은 후보 {exported.candidates.length}개</strong><p>{exported.filename}</p>{exported.candidates.length>0&&<details className="residual-list"><summary>남은 후보 {exported.candidates.length}개 보기</summary>{exported.candidates.map(c=><button key={c.id} onClick={()=>selectState({showOutput:true,view:c.asset?'images':'text',asset:c.asset||s.asset,page:Math.floor(exported.parts.findIndex(p=>p.id===c.part)/25)})}><span className={`risk-${c.risk}`}>{c.labelName}</span> {c.text} <small>{c.location}</small></button>)}</details>}<button className="secondary" onClick={previewOutput}>실제 사본 확인</button><label><input type="checkbox" checked={s.verified} onChange={e=>selectState({verified:e.target.checked})}/>남은 후보, 이미지 가림 범위, 지원 제한을 확인했습니다.</label><button className="primary" disabled={!s.verified||working} onClick={()=>void save()}>{boot.desktop?'새 파일로 사본 저장':'사본 다운로드'}</button></div>}
       </section><p className="file-footer-note">자동 검사는 오탐과 누락이 있을 수 있습니다. OCR 재검사 0건도 이미지에 개인정보가 없다는 뜻은 아닙니다. 부분 가림은 일부 개인정보를 남깁니다. 사본을 원래 문서 프로그램에서 열어 배치와 내용도 확인해 주세요.</p>

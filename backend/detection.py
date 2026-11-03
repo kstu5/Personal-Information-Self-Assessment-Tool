@@ -13,6 +13,7 @@ RISK_ORDER = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'INFO']
 
 def detect_document(title: str, body: str, engine, *, primary=False) -> dict:
     from ko_pii.labels import LABEL_INFO
+    from backend.credentials import LABEL_NAMES
     validate_text(title, body)
     candidates = []
     for source, text in [('title', title), ('body', body)]:
@@ -32,8 +33,9 @@ def detect_document(title: str, body: str, engine, *, primary=False) -> dict:
             candidates.append({
                 'id': f'{source}-{d.start}-{d.end}-{d.label}', 'source': source,
                 'start': offsets[d.start], 'end': offsets[d.end], 'text': d.text,
-                'label': d.label, 'labelName': LABEL_INFO.get(d.label, (d.label,))[0],
+                'label': d.label, 'labelName': LABEL_NAMES.get(d.label, LABEL_INFO.get(d.label, (d.label,))[0]),
                 'risk': risk,
+                **({'credential': d.extra['credential']} if d.extra and d.extra.get('credential') else {}),
                 **({'contextReview': d.extra['contextReview']} if d.extra and d.extra.get('contextReview') else {}),
             })
     return {'candidates': candidates, 'engine': engine.name}
@@ -51,7 +53,7 @@ def review_document(body,candidates,scopes,engine):
         if not 0<=a<b<=len(body) or body[a:b]!=c['text']:raise ValueError('Invalid review source')
         key=(a,b,c['label']);originals[key]=c
         detections.append(DetectionResult(c['label'],c['text'],a,b,RiskLevel[c['risk']],.9,
-                          extra={'contextReview':c['contextReview']} if c.get('contextReview') else {}))
+                          extra={k:c[k] for k in ('contextReview','credential') if c.get(k)}))
     mapped=[]
     for s in scopes or ():
         a,b=reverse[s['start']],reverse[s['end']]
@@ -62,7 +64,7 @@ def review_document(body,candidates,scopes,engine):
     for d in engine.review(body,detections,mapped):
         original=originals.get((d.start,d.end,d.label))
         if original is None or body[d.start:d.end]!=d.text:raise ValueError('Review changed source target')
-        result.append({**original,**({'contextReview':d.extra['contextReview']} if d.extra.get('contextReview') else {})})
+        result.append({**original,**{k:d.extra[k] for k in ('contextReview','credential') if d.extra.get(k)}})
     return {'candidates':result}
 
 

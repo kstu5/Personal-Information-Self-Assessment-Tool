@@ -151,12 +151,20 @@ class HybridDetector:
         merged = [d for d in rule_detections(text) if d.label not in DELEGATED_LABELS]
         reading = self.model.analyze(text)
         merged.extend(d for d in reading if d.label in DELEGATED_LABELS)
-        return refine_detections(text, merged, model_spans=reading)
+        from backend.credentials import merge_credentials
+        # Stage 2 reads the original text, even when stage 1 found no PII.
+        return merge_credentials(text, refine_detections(text, merged, model_spans=reading))
 
     def review(self,text,detections,scopes=None):
+        from backend.credentials import CREDENTIAL_LABELS, review_credentials
+        # Stage 3 uses separate criteria. A PII model cannot reject a secret.
+        personal = [d for d in detections if d.label not in CREDENTIAL_LABELS]
+        credentials = [d for d in detections if d.label in CREDENTIAL_LABELS]
         if getattr(self, 'qwen', None) is not None:
-            return self.qwen.review(text, detections, scopes)
-        from backend.secondary_review import review_candidates
-        analyze=getattr(self.model,'analyze_many',None)
-        if analyze is None:analyze=lambda texts:[self.model.analyze(t) for t in texts]
-        return review_candidates(text,detections,analyze,scopes)
+            reviewed = self.qwen.review(text, personal, scopes) if personal else []
+        else:
+            from backend.secondary_review import review_candidates
+            analyze=getattr(self.model,'analyze_many',None)
+            if analyze is None:analyze=lambda texts:[self.model.analyze(t) for t in texts]
+            reviewed = review_candidates(text,personal,analyze,scopes)
+        return sorted(reviewed + review_credentials(text,credentials,scopes), key=lambda d:(d.start,d.end))

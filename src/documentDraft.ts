@@ -1,9 +1,9 @@
 import type {MaskChoice,MaskMode} from './masking.ts';
-import {partialMask,replacement} from './masking.ts';
+import {isCredential,partialMask,replacement} from './masking.ts';
 import type {FileCandidate,FilePart,FileSelection} from './documentTypes.ts';
 
 export function fileReplacement(candidate:FileCandidate,choice?:MaskChoice):string {
-  if(candidate.imageTextEditable&&choice?.mode==='full')return '비공개';
+  if(candidate.imageTextEditable&&(choice?.mode==='full'||choice?.mode==='partial'&&isCredential(candidate)))return '비공개';
   return choice?.mode==='partial'?(candidate.partialText??partialMask(candidate)):replacement(candidate,choice);
 }
 

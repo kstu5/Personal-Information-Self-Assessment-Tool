@@ -9,8 +9,9 @@ export function fileProgressStatus(job:Pick<DocumentJob,'state'|'progress'>){
   const titles=exporting?['처리 순서를 기다리고 있어요','선택한 내용을 사본에 적용하고 있어요','수정 사본을 다시 검사하고 있어요']:['검사 순서를 기다리고 있어요','문서와 이미지를 읽고 있어요','개인정보 후보를 찾고 있어요'];
   const descriptions=exporting?['차례가 되면 새 사본을 만들기 시작합니다.','지정한 가림과 수정 내용을 새 파일에 반영하고 확인합니다.','사본에 남아 있는 개인정보 후보를 확인합니다.']:['앞선 파일의 처리가 끝나면 이 파일의 검사를 시작합니다.','본문과 지원하는 부가 정보, 이미지 속 글자를 함께 읽습니다.','이름과 번호, 주변 문맥을 함께 살펴봅니다.'];
   const batch=job.progress.match(/·\s*(\d+)\/(\d+)\s*구간/);
-  const secondary=job.progress.includes('주변 문맥 2차 검토');
-  return {exporting,step,steps,title:secondary?'주변 문맥을 한 번 더 검토하고 있어요':titles[step],description:secondary?'검출된 후보를 문장·표 항목과 함께 다시 분석해 결과를 정리합니다.':descriptions[step],batch:step===2&&batch?`검사 구간 ${batch[1]} / ${batch[2]}`:null};
+  const secondary=job.progress.includes('주변 문맥 2차 검토')||job.progress.includes('유형별 주변 문맥 검토');
+  const credential=job.progress.includes('API 키·인증 토큰');
+  return {exporting,step,steps,title:secondary?'주변 문맥을 한 번 더 검토하고 있어요':credential?'API 키·토큰·비밀번호를 찾고 있어요':titles[step],description:secondary?'검출된 후보를 문장·표 항목과 함께 유형별 기준으로 검토합니다.':credential?'알려진 키 형식과 인증정보 항목을 확인합니다.':descriptions[step],batch:step===2&&batch?`검사 구간 ${batch[1]} / ${batch[2]}`:null};
 }
 
 export function FileProgress({job,onCancel}:{job:DocumentJob;onCancel:()=>Promise<void>}){

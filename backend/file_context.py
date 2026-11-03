@@ -10,6 +10,7 @@ from dataclasses import dataclass
 import re
 import unicodedata
 from backend.identifier_rules import FIELD_LABELS, NUMERIC_LABELS, field_detection
+from backend.credentials import CREDENTIAL_FIELD_LABELS, CREDENTIAL_LABELS, password_field_role
 
 _ROLES = {
     'person': ('성명', '이름', 'Name', '담당자', '연락 담당자', '신청인', '지원자',
@@ -28,6 +29,7 @@ _ROLES = {
               '작성일', '회의일', '날짜', '항목', '자료 구분', '구분', '연번', '순번'),
     'object': ('물품 규격', '상품 규격', '제품 크기', '배송 물품 무게', '물품 무게', '장비 수량'),
 }
+_ROLES.update(CREDENTIAL_FIELD_LABELS)
 for _code, _labels in FIELD_LABELS.items():
     _ROLES['type:' + _code] = _labels
 _normalize = lambda value: re.sub(r'\s+', '', unicodedata.normalize('NFKC', value)).casefold()
@@ -62,7 +64,7 @@ class Field:
 
 
 def field_role(text):
-    return _ROLE_BY_LABEL.get(_normalize(text.strip(' \t\r\n:：')))
+    return _ROLE_BY_LABEL.get(_normalize(text.strip(' \t\r\n:：'))) or password_field_role(text)
 
 
 def _bounds(text):
@@ -284,6 +286,7 @@ class FileContext:
                 continue
             start = offsets[field.start + validated.start]; end = offsets[field.start + validated.end]
             overlaps = [c for c in result if start < c['end'] and c['start'] < end]
+            if any(c['label'] in CREDENTIAL_LABELS for c in overlaps):continue
             # Never replace a conflicting high-stakes identifier merely on a
             # field hint. Specific validated fields may displace fuzzy names.
             if any(c['risk'] == 'CRITICAL' and c['label'] != validated.label for c in overlaps):continue

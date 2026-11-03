@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import type { Candidate, CheckResult, Draft } from './types';
 import { boot } from './api';
-import { locationOf, maskedDraft, MODE_NAMES, replacement, RISKS } from './masking';
+import { candidateSummary, isCredential, locationOf, maskedDraft, MODE_NAMES, replacement, RISKS } from './masking';
 import type { MaskChoices, MaskMode } from './masking';
 import './review.css';
 
@@ -150,7 +150,7 @@ export function PrivacyReview({draft,result,choices,disabled,onChange,onWrite}:P
       <button className="rv-row-main" onClick={()=>openCustom(c,true)} aria-pressed={selection.has(c.id)}
         aria-label={`${c.labelName} · ${locationOf(draft,c)} · ${c.text} 직접 수정`}>
         <span className="rv-row-meta">{badge(c)}<span>{c.labelName} · {locationOf(draft,c)}</span><span>직접 수정 ↗</span></span>
-        <span className="rv-row-change">{mode==='keep'?<span>{c.text}</span>:<s>{c.text}</s>}<span aria-hidden="true">→</span><strong>{replacement(c,choices[c.id])}</strong></span>
+        <span className="rv-row-change">{mode==='keep'?<span>{candidateSummary(c)}</span>:<s>{candidateSummary(c)}</s>}<span aria-hidden="true">→</span><strong>{isCredential(c)&&mode==='keep'?'원문 유지':replacement(c,choices[c.id])}</strong></span>
         {(mode==='keep'||mode==='custom')&&<span className="rv-row-mode">{MODE_NAMES[mode]}</span>}
       </button>
       <div className="rv-row-actions">
@@ -178,14 +178,15 @@ export function PrivacyReview({draft,result,choices,disabled,onChange,onWrite}:P
   const others=candidates.filter(c=>['keep','custom'].includes(choices[c.id]?.mode));
   return <fieldset className="privacy-review" disabled={disabled} aria-label="개인정보 검토와 수정">
     {tip&&<div className="rv-tooltip" role="tooltip" style={{left:tip.left,top:tip.top}}>{tip.text}</div>}
-    <div className="page-heading"><div><span className="eyebrow">검사 결과</span><h1>개인정보 자가진단 도구</h1><p>표시된 개인정보 후보의 가림·수정을 선택하세요.</p></div><div className="rv-continue"><button className="secondary" onClick={onWrite}>수정한 글로 이어쓰기</button><span>적용한 가림·수정을 가져갑니다.</span></div></div>
+    <div className="page-heading"><div><span className="eyebrow">검사 결과</span><h1>개인정보 자가진단 도구</h1><p>표시된 개인정보·인증정보 후보의 가림·수정을 선택하세요.</p></div><div className="rv-continue"><button className="secondary" onClick={onWrite}>수정한 글로 이어쓰기</button><span>적용한 가림·수정을 가져갑니다.</span></div></div>
     <p className="review-notice result-notice">자동 검사는 개인정보를 잘못 표시하거나 놓칠 수 있습니다. 게시 전, 표시되지 않은 부분까지 직접 한 번 더 확인해 주세요.</p>
     <section className="dashboard rv-dashboard" aria-label="개인정보 후보 대시보드">
-      <div className="rv-dash-head"><h2>검출된 개인정보</h2><span>위험도는 처리 전 검출 기준 · 같은 값도 위치별 집계</span></div>
+      <div className="rv-dash-head"><h2>개인정보·인증정보 후보</h2><span>위험도는 처리 전 검출 기준 · 같은 값도 위치별 집계</span></div>
       <div className="rv-metrics"><div className="rv-metric"><span>전체 검출</span><div className="total"><strong>{candidates.length.toLocaleString()}</strong><span>곳</span></div></div>
         {RISKS.map(r=><div className="rv-metric" key={r.key}><span className={`rv-risk risk-${r.key}`}><i/>{r.name}</span><strong>{counts[r.key]}<small>곳</small></strong></div>)}</div>
       {candidates.length===0&&<div className="empty-results"><strong>탐지된 후보가 없습니다</strong><p>표시되지 않은 부분도 직접 한 번 더 확인해 주세요.</p></div>}
     </section>
+    {candidates.some(isCredential)&&<p className="review-notice">인증정보는 전체 가림을 기본 지정했습니다. 부분 가림을 선택해도 전체를 가립니다. 실제 유효성·권한은 확인하지 않으며, 이미 공유한 키는 폐기·재발급하고 비밀번호는 변경하세요.</p>}
     <article className="post rv-post" aria-label="전체 본문 미리보기">
       <div className="rv-document-head"><h2>전체 본문 미리보기</h2><div className="rv-view" role="group" aria-label="본문 표시 방식">
         <button aria-pressed={display==='original'} onClick={()=>setDisplay('original')}>원문</button>
@@ -209,6 +210,7 @@ export function PrivacyReview({draft,result,choices,disabled,onChange,onWrite}:P
       {!selected.length?<p className="rv-list-empty">본문에서 색칠된 항목을 선택해 주세요.</p>:<>
         <div className="rv-editor-meta"><span>{single?<>{single.labelName} · {locationOf(draft,single)} {badge(single)}</>:`${selected.length}곳 선택 · 선택한 항목에 함께 적용`}</span><span>{customOpen?'직접 수정 작성 중':common?MODE_NAMES[common]:single?'미설정':'미설정 또는 여러 처리 방식'}</span></div>
         <div className="rv-original">{single?single.text:selected.slice(0,3).map(c=>c.text).join(' · ')+(selected.length>3?` 외 ${selected.length-3}곳`:'')}</div>
+        {single?.credential&&<p className="rv-help">인증정보 · {single.credential.provider} · {single.credential.reason}</p>}
         <div className="rv-methods" role="group" aria-label="선택한 항목 처리 방법">
           {(['partial','full','keep','custom'] as const).map(mode=><button data-mode={mode} key={mode}
             aria-pressed={(customOpen?'custom':common)===mode} disabled={mode==='custom'&&!single}
