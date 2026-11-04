@@ -1,10 +1,24 @@
-# 검사에 사용할 문서 12종과 게시글 10개
+# 검사 예시 안내 — 기본 22개와 확장 52개
 
 각 지원 확장자별로 실제 공유할 법한 문서를 구성했습니다. 인적사항·기관명은 합성 정보이며 이메일은 `example.invalid`를 사용합니다. 실제 개인의 자료를 수집한 문서가 아닙니다.
 
-[전체 예시 ZIP 다운로드](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.2/PrivacySelfAssessmentTool-Examples-0.1.2.zip) · [게시글 10개 ZIP 다운로드](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.2/PrivacySelfAssessmentTool-Posts-0.1.2.zip) · [프로그램 사용법](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool#readme)
+[설치판 기본 예시 22개 ZIP](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.2/PrivacySelfAssessmentTool-Examples-0.1.2.zip) · [별도 확장 테스트 52개 ZIP](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.2/PrivacySelfAssessmentTool-TestExamples-0.1.2.zip) · [게시글 10개 ZIP](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.2/PrivacySelfAssessmentTool-Posts-0.1.2.zip) · [프로그램 사용법](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool#readme)
 
 **0.1.2 설치판**은 API 키·비밀번호 탐지와 유형별 기본 가림 설정을 추가했습니다. 문서 12종과 게시글 10개는 이전 배포와 같은 합성 자료입니다. 드래그 앤 드롭·문서 페이지 이동·문맥 보정도 계속 제공합니다. 후보 수 감소가 정확도 향상을 뜻하지는 않습니다. 현재도 오탐·누락이 발생하므로 원문 위치와 수정 사본을 함께 확인하세요.
+
+## 별도 다운로드: 확장 테스트 자료 52개
+
+| 구성 | 개수 | 확인할 내용 |
+|---|---:|---|
+| 아래의 기본 문서·게시글 | 22 | 형식별 읽기·위치 표시·가림·수정 |
+| 문맥 비교 문서 | 28 | 이름·기관명·일반 안내·연락처가 섞인 문맥 |
+| 인증정보 업무 문서 | 2 | 합성 API 키·비밀번호가 섞인 운영 인수인계 DOCX와 공유 메모 TXT |
+
+확장 ZIP에는 기본 22개를 포함한 **총 52개**가 들어 있습니다. 설치판과 이 소스 폴더는 기본 22개를 제공하며, 추가 30개는 Release의 확장 ZIP으로 받습니다. 확장 ZIP은 별도의 [SHA-256 확인 파일](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.2/PrivacySelfAssessmentTool-TestExamples-0.1.2.sha256.txt)을 사용합니다.
+
+압축을 해제한 뒤 `파일목록.html`에서 파일을 검색하고 `먼저읽기.md`를 확인하세요. 파일 검사는 한 번에 최대 8개이며 `.piipost`는 게시글 검사에서 불러옵니다. ZIP·폴더·안내 목록은 검사 대상이 아닙니다.
+
+실제 발급 인증정보·정답·내부 보고서는 포함하지 않았습니다. 기존 합성 예시를 모은 자료이며, 52개 전체의 정확도를 새로 측정했다는 뜻은 아닙니다. 문맥 비교 자료는 공통 작성 틀이 있어 전체 사용자 문서의 정확도를 대표하지 않습니다.
 
 ## 게시글 예시 불러오기
 
@@ -65,4 +79,4 @@ DOCX의 메모·작성자·속성, PPTX의 발표자 노트, XLSX의 숨김 시�
 
 XLSX는 지원 수식 재계산 후 값 전용 사본을 만들며, 수식을 유지한 편집은 지원하지 않습니다. 그림·차트·필터·외부 연결 등이 있는 다른 XLSX는 검사가 제한될 수 있습니다. PDF는 주석·링크·서명 등 구조에 따라 사본 생성을 제한하며, 저장 가능한 경우에도 목차·문서 속성 등은 보존하지 않습니다. 자세한 범위는 [지원 파일과 제한](../README.md#지원-파일과-제한)을 확인하세요.
 
-일정·작성일과 생년월일을 구분하고 `1세트` 같은 수량이 나이로 잡히는지, 수정한 뒤 이름·전화·주소가 의도대로 바뀌고 공개 일정·표가 유지되는지도 살펴보세요. 이미지는 선명한 기본 예시이며 저화질·필기·기울기 성능을 대표하지 않습니다. 검출 후보 수만으로 전체 정확도를 판단하지 마세요.
+일정·작성일과 생년월일을 구분하고 물품 수량이 나이로 잡히는지, 수정한 뒤 이름·전화·주소가 의도대로 바뀌고 공개 일정·표가 유지되는지도 살펴보세요. 이미지는 선명한 기본 예시이며 저화질·필기·기울기 성능을 대표하지 않습니다. 검출 후보 수만으로 전체 정확도를 판단하지 마세요.
