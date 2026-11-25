@@ -3,6 +3,12 @@
     [Parameter(Mandatory)][string]$AppDir,
     [string]$Components
 )
+# Windows PowerShell can inherit PowerShell 7 module paths from its launcher.
+# Prefer its own built-in modules for hash verification and ZIP extraction.
+if ($PSVersionTable.PSEdition -eq 'Desktop') {
+    $nativeModules = Join-Path $PSHOME 'Modules'
+    $env:PSModulePath = $nativeModules + [IO.Path]::PathSeparator + $env:PSModulePath
+}
 $ErrorActionPreference = 'Stop'
 if (-not $Components) { $Components = Join-Path $PSScriptRoot 'components.json' }
 $ProgressPreference = 'SilentlyContinue'
