@@ -51,6 +51,28 @@ class PreviewRequest(DocumentRef):
     retry: bool = False
 
 
+class KeywordRequest(DocumentRef):
+    revision: StrictStr
+    query: StrictStr
+
+
+class AddKeywordRequest(KeywordRequest):
+    matches: list[StrictStr]
+
+
+class SourceRangeRequest(DocumentRef):
+    revision: StrictStr
+    part: StrictStr
+    start: StrictInt
+    end: StrictInt
+    replaceId: StrictStr | None = None
+
+
+class ExcludeCandidatesRequest(DocumentRef):
+    revision: StrictStr
+    candidates: list[StrictStr]
+
+
 def create_app(port: int, *, desktop: Any = None, dist: Path | None = None) -> FastAPI:
     store, detector = FileStore(), Detector()
     documents = FileReviewStore(detector)
@@ -200,6 +222,22 @@ def create_app(port: int, *, desktop: Any = None, dist: Path | None = None) -> F
     @app.post('/api/documents/export')
     async def export_document(payload: ExportRequest):
         return documents.export(payload.id, payload.revision, payload.choices, payload.regions, payload.textEdits)
+
+    @app.post('/api/documents/search')
+    async def search_document(payload: KeywordRequest):
+        return await run_in_threadpool(documents.search_keywords, payload.id, payload.revision, payload.query)
+
+    @app.post('/api/documents/add-keywords')
+    async def add_document_keywords(payload: AddKeywordRequest):
+        return await run_in_threadpool(documents.add_keywords, payload.id, payload.revision, payload.query, payload.matches)
+
+    @app.post('/api/documents/add-range')
+    async def add_document_range(payload: SourceRangeRequest):
+        return await run_in_threadpool(documents.add_range, payload.id, payload.revision, payload.part, payload.start, payload.end, payload.replaceId)
+
+    @app.post('/api/documents/exclude')
+    async def exclude_document_candidates(payload: ExcludeCandidatesRequest):
+        return await run_in_threadpool(documents.exclude_candidates, payload.id, payload.revision, payload.candidates)
 
     @app.post('/api/documents/preview')
     async def preview_document(payload: PreviewRequest):

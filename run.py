@@ -66,7 +66,9 @@ def main():
             args.ready_file.write_text(json.dumps({'url': url}), encoding='utf-8')
         if desktop:
             import webview
-            desktop.window = webview.create_window('개인정보 자가진단 도구', url, width=1280, height=880, min_size=(760, 600), background_color='#f5f7f8')
+            # pywebview disables body text selection by default. Document range
+            # review needs native selection just like the browser development UI.
+            desktop.window = webview.create_window('개인정보 자가진단 도구', url, width=1280, height=880, min_size=(760, 600), background_color='#f5f7f8', text_select=True)
             desktop.window.events.closing += desktop.closing
             webview.start(gui='edgechromium', private_mode=True, debug=False)
         else:

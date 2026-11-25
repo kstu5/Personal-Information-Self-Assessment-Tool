@@ -31,7 +31,7 @@ export function OfficePreview({job,output,selection,candidates,onState,onSelect,
   const [preview,setPreview]=useState<DocumentPreview|null>(null),[error,setError]=useState(''),[retry,setRetry]=useState(0),[url,setUrl]=useState('');
   const viewportRef=useRef<HTMLDivElement>(null);
   const onReadyRef=useRef(onReady);onReadyRef.current=onReady;
-  const version=output?job.exportResult?.sha256:'source',enabled=job.state==='ready';
+  const version=output?job.exportResult?.sha256:job.revision,enabled=job.state==='ready';
   useEffect(()=>{
     const abort=new AbortController();let stopped=false,timer:ReturnType<typeof setTimeout>;
     setPreview(null);setError('');

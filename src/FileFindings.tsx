@@ -20,20 +20,23 @@ type Props = {
   formatReplacement: (candidate: FileCandidate, choice?: MaskChoice) => string;
   overview?: 'only' | 'hidden';
   output?: boolean;
+  onExclude?: (ids:string[])=>void;
 };
 
-export function FileFindings({ candidates, selection: s, locked, onState, onSelect, onApply, formatReplacement,overview,output=false }: Props) {
+export function FileFindings({ candidates: allCandidates, selection: s, locked, onState, onSelect, onApply, formatReplacement,overview,output=false,onExclude }: Props) {
+  const active=allCandidates,candidates=active;
   const search = s.search.trim().toLocaleLowerCase('ko');
   const filtered = candidates.filter(c => (s.filter === 'all' || c.risk === s.filter)
     && (!search || `${c.text} ${c.labelName} ${c.location}`.toLocaleLowerCase('ko').includes(search)));
-  const groups = RISKS.map(r => ({ ...r, all: candidates.filter(c => c.risk === r.key), items: filtered.filter(c => c.risk === r.key) }));
+  const groups = RISKS.map(r => ({ ...r, all: active.filter(c => c.risk === r.key), items: filtered.filter(c => c.risk === r.key) }));
   const selected = new Set(s.selected);
   const selectedHere = filtered.filter(c => selected.has(c.id)).length;
-  const outside = s.selected.length - selectedHere;
+  const selectedIds=filtered.filter(c=>selected.has(c.id)).map(c=>c.id);
+  const excludeIds=filtered.filter(c=>selected.has(c.id)&&!(c.part in s.textEdits)).map(c=>c.id);
   const allSelected = filtered.length > 0 && selectedHere === filtered.length;
   const selectAll = useRef<HTMLInputElement>(null);
-  const applied = candidates.filter(c => s.choices[c.id] && s.choices[c.id].mode !== 'keep').length;
-  const assigned = candidates.filter(c => draftStatus(c,s)!=='unset').length;
+  const applied = active.filter(c => s.choices[c.id] && s.choices[c.id].mode !== 'keep').length;
+  const assigned = active.filter(c => draftStatus(c,s)!=='unset').length;
   useEffect(() => {
     if (selectAll.current) selectAll.current.indeterminate = selectedHere > 0 && !allSelected;
   }, [selectedHere, allSelected]);
@@ -42,8 +45,8 @@ export function FileFindings({ candidates, selection: s, locked, onState, onSele
   return <section className="file-findings" aria-label="위험도별 개인정보 검토">
     {overview!=='hidden'&&<div className="file-risk-overview">
       <div className="file-risk-overview-head">
-        <div><strong>{candidates.length}</strong><span>{output?'개 사본의 남은 후보':'개 개인정보·인증정보 후보'}</span></div>
-        <p>{output?'수정 사본의 재검사 결과':<>처리 지정 <b>{assigned}/{candidates.length}개</b><span>가림·수정 {applied}개 · 영역 수정 {Object.keys(s.textEdits).length}곳 · 영역 가림 {s.regions.length}곳</span></>}</p>
+        <div><strong>{active.length}</strong><span>{output?'개 사본의 남은 후보':'개 개인정보·인증정보 후보'}</span></div>
+        <p>{output?'수정 사본의 재검사 결과':<>처리 지정 <b>{assigned}/{active.length}개</b><span>자동 탐지 {allCandidates.filter(c=>!c.addedByUser).length}개 · 사용자 추가 {allCandidates.filter(c=>c.addedByUser).length}개</span><span>가림·수정 {applied}개 · 영역 수정 {Object.keys(s.textEdits).length}곳 · 영역 가림 {s.regions.length}곳</span></>}</p>
       </div>
       <div className="file-risk-cards" role="group" aria-label="위험도별 목록 필터">
         {groups.map(r => <button key={r.key} className={`file-risk-card risk-${r.key} ${!r.all.length ? 'is-empty' : ''}`}
@@ -51,23 +54,24 @@ export function FileFindings({ candidates, selection: s, locked, onState, onSele
           onClick={() => onState({ filter: s.filter === r.key ? 'all' : r.key })}>
           <span className="file-risk-card-name"><i aria-hidden="true"/>{r.name}<span aria-hidden="true">{s.filter === r.key ? '✓' : '↗'}</span></span>
           <strong>{r.all.length}<small>개</small></strong><span className="file-risk-guidance">{GUIDANCE[r.key]}</span>
-          <span className="file-risk-meter" aria-hidden="true"><span style={{ width: `${candidates.length ? r.all.length / candidates.length * 100 : 0}%` }}/></span>
+          <span className="file-risk-meter" aria-hidden="true"><span style={{ width: `${active.length ? r.all.length / active.length * 100 : 0}%` }}/></span>
         </button>)}
       </div>
     </div>}
 
     {overview!=='only'&&<section className="file-findings-panel" aria-labelledby="file-findings-title">
       <div className="file-findings-heading">
-        <div><h3 id="file-findings-title">{output?'사본의 남은 후보':'검출 목록'} <span>{filtered.length}<small> / {candidates.length}개</small></span></h3><p>{output?'수정 사본에서 다시 찾은 후보입니다. 유지한 정보·부분 가림·오탐이 포함될 수 있어요.':'개인정보·인증정보 후보를 위험도가 높은 순서로 보여줍니다. 항목을 누르면 원문 위치로 이동해요.'}</p></div>
+        <div><h3 id="file-findings-title">{output?'사본의 남은 후보':'검출 목록'} <span>{filtered.length}<small> / {candidates.length}개</small></span></h3><p>{output?'수정 사본에서 다시 찾은 후보입니다. 유지한 정보·부분 가림·오탐이 포함될 수 있어요.':'오탐은 제외하고, 누락은 원문 검색으로 추가한 뒤 남은 후보에 처리 방법을 지정하세요.'}</p></div>
         <label className="file-findings-search"><span className="sr-only">검출 목록 검색</span><input value={s.search} onChange={e => onState({ search: e.target.value })} placeholder="내용·유형·위치 검색"/></label>
       </div>
+      {!output&&<p className="file-footer-note">제외한 위치는 가림 대상에서 빠지고 원문은 유지됩니다. 필요하면 원문을 다시 선택해 새 항목으로 추가하세요. 영역 직접 수정을 먼저 취소해야 제외할 수 있으며, 직접 지정한 가림 영역은 별도로 남습니다.</p>}
       {!output&&candidates.some(isCredential)&&<p className="file-footer-note">인증정보는 전체 가림을 기본 지정했습니다. 부분 가림도 전체를 가립니다. 실제 유효성·권한은 확인하지 않으며, 이미 공유한 키는 폐기·재발급하고 비밀번호는 변경하세요.</p>}
       <div className="file-findings-filter"><span>{s.filter === 'all' ? '전체 위험도' : `${RISKS.find(r => r.key === s.filter)?.name} 위험도`}{s.search.trim() ? ` · “${s.search.trim()}” 검색` : ''}</span><button onClick={reset} disabled={s.filter === 'all' && !s.search}>전체 목록 보기</button></div>
       {!output&&<div className="file-findings-bulk">
         <label><input ref={selectAll} type="checkbox" disabled={locked || !filtered.length} checked={allSelected} aria-checked={selectedHere > 0 && !allSelected ? 'mixed' : allSelected}
           onChange={e => onState({ selected: e.target.checked ? Array.from(new Set([...s.selected, ...filtered.map(c => c.id)])) : s.selected.filter(key => !filtered.some(c => c.id === key)) })}/>현재 목록 일괄 선택</label>
-        <span>{s.selected.length}개 일괄 선택{outside > 0 && <small> · 목록 밖 {outside}개 포함</small>}</span>
-        <div>{(['partial', 'full', 'keep'] as const).map(mode => <button key={mode} disabled={locked || !s.selected.length} onClick={() => onApply(mode, s.selected)}>{MODE_NAMES[mode]}</button>)}</div>
+        <span>현재 목록에서 {selectedHere}개 선택</span>
+        <div><button disabled={locked||!excludeIds.length} onClick={()=>onExclude?.(excludeIds)}>선택 후보 제외</button>{(['partial', 'full', 'keep'] as const).map(mode => <button key={mode} disabled={locked || !selectedIds.length} onClick={() => onApply(mode, selectedIds)}>{MODE_NAMES[mode]}</button>)}</div>
       </div>}
       <div className="file-findings-groups">
         {groups.filter(r => r.items.length).map(r => <details className={`file-findings-group risk-${r.key}`} key={`${r.key}:${s.filter}:${search}`} open>
@@ -78,13 +82,13 @@ export function FileFindings({ candidates, selection: s, locked, onState, onSele
             return <li className={`file-finding ${s.focus === c.id ? 'is-focused' : ''} ${!output&&(edited||choice)?choice?.mode==='keep'&&!edited?'is-kept':'is-assigned':''}`} key={c.id}>
               <input type="checkbox" aria-label={`${c.location} ${c.text} 선택`} disabled={locked} checked={selected.has(c.id)} onChange={e => onState({ selected: e.target.checked ? [...s.selected, c.id] : s.selected.filter(key => key !== c.id) })}/>
               <button className="file-finding-content" aria-label={`${c.labelName} ${c.text} 원문 위치 확인`} onClick={() => onSelect(c)}>
-                <span className="file-finding-meta"><span className="file-finding-type">{c.labelName}</span><span className={`file-finding-status ${changed||choice ? 'has-choice' : ''}`}>{output?'재검출':edited ? '✓ 영역 직접 수정' : choice ? `✓ ${MODE_NAMES[choice.mode]} 지정` : '미설정'}</span></span>
+                <span className="file-finding-meta"><span className="file-finding-type">{c.labelName}</span>{c.addedByUser&&<small>직접 추가 · 위험도 자동 판정 안 함</small>}<span className={`file-finding-status ${changed||choice ? 'has-choice' : ''}`}>{output?'재검출':edited ? '✓ 영역 직접 수정' : choice ? `✓ ${MODE_NAMES[choice.mode]} 지정` : '미설정'}</span></span>
                 <strong>{candidateSummary(c)}</strong>{c.credential&&<span className="file-finding-location">인증정보 · {c.credential.reason}</span>}{c.readingMethod&&<span className="file-finding-reading">{c.readingMethod==='native'?'원문 텍스트':'이미지에서 읽음 · OCR'}</span>}<span className="file-finding-location">{c.location}</span>
                 {choice && choice.mode !== 'keep' && !edited && <span className="file-finding-result">변경 예정 <b>{c.asset&&!c.imageTextEditable ? '선택한 이미지 영역 가림' : formatReplacement(c, choice) || '(빈 내용)'}</b></span>}
               </button>
               <div className="file-finding-actions">{!output&&<select aria-label={`${c.text} 가림 방법`} disabled={locked || edited} value={choice?.mode || ''} onChange={e => onApply(e.target.value as MaskMode, [c.id])}>
                 <option value="" disabled>처리 방법 선택</option>{(['keep', 'partial', 'full', 'custom'] as MaskMode[]).map(mode => <option key={mode} value={mode} disabled={!!c.asset && !c.imageTextEditable && mode === 'custom'}>{c.imageTextEditable&&mode==='full'?'비공개 표시':MODE_NAMES[mode]}</option>)}
-              </select>}<button onClick={() => onSelect(c)}>{output?'사본 위치':'원문 위치'} <span aria-hidden="true">↗</span></button></div>
+              </select>}{!output&&<button disabled={locked||edited} onClick={()=>onExclude?.([c.id])}>제외</button>}<button onClick={() => onSelect(c)}>{output?'사본 위치':'원문 위치'} <span aria-hidden="true">↗</span></button></div>
             </li>;
           })}</ol>
         </details>)}

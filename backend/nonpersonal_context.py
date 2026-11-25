@@ -22,7 +22,7 @@ _ELIGIBILITY=re.compile(r'만학도|지원[ \t]*자격|모집[ \t]*대상|연령
 _ACTUAL_AGE=re.compile(r'(?:실제|현재|본인)[ \t]*(?:나이|연령)|(?:나이|연령)[ \t]*(?:는|은|:|：)')
 # A generated full mask in an explicit auth header is not a person's name.
 # Keep the literal source span and never exclude a bare name or an actual token.
-_MASKED_AUTH=re.compile(r'''(?<![A-Za-z0-9_])(?i:authorization)["']?[ \t]*[:=：][ \t]*["']?(?P<value>(?i:bearer)[ \t]+█████)(?=$|[ \t\r\n"',;.])''')
+_MASKED_AUTH=re.compile(r'''(?<![A-Za-z0-9_])(?i:authorization)["']?[ \t]*[:=：][ \t]*["']?(?P<value>(?i:bearer)[ \t]+█+)(?=$|[ \t\r\n"',;.])''')
 
 
 def filter_nonpersonal(text,detections):

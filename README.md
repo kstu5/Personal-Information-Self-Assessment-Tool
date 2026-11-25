@@ -1,36 +1,38 @@
 ﻿# 개인정보 자가진단 도구
 
-공유하기 전 게시글과 문서에서 개인정보·인증정보 후보를 찾고, 사용자가 위치와 문맥을 확인해 가리거나 수정하는 **Windows용 로컬 프로그램**입니다. 현재 배포 버전은 **0.1.2**입니다.
+공유하기 전 게시글과 문서에서 개인정보·인증정보 후보를 찾고, 사용자가 위치와 문맥을 확인해 가리거나 수정하는 **Windows용 로컬 프로그램**입니다. 현재 배포 버전은 **0.1.3**입니다.
 
 **PNG·JPG·JPEG 이미지의 개인정보도 부분 가림·비공개 표시·직접 문구 수정이 가능합니다.** 원본과 적용 미리보기를 비교한 뒤 수정 사본을 PNG로 저장합니다.
 
-**0.1.2는 API 키·인증 토큰·비밀번호 탐지와 유형별 기본 가림 설정을 추가한 버전입니다.** 기존 사용자는 작업을 저장하고 앱을 종료한 뒤 새 설치 파일로 업데이트하세요. 문서 미리보기·페이지 이동·이미지 문구 수정·드래그 앤 드롭도 계속 지원합니다.
+**0.1.3은 검출 목록 정리·원문 범위 선택·파일 일괄 가림을 추가하고, 데스크톱 드래그와 전체 가림 길이를 개선한 버전입니다.** 기존 사용자는 필요한 사본을 저장하고 앱을 종료한 뒤 새 설치 파일로 업데이트하세요. API 키·비밀번호 탐지와 유형별 기본 가림 설정도 계속 제공합니다.
 
 **현재도 오탐과 누락이 발생합니다.** 일반 단어·항목 기호가 이름으로, 동작 표현이 학교 약칭·학력으로 검출될 수 있습니다. 검출 결과는 확정 판정이 아닌 후보이며, 세부 내용은 아래 [확인된 오탐과 남은 제한](#확인된-오탐과-남은-제한)을 확인하세요.
 
-**[Windows 설치 파일 다운로드](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.2/PrivacySelfAssessmentTool-Setup-0.1.2.exe)** · **[확장 테스트 52개 ZIP 다운로드](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.2/PrivacySelfAssessmentTool-TestExamples-0.1.2.zip)** · [설치판 기본 예시 22개 ZIP](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.2/PrivacySelfAssessmentTool-Examples-0.1.2.zip) · [게시글 예시 10개 ZIP](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.2/PrivacySelfAssessmentTool-Posts-0.1.2.zip) · [Release 0.1.2](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/tag/v0.1.2)
+**[Windows 설치 파일 다운로드](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.3/PrivacySelfAssessmentTool-Setup-0.1.3.exe)** · **[확장 테스트 52개 ZIP 다운로드](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.3/PrivacySelfAssessmentTool-TestExamples-0.1.3.zip)** · [설치판 기본 예시 22개 ZIP](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.3/PrivacySelfAssessmentTool-Examples-0.1.3.zip) · [게시글 예시 10개 ZIP](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.3/PrivacySelfAssessmentTool-Posts-0.1.3.zip) · [Release 0.1.3](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/tag/v0.1.3)
 
-### 0.1.2에서 달라진 점
+### 0.1.3에서 달라진 점
 
 **편의성**
 
-- API 키·인증 토큰·비밀번호에는 전체 가림을, 주민등록번호·외국인등록번호·운전면허번호·여권번호에는 부분 가림을 기본 지정합니다. 처리 방법은 항목마다 변경할 수 있습니다.
-- 브라우저가 지원하면 운영체제 파일 선택 기능을 우선 사용하고, 문서·이미지 필터와 여러 파일 선택을 제공합니다. 설치판은 기존 Windows 기본 선택 창을 사용합니다.
-- 기본 화면은 원본이며, 적용 미리보기에서 지정한 가림·수정 모습을 비교합니다. 기존 문서 예시 12종과 게시글 예시 10개를 유지합니다.
-- README와 설치 안내에 인증정보 탐지 범위·자동 가림 기준·남아 있는 제한을 정리했습니다.
-
-Release에는 별도 다운로드용 **확장 테스트 자료 52개**도 제공합니다. 설치판에 포함된 기본 예시 22개에 문맥 비교 문서 28개와 인증정보 업무 문서 2개를 더한 묶음이며, 설치판에 52개 모두가 포함되는 것은 아닙니다.
+- 검출 목록에서 오탐 후보를 개별·검색 결과 선택으로 제외합니다. 제외한 내용은 원문에서 새 사용자 항목으로 다시 추가할 수 있으며, 이전 처리 설정을 복원하지 않습니다.
+- 원문 키워드 검색으로 누락된 위치를 한 곳·여러 곳·전체 선택해 추가하고, 원문 위치에서 선택 범위를 확인합니다.
+- 원본의 후보는 클릭하고 원하는 글자는 드래그합니다. 한 문단·셀 안에서 범위를 추가·변경하고 부분·전체 가림이나 직접 수정으로 연결합니다.
+- 현재 파일의 미설정 후보에 부분·전체 가림을 일괄 적용하고 되돌릴 수 있습니다. 기존 개별 지정·영역 직접 수정은 유지합니다.
+- 이미지의 가림 영역을 확대 확인하고 모서리를 조정한 뒤 확정합니다. 원본·적용 미리보기와 실제 사본 확인 흐름을 유지합니다.
 
 **개선사항**
 
-- 기본 개인정보 탐지 → 인증정보 후보 탐지 → 유형별 문맥 검토 순서로 처리합니다. 인증정보는 별도 규칙으로 검토하며 개인정보용 모델의 판단으로 제외하지 않습니다.
-- 알려진 GitHub·OpenAI·Stripe 키 형식, AWS 비밀 키 항목, 일반 API 키·토큰 항목과 비밀번호를 탐지합니다. 추가 모델이나 외부 유효성 확인 API는 사용하지 않습니다.
-- 비밀번호 항목에서는 짧은 값·특수문자·한글·따옴표 안 공백을 확인하고, 빈 값·명확한 안내·자리표시자를 구분합니다.
-- 후보가 겹쳐도 인증정보와 기존 고위험 정보의 범위가 빠지지 않도록 보완했습니다.
-- 인증정보는 부분 가림을 선택해도 전체를 가립니다. 독립 이미지에서는 비공개 표시로 처리하며 미리보기와 저장 결과를 일치시킵니다.
-- 가림 사본의 인증 헤더가 이름으로 재검출되는 일부 오탐을 보정했습니다.
+- 데스크톱 앱의 본문 글자 선택 차단을 해제해 드래그와 범위 변경이 동작하도록 수정했습니다.
+- 텍스트 전체 가림을 고정 다섯 칸에서 원문의 표시 글자 수에 맞게 바꿨습니다. 공백·줄바꿈과 이모지·결합 문자를 고려하고 미리보기·저장 기준을 일치시킵니다.
+- 사용자 후보 변경 후 문서 미리보기 위치를 갱신하고, 활성 후보와 겹치는 중복 범위 추가를 차단합니다.
+- 검출 목록의 선택 처리는 현재 검색·위험도 필터에 표시된 선택 항목에 적용합니다. 현재 파일 일괄 적용은 필터와 관계없이 미설정 후보를 대상으로 합니다.
+- 인증정보의 부분 가림은 계속 전체를 숨기며, 이미지의 해당 문자 영역도 빠짐없이 지웁니다. 가림 사본의 인증 헤더 검토는 바뀐 가림 길이를 반영합니다.
 
-이전 배포인 [0.1.1](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/tag/v0.1.1)과 [0.1.0](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/tag/v0.1.0)은 보존합니다.
+탐지 모델과 기본 가림 유형은 유지합니다. 이번 검증은 목록 정리·범위 선택·가림·사본 저장 동작을 확인한 것이며, 전체 문서의 탐지 정확도를 새로 측정한 수치는 아닙니다. 오탐·누락이 남아 있으므로 최종 사본을 확인하세요.
+
+Release에는 별도 다운로드용 **확장 테스트 자료 52개**도 제공합니다. 기본 문서 12종·게시글 10개에 기존 문맥 비교 문서 28개와 인증정보 업무 문서 2개를 더한 묶음입니다. 설치판에는 기본 22개만 포함하며 예시의 검사 대상 내용은 이전 배포와 같습니다.
+
+이전 배포인 [0.1.2](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/tag/v0.1.2), [0.1.1](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/tag/v0.1.1), [0.1.0](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/tag/v0.1.0)은 보존합니다.
 
 ## 설치와 실행
 
@@ -43,7 +45,7 @@ Release에는 별도 다운로드용 **확장 테스트 자료 52개**도 제공
 
 기본 설치 위치는 `%LOCALAPPDATA%\Programs\BeforePost`이고 설치 화면에서 바꿀 수 있습니다. 실행 구성요소의 긴 경로 오류를 피하도록 **설치 폴더의 전체 경로는 100자 이하**로 제한하며, 너무 길면 설치 전에 다른 위치를 선택하도록 안내합니다. 폴더 이름의 BeforePost는 기존 설치와의 호환성을 위한 내부 이름입니다. 실패하면 설치 폴더의 `install.log`에서 실패 단계를 확인하세요. 로그를 공유할 때는 개인 경로 등 불필요한 정보를 지우세요.
 
-설치 EXE에는 코드 서명을 적용하지 않았습니다. Release의 [SHA256SUMS.txt](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.2/SHA256SUMS.txt)로 다운로드한 EXE·기본 예시 22개 ZIP·게시글 예시 ZIP의 해시를 대조할 수 있습니다. 확장 테스트 52개 ZIP은 별도의 [해시 확인 파일](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.2/PrivacySelfAssessmentTool-TestExamples-0.1.2.sha256.txt)을 사용합니다. 해시는 파일이 배포본과 일치하는지 확인하는 수단이며 코드 서명과는 다릅니다. GitHub의 **Source code ZIP/TAR는 개발용 소스**이며 설치 프로그램이 아닙니다.
+설치 EXE에는 코드 서명을 적용하지 않았습니다. Release의 [SHA256SUMS.txt](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.3/SHA256SUMS.txt)로 다운로드한 EXE·기본 예시 22개 ZIP·게시글 예시 ZIP의 해시를 대조할 수 있습니다. 확장 테스트 52개 ZIP은 별도의 [해시 확인 파일](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.3/PrivacySelfAssessmentTool-TestExamples-0.1.3.sha256.txt)을 사용합니다. 해시는 파일이 배포본과 일치하는지 확인하는 수단이며 코드 서명과는 다릅니다. GitHub의 **Source code ZIP/TAR는 개발용 소스**이며 설치 프로그램이 아닙니다.
 
 ## 사용 방법
 
@@ -58,6 +60,22 @@ Release에는 별도 다운로드용 **확장 테스트 자료 52개**도 제공
 파일 검사 중에는 **대기 → 내용 읽기 → 개인정보 검사 → 검토 준비**를 단계형 카드로 표시합니다. 검사 구간 수가 확인되면 현재 구간도 보여주며, **작업 취소**로 중지할 수 있습니다. 검사가 끝나기 전에는 미완성 결과를 표시하지 않습니다. 사본 생성 중에는 같은 카드에서 수정 적용·재검사 단계를 확인할 수 있습니다.
 
 게시글은 **제목 300자·본문 30,000자 이하**를 검사하며, 수정한 내용으로 이어 쓰거나 `.piipost` 작업 파일로 저장합니다. 이 파일은 제목·본문을 담은 암호화되지 않은 JSON이며, 파일 검사에서 선택한 처리 상태를 보관하는 형식은 아닙니다. 앱 종료·화면 새로고침 전에 필요한 사본을 저장하세요.
+
+### 파일 검출 목록 정리
+
+아래 기능은 0.1.3부터 소스와 Windows 설치판에 포함됩니다.
+
+1. **검출 목록 검색 → 선택 후보 제외**로 오탐을 정리합니다. 한 곳·여러 곳·현재 검색 목록 전체를 선택할 수 있습니다. 제외한 위치는 일괄 가림 대상에서 빠지며, 필요하면 원문을 다시 선택해 새 항목으로 추가합니다. 이전 처리 지정은 복구하지 않습니다.
+2. **원문에서 누락 항목 검색·추가**를 열어 자동 탐지가 놓친 문구를 검색합니다. 추가 가능한 결과를 한 곳·여러 곳·전체 선택해 **사용자 추가** 후보로 등록합니다. 이미 후보가 있는 위치는 중복 추가하지 않습니다. 추가 자체로 가림이 적용되지는 않습니다.
+3. **원본의 후보는 클릭하고, 원하는 글자는 드래그**합니다. 한 문단·셀에서 선택한 범위를 목록에만 추가하거나 부분·전체 가림·직접 수정으로 연결할 수 있습니다. 후보 편집의 **글자 범위 변경**은 기존 항목을 새 사용자 후보로 바꾸며, 다른 후보와 겹치는 범위는 추가하지 않습니다.
+4. 정리한 후보에 개별 처리 방법을 지정하거나 **현재 파일 후보에 일괄 적용**으로 미설정 후보에 부분·전체 가림을 지정하고, 원본과 적용 미리보기를 비교합니다. 기존 개별 지정과 영역 직접 수정은 유지됩니다.
+5. **사본 생성·재검사 → 실제 사본 확인 → 저장**으로 마무리합니다. 재검사는 사본을 새로 검사하므로 제외했던 정보도 다시 후보로 나올 수 있습니다.
+
+텍스트의 **전체 가림**은 원문에서 보이는 글자마다 `█` 한 개로 바꿉니다. 예를 들어 `김도윤`은 `███`가 됩니다. 공백·줄바꿈은 유지하며, 이모지와 결합 문자는 보이는 한 글자를 기준으로 셉니다. 게시글·문서 텍스트의 미리보기와 저장 사본에 같은 기준을 적용합니다. 이미지의 비공개 표시·영역 가림 방식은 기존과 같습니다.
+
+Word·PPT의 페이지 화면은 이미지로 표시하므로 **원문 글자 범위 선택**으로 텍스트 화면을 열어 드래그합니다. 적용 미리보기와 영역 직접 수정 중인 문단은 새 글자 선택을 받지 않습니다. 이미지의 **직접 영역 가리기**는 사각형을 그린 뒤 확대 화면에서 확인하고, 모서리를 조정해 **이 영역 가림 적용**으로 확정합니다. 모서리는 키보드 방향키(Shift: 10픽셀)로도 조정할 수 있습니다.
+
+원문 검색은 대소문자·띄어쓰기가 같은 문구를 문단·셀별로 찾습니다. 이미지에서는 OCR가 읽은 텍스트 범위만 검색되며, 미인식 글자는 이미지 영역을 직접 지정해 보완합니다. 사용자 추가 후보의 위험도는 자동 판정하지 않으며 참고 항목으로 표시합니다. 목록 제외·추가는 현재 파일의 위치에만 적용하고 다른 파일의 탐지 기준에는 반영하지 않습니다. 제외하더라도 별도로 지정한 이미지 가림 영역이나 영역 직접 수정은 남으므로 함께 확인하세요.
 
 ### 이미지의 가림과 직접 수정
 
@@ -108,7 +126,7 @@ DOCX·PPTX 문서 화면과 **PDF 페이지** 화면의 **이전 / 다음** 버�
 
 ### 설치판 기본 예시 22개
 
-[예시 목록과 사용 안내](examples/README.md)에서 기본 예시를 하나씩 받거나 [기본 예시 22개 ZIP](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.2/PrivacySelfAssessmentTool-Examples-0.1.2.zip)으로 한 번에 받을 수 있습니다. 설치 폴더의 `examples/formats/files/`와 시작 메뉴의 **개인정보 자가진단 도구 예시 문서**에도 같은 12종을 제공합니다.
+[예시 목록과 사용 안내](examples/README.md)에서 기본 예시를 하나씩 받거나 [기본 예시 22개 ZIP](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.3/PrivacySelfAssessmentTool-Examples-0.1.3.zip)으로 한 번에 받을 수 있습니다. 설치 폴더의 `examples/formats/files/`와 시작 메뉴의 **개인정보 자가진단 도구 예시 문서**에도 같은 12종을 제공합니다.
 
 게시글 예시는 `examples/posts/`와 시작 메뉴의 **개인정보 자가진단 도구 게시글 예시**에서 찾을 수 있습니다. **게시글 검사 → 저장한 글 불러오기**에서 `.piipost` 하나를 선택하면 제목과 본문을 그대로 불러옵니다. 이 파일은 **파일 검사**에 추가하는 문서가 아닙니다. 모임 안내·당첨자 발표·배송 요청·채용 공고 등 10가지 상황을 구성했습니다. 수정한 글은 다른 이름으로 저장해 이어서 사용할 수 있습니다.
 
@@ -116,7 +134,7 @@ TXT·CSV·TSV·DOCX·PPTX·HWPX·HWP·XLSX·PDF·PNG·JPG·JPEG를 실제 공유
 
 ### 별도 확장 테스트 자료 52개
 
-[확장 테스트 ZIP](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.2/PrivacySelfAssessmentTool-TestExamples-0.1.2.zip)은 다음 자료를 모은 별도 다운로드입니다. 기본 예시 22개를 포함해 총 52개이며, 기본 ZIP과 일부 파일이 중복됩니다.
+[확장 테스트 ZIP](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.3/PrivacySelfAssessmentTool-TestExamples-0.1.3.zip)은 다음 자료를 모은 별도 다운로드입니다. 기본 예시 22개를 포함해 총 52개이며, 기본 ZIP과 일부 파일이 중복됩니다.
 
 | 구성 | 개수 | 확인할 내용 |
 |---|---:|---|
@@ -133,7 +151,7 @@ TXT·CSV·TSV·DOCX·PPTX·HWPX·HWP·XLSX·PDF·PNG·JPG·JPEG를 실제 공유
 
 ### API 키·인증 토큰·비밀번호 점검
 
-**0.1.2부터 제공하는 기능입니다.** 기본 개인정보 후보 탐지 → API 키·인증 토큰·비밀번호 후보 탐지 → 유형별 문맥 검토 순서로 처리합니다. 문맥 검토는 후보 주변 문장·문단과 확인 가능한 표 항목명을 사용하며, 문서 전체 의미를 완전히 이해하거나 정확한 판정을 보장하지 않습니다.
+**0.1.3부터 제공하는 기능입니다.** 기본 개인정보 후보 탐지 → API 키·인증 토큰·비밀번호 후보 탐지 → 유형별 문맥 검토 순서로 처리합니다. 문맥 검토는 후보 주변 문장·문단과 확인 가능한 표 항목명을 사용하며, 문서 전체 의미를 완전히 이해하거나 정확한 판정을 보장하지 않습니다.
 
 GitHub 토큰, OpenAI의 알려진 키 형식, Stripe 비밀·제한 키를 확인합니다. AWS Secret Access Key는 명시적인 항목과 40자 값 형식을 함께 확인하며, 일반 API 키·client secret·access token 항목과 Authorization Bearer 헤더의 값도 제한적으로 탐색합니다. AWS 접근 키 ID 단독이나 Stripe 공개용 키는 비밀 키로 취급하지 않습니다. 모든 서비스·새로운 키 형식을 지원하는 것은 아닙니다.
 
@@ -163,7 +181,7 @@ GitHub 토큰, OpenAI의 알려진 키 형식, Stripe 비밀·제한 키를 확�
 
 Qwen은 이름·주소·생년월일·나이·키·몸무게·직위·국적·학력·전공 후보를 검토합니다. 전화번호·계좌번호 등 번호 판정은 기존 규칙을 사용합니다. 이미지는 기존 OCR로 읽은 글자를 검토하며, Qwen의 이미지 입력 기능을 연결한 것은 아닙니다.
 
-**시험용 선택 기능입니다.** 합성 문서 비교에서 오탐 감소와 함께 실제 개인정보를 잘못 제외하는 사례도 확인했습니다. 기본값은 KoELECTRA입니다. 0.1.2 설치판에는 선택 기능의 연결 코드·준비 도구를 제공하며, Qwen 가중치·추가 실행 도구는 포함하거나 자동 설치하지 않습니다.
+**시험용 선택 기능입니다.** 합성 문서 비교에서 오탐 감소와 함께 실제 개인정보를 잘못 제외하는 사례도 확인했습니다. 기본값은 KoELECTRA입니다. 0.1.3 설치판에는 선택 기능의 연결 코드·준비 도구를 제공하며, Qwen 가중치·추가 실행 도구는 포함하거나 자동 설치하지 않습니다.
 
 Windows x64 소스 환경을 준비한 후 다음 명령으로 선택 모델을 내려받고 실행합니다.
 
@@ -178,7 +196,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\start.ps1 -Secondary
 
 ### 확인된 오탐과 남은 제한
 
-**0.1.2에서도 개인정보가 아닌 내용을 검출하는 오탐과 실제 개인정보를 놓치는 누락이 남아 있습니다.** 문맥 보정과 2차 검토를 적용했다고 정확한 판정이 보장되는 것은 아닙니다.
+**0.1.3에서도 개인정보가 아닌 내용을 검출하는 오탐과 실제 개인정보를 놓치는 누락이 남아 있습니다.** 문맥 보정과 2차 검토를 적용했다고 정확한 판정이 보장되는 것은 아닙니다.
 
 | 유형 | 남아 있는 문제 |
 |---|---|

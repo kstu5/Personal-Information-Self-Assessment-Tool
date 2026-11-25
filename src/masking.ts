@@ -23,10 +23,13 @@ export const candidateSummary = (c:Candidate):string => isCredential(c)
 const segments = new Intl.Segmenter('ko', {granularity:'grapheme'});
 const chars = (s:string) => Array.from(segments.segment(s), x=>x.segment);
 
-/** Every partial mask hides at least one character; full masking has a fixed length. */
+/** One block per visible character; preserve spacing and line layout. */
+export const fullMask = (text:string):string => chars(text).map(c=>/^\p{White_Space}+$/u.test(c)?c:'█').join('');
+
+/** Every partial mask hides at least one character. Credentials hide every character. */
 export function partialMask(candidate: Pick<Candidate,'text'|'label'>): string {
   const {text,label}=candidate;
-  if(isCredential(candidate)) return '█████';
+  if(isCredential(candidate)) return fullMask(text);
   const digitCount=(text.match(/\d/g)||[]).length;
   function digits(keepStart:number,keepEnd:number) {
     let i=0;
@@ -53,7 +56,7 @@ export function partialMask(candidate: Pick<Candidate,'text'|'label'>): string {
 
 export function replacement(candidate:Candidate, choice?:MaskChoice):string {
   if (!choice || choice.mode==='keep') return candidate.text;
-  if (choice.mode==='full') return '█████';
+  if (choice.mode==='full') return fullMask(candidate.text);
   if (choice.mode==='partial') return partialMask(candidate);
   return choice.text;
 }

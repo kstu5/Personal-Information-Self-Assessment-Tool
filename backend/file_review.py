@@ -16,6 +16,7 @@ import sys
 import tempfile
 import threading
 import time
+import regex
 
 from backend.documents import DocumentError
 from backend.detection_context import table_date_fields, schedule_date_field, birth_date_field, date_field_role
@@ -37,8 +38,8 @@ def py_offset(value, offset):
 def replacement(text,label,choice):
     mode=choice.get('mode','keep')
     if mode=='keep': return text
-    if mode=='full': return '█████'
-    if label in {'API_KEY','PASSWORD'} and mode=='partial':return '█████'
+    if mode=='full' or label in {'API_KEY','PASSWORD'} and mode=='partial':
+        return ''.join(unit if regex.fullmatch(r'\p{White_Space}+', unit) else '█' for unit in regex.findall(r'\X', text))
     if mode=='custom':
         value=choice.get('text')
         if not isinstance(value,str) or len(value)>2000 or any(0xd800<=ord(c)<=0xdfff or ord(c)<32 and c not in '\n\t\r' for c in value): raise DocumentError('직접 수정 내용은 2,000자 이하의 텍스트여야 합니다.')
@@ -63,7 +64,7 @@ def image_mask_boxes(candidate,mode,asset):
     masked=replacement(candidate['text'],candidate['label'],{'mode':mode})
     groups=[];current=[]
     for i,box in enumerate(candidate['boxes']):
-        hide=mode=='full' or i<len(masked) and masked[i]!=candidate['text'][i]
+        hide=mode=='full' or mode=='partial' and candidate['label'] in {'API_KEY','PASSWORD'} or i<len(masked) and masked[i]!=candidate['text'][i]
         if hide:
             if box[2]>box[0] and box[3]>box[1]:current.append(box)
         elif current:groups.append(current);current=[]
@@ -333,6 +334,101 @@ class FileReviewStore:
     def list_jobs(self):
         with self.lock:return [self._public(job) for job in self.jobs.values()]
 
+    def _keyword_job(self, ident, revision):
+        job = self._job(ident)
+        if job['state'] != 'ready' or job['revision'] != revision:
+            raise DocumentError('검사 결과가 바뀌었습니다. 원문을 다시 검색해 주세요.')
+        self._check_cancel(job)
+        self._unchanged(job)
+        if not job['manifest'] or job['manifest']['blockers']:
+            raise DocumentError('이 파일은 지원 범위를 확인한 뒤 다시 열어 주세요.')
+        return job
+
+    def search_keywords(self, ident, revision, query):
+        from backend.file_keywords import keyword_matches
+        with self.lock:
+            job = self._keyword_job(ident, revision)
+            return {'matches': keyword_matches(job['manifest']['parts'], job['candidates'], query)}
+
+    def _manual_candidate(self, job, part, start, end):
+        # The client supplies only source positions. Text and image coordinates
+        # always come from the inspected, unchanged source on the server.
+        if type(start) is not int or type(end) is not int or not 0 <= start < end <= utf16(part['text']):
+            raise DocumentError('원문 안의 글자 범위를 선택해 주세요.')
+        lo, hi = py_offset(part['text'], start), py_offset(part['text'], end)
+        text = part['text'][lo:hi]
+        if not text.strip() or len(text) > 12000:
+            raise DocumentError('한 문단·셀 안에서 12,000자 이하의 내용을 선택해 주세요.')
+        item = dict(id=f"{part['id']}:{start}:{end}:USER_DEFINED:{secrets.token_urlsafe(6)}",
+                    part=part['id'], start=start, end=end, text=text, location=part['location'],
+                    readingMethod=part.get('readingMethod', 'ocr' if part.get('asset') else 'native'),
+                    source='body', label='USER_DEFINED', labelName='사용자 추가', risk='INFO', addedByUser=True,
+                    partialText=replacement(text, 'USER_DEFINED', {'mode': 'partial'}),
+                    imageTextEditable=job['manifest']['kind'] in {'.png', '.jpg', '.jpeg'} and bool(part.get('asset')))
+        if part.get('asset'):
+            boxes = part.get('boxes', [])[lo:hi]
+            if not any(b[2] > b[0] and b[3] > b[1] for b in boxes):
+                raise DocumentError('이미지 글자 위치가 없습니다. 이미지에서 영역을 직접 지정해 주세요.')
+            item.update(asset=part['asset'], boxes=boxes)
+            asset = next(a for a in job['manifest']['assets'] if a['id'] == part['asset'])
+            item['maskBoxes'] = {mode: image_mask_boxes(item, mode, asset) for mode in ('full', 'partial')}
+        return item
+
+    def _set_candidates(self, job, candidates):
+        order = {p['id']: i for i, p in enumerate(job['manifest']['parts'])}
+        job['candidates'] = sorted(candidates, key=lambda c: (order[c['part']], c['start'], c['end']))
+        job['revision'] = secrets.token_urlsafe(12)
+        job['exportResult'] = None
+        job['outputManifest'] = None
+        job['output'] = None
+        return self._public(job)
+
+    def add_range(self, ident, revision, part_id, start, end, replace_id=None):
+        with self.lock:
+            job = self._keyword_job(ident, revision)
+            part = next((p for p in job['manifest']['parts'] if p['id'] == part_id), None)
+            previous = next((c for c in job['candidates'] if c['id'] == replace_id), None) if replace_id else None
+            if not part or replace_id is not None and (not previous or previous['part'] != part_id):
+                raise DocumentError('현재 원문과 같은 위치의 후보를 선택해 주세요.')
+            item = self._manual_candidate(job, part, start, end)
+            remaining = [c for c in job['candidates'] if c['id'] != replace_id]
+            if any(c['part'] == part_id and start < c['end'] and c['start'] < end for c in remaining):
+                raise DocumentError('다른 검토 후보와 범위가 겹칩니다. 범위를 줄이거나 해당 후보를 먼저 제외하세요.')
+            if len(remaining) >= 6000:
+                raise DocumentError('후보는 6천 개까지 추가할 수 있습니다.')
+            return self._set_candidates(job, remaining + [item])
+
+    def exclude_candidates(self, ident, revision, ids):
+        with self.lock:
+            job = self._keyword_job(ident, revision)
+            known = {c['id'] for c in job['candidates']}
+            if not isinstance(ids, list) or not ids or len(ids) > 6000 or any(not isinstance(key, str) for key in ids) or len(set(ids)) != len(ids) or any(key not in known for key in ids):
+                raise DocumentError('제외할 현재 후보를 선택해 주세요.')
+            # No restoration history: reselecting the source creates a new,
+            # unassigned manual candidate instead of recovering old choices.
+            targets = set(ids)
+            return self._set_candidates(job, [c for c in job['candidates'] if c['id'] not in targets])
+
+    def add_keywords(self, ident, revision, query, matches):
+        from backend.file_keywords import keyword_matches
+        with self.lock:
+            job = self._keyword_job(ident, revision)
+            if not isinstance(matches, list) or not matches or len(matches) > 6000 or any(not isinstance(m, str) for m in matches) or len(set(matches)) != len(matches):
+                raise DocumentError('추가할 검색 결과를 선택해 주세요.')
+            available = {m['id']: m for m in keyword_matches(job['manifest']['parts'], job['candidates'], query)}
+            if any(m not in available or available[m]['reason'] for m in matches):
+                raise DocumentError('이미 후보가 있거나 원문과 일치하지 않는 위치입니다. 다시 검색해 주세요.')
+            if len(job['candidates']) + len(matches) > 6000:
+                raise DocumentError('후보는 6천 개까지 추가할 수 있습니다. 파일을 나누어 검사해 주세요.')
+            parts = {p['id']: p for p in job['manifest']['parts']}
+            added = []
+            for key in matches:
+                match = available[key]
+                part = parts[match['part']]
+                added.append(self._manual_candidate(job, part, match['start'], match['end']))
+            # Validate everything before changing the session; never modify source bytes.
+            return self._set_candidates(job, job['candidates'] + added)
+
     def _public(self,job):
         m=job['manifest']
         return {'id':job['id'],'name':job['name'],'state':job['state'],'progress':job['progress'],'revision':job['revision'],
@@ -355,7 +451,7 @@ class FileReviewStore:
         self._unchanged(job)
         if output and job.get('exportResult'):self.output(ident)
         with self.lock:
-            version=(job.get('exportResult') or {}).get('sha256') if output else job['hash']
+            version=(job.get('exportResult') or {}).get('sha256') if output else job['revision']
             cached=job['previews'].get(key)
             if cached and cached['version']==version and not (retry and cached['state']=='error'):
                 return self._public_preview(cached)
@@ -403,7 +499,7 @@ class FileReviewStore:
         job=self._job(ident);self._check_cancel(job);self._unchanged(job)
         if output:self.output(ident)
         value=job['previews'].get('output' if output else 'source')
-        version=(job.get('exportResult') or {}).get('sha256') if output else job['hash']
+        version=(job.get('exportResult') or {}).get('sha256') if output else job['revision']
         if not value or value['state']!='ready' or value['version']!=version or type(page) is not int or not 0<=page<len(value['pages']):
             raise DocumentError('문서 화면이 아직 준비되지 않았거나 바뀌었습니다. 다시 열어 주세요.')
         return job['work']/value['directory']/value['pages'][page]['file']
