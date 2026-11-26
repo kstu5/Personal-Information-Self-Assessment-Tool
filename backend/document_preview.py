@@ -59,7 +59,7 @@ def hit_boxes(refs, dimensions):
     return [{'page':page,'boxes':boxes} for page,boxes in pages.items()]
 
 
-def locate(parts,candidates,stream,refs,dimensions,slides):
+def locate(parts,candidates,stream,refs,dimensions,slides,source_spans=None):
     groups={}
     for p in parts:
         target=p['target'];name=target.get('name','')
@@ -81,7 +81,7 @@ def locate(parts,candidates,stream,refs,dimensions,slides):
                 context=compact(part['text'][:hi]) if prefix>=3 else compact(part['text'])
                 duplicates=any(p['id']!=part['id'] and compact(p['text']).startswith(context)
                                for group in groups.values() for p in group)
-                found=[]
+                found=[];spans=[]
                 for start in matches(stream,context):
                     end=start+len(context)-1
                     if refs[start][0]!=refs[end][0]:continue
@@ -91,7 +91,9 @@ def locate(parts,candidates,stream,refs,dimensions,slides):
                     offset=start+prefix
                     if in_margin and value and stream[offset:offset+len(value)]==value:
                         found.extend(refs[offset:offset+len(value)])
+                        spans.append((offset,offset+len(value)))
                 if found:link={'state':'ambiguous' if duplicates else 'linked','hits':hit_boxes(found,dimensions)}
+                if source_spans is not None and link['state']=='linked':source_spans[c['id']]=spans
                 links[c['id']]=link
                 continue
             allowed_page=slides.get(name)
@@ -108,6 +110,7 @@ def locate(parts,candidates,stream,refs,dimensions,slides):
                     offset=found[0]+sum(len(compact(p['text'])) for p in items[begin:i])+prefix
                     if value and stream[offset:offset+len(value)]==value:
                         link={'state':'linked','hits':hit_boxes(refs[offset:offset+len(value)],dimensions)}
+                        if source_spans is not None:source_spans[c['id']]=[(offset,offset+len(value))]
                         break
             if link['state']!='linked' and value:
                 found=found_in(value)
@@ -117,7 +120,60 @@ def locate(parts,candidates,stream,refs,dimensions,slides):
     return links
 
 
-def link_images(pdf,assets,asset_root,candidates,dimensions,entries):
+def selection_ranges(parts,stream,refs,dimensions,slides):
+    """Only verified whole-paragraph mappings become editable page characters."""
+    spans={}
+    whole=[{'id':p['id'],'part':p['id'],'start':0,'end':len(p['text'].encode('utf-16-le'))//2} for p in parts]
+    locate(parts,whole,stream,refs,dimensions,slides,spans)
+    result=[]
+    for part in parts:
+        positions=[];offset=0
+        for char in part['text']:
+            end=offset+len(char.encode('utf-16-le'))//2
+            if not char.isspace():positions.append((offset,end))
+            offset=end
+        for start,stop in spans.get(part['id'],[]):
+            if stop-start!=len(positions):continue
+            pages={}
+            for (lo,hi),(page,box) in zip(positions,refs[start:stop]):
+                width,height,pw,ph=dimensions[page]
+                scaled=[max(0,box[0]*width/pw),max(0,box[1]*height/ph),min(width,box[2]*width/pw),min(height,box[3]*height/ph)]
+                if scaled[2]>scaled[0] and scaled[3]>scaled[1]:pages.setdefault(page,[]).append([lo,hi,*scaled])
+            for page,characters in pages.items():result.append({'part':part['id'],'page':page,'characters':characters})
+    # Overlapping mappings to different parts cannot be used as edit anchors.
+    owners={}
+    for item in result:
+        for char in item['characters']:
+            owners.setdefault((item['page'],*char[2:]),set()).add(item['part'])
+    for item in result:
+        item['characters']=[char for char in item['characters'] if len(owners[(item['page'],*char[2:])])==1]
+    return [item for item in result if item['characters']]
+
+
+def links_from_ranges(candidates,ranges,pages,previous):
+    """Relink edited review lists without rerendering an unchanged source file."""
+    by_part={}
+    for item in ranges:by_part.setdefault(item['part'],[]).append(item)
+    dimensions=[(p['width'],p['height'],p['width'],p['height']) for p in pages]
+    result={}
+    for candidate in candidates:
+        if candidate['id'] in previous:
+            result[candidate['id']]=previous[candidate['id']]
+            continue
+        refs=[];covered=set()
+        for item in by_part.get(candidate['part'],[]):
+            for lo,hi,*box in item['characters']:
+                if lo<candidate['end'] and hi>candidate['start']:
+                    refs.append((item['page'],box));covered.add(lo)
+        expected=set();offset=candidate['start']
+        for char in candidate['text']:
+            if not char.isspace():expected.add(offset)
+            offset+=len(char.encode('utf-16-le'))//2
+        result[candidate['id']]={'state':'linked','hits':hit_boxes(refs,dimensions)} if expected and expected<=covered else {'state':'unavailable','hits':[]}
+    return result
+
+
+def link_images(pdf,assets,asset_root,candidates,dimensions,entries,parts=None,text_ranges=None):
     """Link exact image pixels to uncropped, axis-aligned page placements."""
     import hashlib
     from PIL import Image
@@ -154,6 +210,18 @@ def link_images(pdf,assets,asset_root,candidates,dimensions,entries):
             # the original-image view; no guessed page mask is shown.
             if abs(b)>1e-5 or abs(c)>1e-5 or a<=0 or d<=0:continue
             if e<0 or f<0 or e+a>pw+.1 or f+d>ph+.1:continue
+            if text_ranges is not None:
+                for part in parts or []:
+                    if part.get('asset')!=asset['id']:continue
+                    characters=[];offset=0
+                    for char,box in zip(part['text'],part.get('boxes',[])):
+                        end=offset+len(char.encode('utf-16-le'))//2
+                        x0,y0,x1,y1=box
+                        if not char.isspace() and 0<=x0<x1<=asset['width'] and 0<=y0<y1<=asset['height']:
+                            characters.append([offset,end,(e+a*x0/asset['width'])*width/pw,(f+d*y0/asset['height'])*height/ph,
+                                               (e+a*x1/asset['width'])*width/pw,(f+d*y1/asset['height'])*height/ph])
+                        offset=end
+                    if characters:text_ranges.append({'part':part['id'],'page':page_no,'characters':characters})
             for candidate in candidates:
                 if candidate.get('asset')!=asset['id']:continue
                 boxes=[]
@@ -195,8 +263,9 @@ def create_preview(source,work,parts,candidates,assets=None,asset_root=None):
             dimensions.append((pix.width,pix.height,page.rect.width,page.rect.height))
         stream,refs=pdf_stream(islice(pdf,40))
         links=locate(parts,candidates,stream,refs,dimensions,slides)
+        text_ranges=selection_ranges(parts,stream,refs,dimensions,slides)
         if assets:
-            links.update(link_images(pdf,assets,asset_root or source.parent,candidates,dimensions,entries))
-    return {'state':'ready','pages':pages,'links':links,
+            links.update(link_images(pdf,assets,asset_root or source.parent,candidates,dimensions,entries,parts,text_ranges))
+    return {'state':'ready','pages':pages,'links':links,'textRanges':text_ranges,
             'notices':notices,
             'warnings':notices+['변환한 문서 화면은 원래 프로그램의 배치와 다를 수 있습니다. 메모·노트·문서 속성은 텍스트 · 위치에서도 확인하세요.']}

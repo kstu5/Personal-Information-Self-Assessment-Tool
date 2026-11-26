@@ -35,6 +35,16 @@ def py_offset(value, offset):
     except UnicodeError: raise DocumentError('글자 위치가 올바르지 않습니다.')
 
 
+def public_characters(part):
+    """Source-derived UTF-16 positions, never browser-provided edit coordinates."""
+    result=[];offset=0
+    for char,box in zip(part['text'],part.get('boxes',[])):
+        end=offset+utf16(char)
+        if not char.isspace() and box[2]>box[0] and box[3]>box[1]:result.append([offset,end,*box])
+        offset=end
+    return result
+
+
 def replacement(text,label,choice):
     mode=choice.get('mode','keep')
     if mode=='keep': return text
@@ -290,6 +300,7 @@ class FileReviewStore:
                             break
                         item={**c,'id':f"{p['id']}:{start}:{end}:{c['label']}",'part':p['id'],'start':start,'end':end,'location':p['location'],
                               'readingMethod':p.get('readingMethod','ocr' if p.get('asset') and p.get('target',{}).get('kind')=='raster' else 'native')}
+                        if p.get('editable') is False:item.update(editable=False,readOnlyReason=p.get('readOnlyReason','이 글자 구간은 수정할 수 없습니다.'))
                         if c['label']=='DT_BIRTH' and birth_date_field(p['text'],date_fields.get(p['id'])):
                             item['contextReview']={**c.get('contextReview',{}),'state':'supported','reason':'표의 생년월일 항목과 연결된 날짜입니다.'}
                         if c['label']=='PERSON' and c.get('contextReview',{}).get('state')=='uncertain':
@@ -340,7 +351,7 @@ class FileReviewStore:
             raise DocumentError('검사 결과가 바뀌었습니다. 원문을 다시 검색해 주세요.')
         self._check_cancel(job)
         self._unchanged(job)
-        if not job['manifest'] or job['manifest']['blockers']:
+        if not job['manifest'] or job['manifest']['blockers'] and job['manifest']['kind']!='.hwp':
             raise DocumentError('이 파일은 지원 범위를 확인한 뒤 다시 열어 주세요.')
         return job
 
@@ -350,7 +361,7 @@ class FileReviewStore:
             job = self._keyword_job(ident, revision)
             return {'matches': keyword_matches(job['manifest']['parts'], job['candidates'], query)}
 
-    def _manual_candidate(self, job, part, start, end):
+    def _manual_candidate(self, job, part, start, end, label='USER_DEFINED',identifier=None):
         # The client supplies only source positions. Text and image coordinates
         # always come from the inspected, unchanged source on the server.
         if type(start) is not int or type(end) is not int or not 0 <= start < end <= utf16(part['text']):
@@ -359,12 +370,15 @@ class FileReviewStore:
         text = part['text'][lo:hi]
         if not text.strip() or len(text) > 12000:
             raise DocumentError('한 문단·셀 안에서 12,000자 이하의 내용을 선택해 주세요.')
-        item = dict(id=f"{part['id']}:{start}:{end}:USER_DEFINED:{secrets.token_urlsafe(6)}",
+        from backend.manual_types import manual_type
+        metadata=manual_type(label)
+        item = dict(id=identifier or f"{part['id']}:{start}:{end}:{label}:{secrets.token_urlsafe(6)}",
                     part=part['id'], start=start, end=end, text=text, location=part['location'],
                     readingMethod=part.get('readingMethod', 'ocr' if part.get('asset') else 'native'),
-                    source='body', label='USER_DEFINED', labelName='사용자 추가', risk='INFO', addedByUser=True,
-                    partialText=replacement(text, 'USER_DEFINED', {'mode': 'partial'}),
+                    source='body', **metadata, addedByUser=True,
+                    partialText=replacement(text, label, {'mode': 'partial'}),
                     imageTextEditable=job['manifest']['kind'] in {'.png', '.jpg', '.jpeg'} and bool(part.get('asset')))
+        if part.get('editable') is False:item.update(editable=False,readOnlyReason=part.get('readOnlyReason','이 글자 구간은 수정할 수 없습니다.'))
         if part.get('asset'):
             boxes = part.get('boxes', [])[lo:hi]
             if not any(b[2] > b[0] and b[3] > b[1] for b in boxes):
@@ -375,28 +389,47 @@ class FileReviewStore:
         return item
 
     def _set_candidates(self, job, candidates):
+        source_preview=job['previews'].get('source')
+        reusable=source_preview and source_preview['state']=='ready' and source_preview['version']==job['revision'] and 'textRanges' in source_preview
         order = {p['id']: i for i, p in enumerate(job['manifest']['parts'])}
         job['candidates'] = sorted(candidates, key=lambda c: (order[c['part']], c['start'], c['end']))
         job['revision'] = secrets.token_urlsafe(12)
         job['exportResult'] = None
         job['outputManifest'] = None
         job['output'] = None
+        if reusable:
+            from backend.document_preview import links_from_ranges
+            job['previews']['source']={**source_preview,'version':job['revision'],
+                'links':links_from_ranges(job['candidates'],source_preview['textRanges'],source_preview['pages'],source_preview['links'])}
         return self._public(job)
 
-    def add_range(self, ident, revision, part_id, start, end, replace_id=None):
+    def add_range(self, ident, revision, part_id, start, end, replace_id=None,label='USER_DEFINED'):
         with self.lock:
             job = self._keyword_job(ident, revision)
             part = next((p for p in job['manifest']['parts'] if p['id'] == part_id), None)
             previous = next((c for c in job['candidates'] if c['id'] == replace_id), None) if replace_id else None
             if not part or replace_id is not None and (not previous or previous['part'] != part_id):
                 raise DocumentError('현재 원문과 같은 위치의 후보를 선택해 주세요.')
-            item = self._manual_candidate(job, part, start, end)
+            item = self._manual_candidate(job, part, start, end,label)
             remaining = [c for c in job['candidates'] if c['id'] != replace_id]
             if any(c['part'] == part_id and start < c['end'] and c['start'] < end for c in remaining):
                 raise DocumentError('다른 검토 후보와 범위가 겹칩니다. 범위를 줄이거나 해당 후보를 먼저 제외하세요.')
             if len(remaining) >= 6000:
                 raise DocumentError('후보는 6천 개까지 추가할 수 있습니다.')
             return self._set_candidates(job, remaining + [item])
+
+    def set_manual_type(self,ident,revision,ids,label):
+        with self.lock:
+            job=self._keyword_job(ident,revision)
+            from backend.manual_types import manual_type
+            manual_type(label)
+            targets=set(ids)
+            chosen=[c for c in job['candidates'] if c['id'] in targets]
+            if not ids or len(ids)>6000 or len(targets)!=len(ids) or len(chosen)!=len(ids) or any(not c.get('addedByUser') for c in chosen):
+                raise DocumentError('유형을 지정할 현재 사용자 추가 항목을 선택해 주세요.')
+            parts={p['id']:p for p in job['manifest']['parts']}
+            replacements={c['id']:self._manual_candidate(job,parts[c['part']],c['start'],c['end'],label,c['id']) for c in chosen}
+            return self._set_candidates(job,[replacements.get(c['id'],c) for c in job['candidates']])
 
     def exclude_candidates(self, ident, revision, ids):
         with self.lock:
@@ -409,7 +442,7 @@ class FileReviewStore:
             targets = set(ids)
             return self._set_candidates(job, [c for c in job['candidates'] if c['id'] not in targets])
 
-    def add_keywords(self, ident, revision, query, matches):
+    def add_keywords(self, ident, revision, query, matches,label='USER_DEFINED'):
         from backend.file_keywords import keyword_matches
         with self.lock:
             job = self._keyword_job(ident, revision)
@@ -425,16 +458,18 @@ class FileReviewStore:
             for key in matches:
                 match = available[key]
                 part = parts[match['part']]
-                added.append(self._manual_candidate(job, part, match['start'], match['end']))
+                added.append(self._manual_candidate(job, part, match['start'], match['end'],label))
             # Validate everything before changing the session; never modify source bytes.
             return self._set_candidates(job, job['candidates'] + added)
 
     def _public(self,job):
         m=job['manifest']
+        from backend.auto_mask import proposals
+        automatic = proposals(job['candidates'], job.setdefault('autoAliases', {}))
         return {'id':job['id'],'name':job['name'],'state':job['state'],'progress':job['progress'],'revision':job['revision'],
-            'error':job['error'],'candidates':copy.deepcopy(job['candidates']),
+            'error':job['error'],'candidates':[{**copy.deepcopy(c),'autoMask':automatic[c['id']]} for c in job['candidates']],
             'manifest':None if m is None else {**{k:copy.deepcopy(v) for k,v in m.items() if k not in {'parts','assets'}},
-                'parts':[{k:v for k,v in p.items() if k not in {'target','boxes','ocrConfidences'}} for p in m['parts']],
+                'parts':[{**{k:v for k,v in p.items() if k not in {'target','boxes','ocrConfidences'}},**({'characters':public_characters(p)} if p.get('asset') else {})} for p in m['parts']],
                 'assets':[{k:v for k,v in a.items() if k not in {'target','file'}} for a in m['assets']]},
             'exportResult':copy.deepcopy(job['exportResult'])}
 
@@ -516,6 +551,7 @@ class FileReviewStore:
             for p in parts.values():
                 selected=[c for c in job['candidates'] if c['part']==p['id'] and choices.get(c['id'],{}).get('mode','keep')!='keep']
                 if not selected:continue
+                if p.get('editable') is False:raise DocumentError(p.get('readOnlyReason','이 글자 구간은 수정할 수 없습니다.'))
                 value=p['text'];is_image=bool(p.get('asset'))
                 for c in sorted(selected,key=lambda c:c['start'],reverse=True):
                     choice=choices[c['id']]
@@ -538,7 +574,7 @@ class FileReviewStore:
                 if not is_image:edits[p['id']]=value
             for pid,value in (text_edits or {}).items():
                 part=parts.get(pid)
-                if not part or part.get('asset') or part['target']['kind']=='readonly':raise DocumentError('직접 수정할 수 없는 영역입니다.')
+                if not part or part.get('asset') or part.get('editable') is False or part['target']['kind']=='readonly':raise DocumentError('직접 수정할 수 없는 영역입니다.')
                 if not isinstance(value,str) or len(value)>12000 or any(0xd800<=ord(c)<=0xdfff or ord(c)<32 and c not in '\n\t\r' for c in value):raise DocumentError('직접 수정은 영역당 12,000자 이하로 입력해 주세요.')
                 edits[pid]=value
             assets={a['id']:a for a in job['manifest']['assets']}

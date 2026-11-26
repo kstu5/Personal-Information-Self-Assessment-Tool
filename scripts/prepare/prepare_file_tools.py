@@ -94,8 +94,8 @@ def report():
         ('OCR data (eng)', (DEST/'tessdata'/'eng.traineddata').exists(), 'image OCR', '.runtime/file-tools/tessdata/eng.traineddata'),
         ('OCR data (kor)', (DEST/'tessdata'/'kor.traineddata').exists(), 'image OCR', '.runtime/file-tools/tessdata/kor.traineddata'),
         ('LibreOffice', (DEST/'libreoffice'/'program'/'soffice.com').is_file(), 'Word/PPT preview and XLSX value check', '.runtime/file-tools/libreoffice/program/soffice.com'),
-        ('hwplib 1.1.11', (DEST/'hwplib-1.1.11.jar').exists(), 'HWP reading', '.runtime/file-tools/hwplib-1.1.11.jar'),
-        ('Java (11 or later required; version not checked)', bool(java), 'HWP reading', 'java on PATH'),
+        ('hwplib 1.1.11', (DEST/'hwplib-1.1.11.jar').exists(), 'HWP inspection and verified copy writing', '.runtime/file-tools/hwplib-1.1.11.jar'),
+        ('Java (11 or later required; version not checked)', bool(java), 'HWP inspection and verified copy writing', 'java on PATH'),
     ]
     print('File inspection tools (setup guide: README.md):')
     for name, ok, feature, where in checks:

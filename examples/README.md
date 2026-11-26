@@ -2,7 +2,7 @@
 
 각 지원 확장자별로 실제 공유할 법한 문서를 구성했습니다. 인적사항·기관명은 합성 정보이며 이메일은 `example.invalid`를 사용합니다. 실제 개인의 자료를 수집한 문서가 아닙니다.
 
-[설치판 기본 예시 22개 ZIP](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.3/PrivacySelfAssessmentTool-Examples-0.1.3.zip) · [별도 확장 테스트 52개 ZIP](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.3/PrivacySelfAssessmentTool-TestExamples-0.1.3.zip) · [게시글 10개 ZIP](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.3/PrivacySelfAssessmentTool-Posts-0.1.3.zip) · [프로그램 사용법](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool#readme)
+[설치판 기본 예시 22개 ZIP](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.4/PrivacySelfAssessmentTool-Examples-0.1.4.zip) · [별도 확장 테스트 52개 ZIP](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.4/PrivacySelfAssessmentTool-TestExamples-0.1.4.zip) · [게시글 10개 ZIP](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.4/PrivacySelfAssessmentTool-Posts-0.1.4.zip) · [프로그램 사용법](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool#readme)
 
 설치판에는 **문서 12종·게시글 10개**, 확장 ZIP에는 이 기본 22개를 포함한 **총 52개**가 들어 있습니다. 검사 대상 내용은 이전 배포와 같은 합성 자료입니다. 프로그램 기능과 설치 방법은 [프로젝트 README](../README.md)를 확인하세요.
 
@@ -21,7 +21,7 @@ ZIP·폴더·안내 목록은 검사 대상이 아닙니다. 먼저 압축을 �
 | 문맥 비교 문서 | 28 | 이름·기관명·일반 안내·연락처가 섞인 문맥 |
 | 인증정보 업무 문서 | 2 | 합성 API 키·비밀번호가 섞인 운영 인수인계 DOCX와 공유 메모 TXT |
 
-확장 ZIP에는 기본 22개를 포함한 **총 52개**가 들어 있습니다. 설치판과 이 소스 폴더는 기본 22개를 제공하며, 추가 30개는 Release의 확장 ZIP으로 받습니다. 확장 ZIP은 별도의 [SHA-256 확인 파일](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.3/PrivacySelfAssessmentTool-TestExamples-0.1.3.sha256.txt)을 사용합니다.
+확장 ZIP에는 기본 22개를 포함한 **총 52개**가 들어 있습니다. 설치판과 이 소스 폴더는 기본 22개를 제공하며, 추가 30개는 Release의 확장 ZIP으로 받습니다. 확장 ZIP은 별도의 [SHA-256 확인 파일](https://github.com/kstu5/Personal-Information-Self-Assessment-Tool/releases/download/v0.1.4/PrivacySelfAssessmentTool-TestExamples-0.1.4.sha256.txt)을 사용합니다.
 
 압축을 해제한 뒤 `파일목록.html`에서 파일을 검색하고 `먼저읽기.md`를 확인하세요. 파일 검사는 한 번에 최대 8개이며 `.piipost`는 게시글 검사에서 불러옵니다. ZIP·폴더·안내 목록은 검사 대상이 아닙니다.
 
@@ -67,7 +67,7 @@ ZIP·폴더·안내 목록은 검사 대상이 아닙니다. 먼저 압축을 �
 
 1. 프로그램의 **파일 검사 → 파일 추가**에서 `formats/files/`의 문서만 선택하거나 해당 파일을 파일 검사 화면에 **드래그 앤 드롭**합니다. 폴더 전체는 지원하지 않습니다. 한 번에 최대 8개이므로 나눠 검사하세요.
 2. 위험도별 후보와 원문 위치를 확인해 오탐을 제외합니다. 누락된 문구는 원문 검색이나 한 문단·셀 안의 글자 드래그로 사용자 후보에 추가합니다. 제외·추가는 해당 파일의 위치에만 적용하며, 제외한 내용을 다시 추가해도 이전 처리 설정을 복원하지 않습니다.
-3. 남은 후보에 형식별로 지원하는 부분 가림·전체 가림·직접 수정을 지정하거나 **현재 파일 후보에 일괄 적용**으로 미설정 후보를 처리합니다. **원본 / 적용 미리보기**로 비교하세요. HWP는 확인만 가능하며 미설정 항목은 원문 그대로 남습니다.
+3. 남은 후보에 형식별로 지원하는 부분 가림·전체 가림·직접 수정을 지정하거나 **현재 파일 후보에 일괄 적용**으로 미설정 후보를 처리합니다. **원본 / 적용 미리보기**로 비교하세요. 미설정 항목은 원문 그대로 남습니다. 지원 HWP 5는 가림·수정을 적용한 사본을 저장할 수 있습니다. 긴 문구는 줄바꿈·배치가 바뀔 수 있습니다.
 4. **사본 생성·재검사 → 실제 사본 확인** 후 남은 후보와 가림 범위를 검토합니다. **남은 후보, 이미지 가림 범위, 지원 제한을 확인했습니다.**를 체크한 뒤 새 파일로 저장합니다.
 
 ## 이미지 수정 확인하기
@@ -84,7 +84,7 @@ ZIP·폴더·안내 목록은 검사 대상이 아닙니다. 먼저 압축을 �
 
 ## 다른 형식의 확인 범위
 
-DOCX의 메모·작성자·속성, PPTX의 발표자 노트, XLSX의 숨김 시트에도 정보가 있습니다. **텍스트 · 위치**에서 본문 화면 밖의 위치도 확인하세요. HWP는 읽기 전용이고 HWP/HWPX 내용 화면은 원래 쪽 배치를 재현하지 않습니다. PDF 페이지와 DOCX·PPTX·HWPX에서 읽어낸 지원 내장 이미지는 검은 영역 가림을 사용하며 문구 직접 수정은 비활성화됩니다.
+DOCX의 메모·작성자·속성, PPTX의 발표자 노트, XLSX의 숨김 시트에도 정보가 있습니다. **텍스트 · 위치**에서 본문 화면 밖의 위치도 확인하세요. HWP/HWPX 내용 화면은 원래 쪽 배치를 재현하지 않습니다. HWP 5는 원본 위치에 연결한 텍스트 수정과 지원 내장 이미지 가림을 저장하고 다시 검증합니다. 암호화·변경 추적·첨부·외부 그림 등 검증할 수 없는 구조는 저장이 제한되며, 필드 결과는 읽기 전용으로 표시합니다. PDF 페이지와 DOCX·PPTX·HWPX·HWP 5에서 읽어낸 지원 내장 이미지는 검은 영역 가림을 사용하며 문구 직접 수정은 비활성화됩니다.
 
 XLSX는 지원 수식 재계산 후 값 전용 사본을 만들며, 수식을 유지한 편집은 지원하지 않습니다. 그림·차트·필터·외부 연결 등이 있는 다른 XLSX는 검사가 제한될 수 있습니다. PDF는 주석·링크·서명 등 구조에 따라 사본 생성을 제한하며, 저장 가능한 경우에도 목차·문서 속성 등은 보존하지 않습니다. 자세한 범위는 [지원 파일과 제한](../README.md#지원-파일과-제한)을 확인하세요.
 

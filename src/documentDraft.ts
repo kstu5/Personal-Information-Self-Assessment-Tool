@@ -15,6 +15,7 @@ export function bulkMaskTargets(candidates:FileCandidate[],selection:FileSelecti
   const ids:string[]=[];
   let overlaps=0;
   for(const candidate of candidates){
+    if(candidate.editable===false)continue;
     if(draftStatus(candidate,selection)!=='unset')continue;
     const boxes=candidate.maskBoxes?.full??candidate.boxes??[];
     const intersects=candidate.asset&&selection.regions.some(({asset,box})=>

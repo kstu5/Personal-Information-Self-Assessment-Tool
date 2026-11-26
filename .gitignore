@@ -47,6 +47,6 @@ runtime.local.json
 
 # --- 설치판 빌드 산출물 / 로컬 도구 ---
 .tools/
-backend/HwpText.class
+backend/HwpText*.class
 installer/out/
 installer/stage/

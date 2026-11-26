@@ -1,13 +1,15 @@
 import {useEffect,useRef,useState} from 'react';
 import {api} from './api';
 import type {DocumentJob,FileCandidate,FileSelection} from './documentTypes';
+import {ManualTypeSelect} from './ManualTypeSelect';
 
 type Match={id:string;part:string;start:number;end:number;text:string;location:string;before:string;after:string;reason:string;readingMethod:string};
-type Props={job:DocumentJob;selection:FileSelection;locked:boolean;onLocate:(c:FileCandidate)=>void;onAdd:(query:string,ids:string[])=>Promise<void>};
+type Props={job:DocumentJob;selection:FileSelection;locked:boolean;onLocate:(c:FileCandidate)=>void;onAdd:(query:string,ids:string[],label:string)=>Promise<void>};
 
 export function FileKeywordSearch({job,selection,locked,onLocate,onAdd}:Props){
   const [query,setQuery]=useState(''),[searched,setSearched]=useState<string|null>(null),[matches,setMatches]=useState<Match[]>([]);
   const [selected,setSelected]=useState<string[]>([]),[busy,setBusy]=useState(false),[error,setError]=useState('');
+  const [label,setLabel]=useState('USER_DEFINED');
   const request=useRef<AbortController|null>(null),generation=useRef(0),allBox=useRef<HTMLInputElement>(null),adding=useRef(false);
   function reset(){request.current?.abort();generation.current++;setBusy(false);setSearched(null);setMatches([]);setSelected([]);setError('');}
   useEffect(()=>{reset();return()=>{generation.current++;request.current?.abort();};},[job.id,job.revision]);
@@ -26,13 +28,13 @@ export function FileKeywordSearch({job,selection,locked,onLocate,onAdd}:Props){
   async function add(){
     if(adding.current||!chosen.length||searched===null)return;
     adding.current=true;setError('');
-    try{await onAdd(searched,chosen);}
+    try{await onAdd(searched,chosen,label);}
     catch(e){setError(e instanceof Error?e.message:'항목을 추가하지 못했습니다.');}
     finally{adding.current=false;}
   }
   function locate(m:Match){
     const part=job.manifest?.parts.find(p=>p.id===m.part);
-    onLocate({id:m.id,part:m.part,start:m.start,end:m.end,text:m.text,location:m.location,source:'body',label:'USER_DEFINED',labelName:'검색 위치',risk:'INFO',asset:part?.asset});
+    onLocate({id:m.id,part:m.part,start:m.start,end:m.end,text:m.text,location:m.location,source:'body',label,labelName:'검색 위치',risk:'INFO',asset:part?.asset});
   }
   return <details className="file-keyword-search">
     <summary>원문에서 누락 항목 검색·추가</summary>
@@ -43,6 +45,7 @@ export function FileKeywordSearch({job,selection,locked,onLocate,onAdd}:Props){
       <button className="secondary" disabled={locked||busy||!query.trim()}>원문 검색</button>
     </form>
     <p className="file-footer-note">대소문자·띄어쓰기가 같은 문구를 검색합니다. 문단·셀 경계를 넘는 문구와 OCR가 읽지 못한 글자는 검색되지 않습니다. 이미지는 영역 지정으로 보완하세요.</p>
+    <ManualTypeSelect value={label} onChange={setLabel} disabled={locked||busy}/>
     {error&&<p role="alert">{error}</p>}{busy&&<p role="status">원문 검색 중…</p>}
     {searched!==null&&<>
       <div className="keyword-selection">

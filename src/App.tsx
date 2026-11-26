@@ -44,8 +44,10 @@ export function App() {
   const [started,setStarted]=useState(false);
   const [view,setView]=useState<'write'|'results'>('write');
   const [result,setResult]=useState<CheckResult|null>(null);
+  const resultRef=useRef(result);resultRef.current=result;
   const [choices,setChoices]=useState<MaskChoices>({});
   const [checking,setChecking]=useState(false);
+  const [reviewBusy,setReviewBusy]=useState(false);
   const [io,setIO]=useState(false);
   const ioRef=useRef(false);
   const revision=useRef(0);
@@ -61,12 +63,12 @@ export function App() {
   const dirty=JSON.stringify(currentDraft)!==savedText;
   const titleCount=Array.from(currentDraft.title).length,bodyCount=Array.from(currentDraft.body).length;
   const valid=titleCount<=boot.maxTitle && bodyCount<=boot.maxBody;
-  const busy=io || checking;
+  const busy=io || checking || reviewBusy;
   const fail=(e:unknown)=>setError(e instanceof Error?e.message:'작업을 완료하지 못했습니다. 다시 시도해 주세요.');
   function working(value:boolean){ioRef.current=value;setIO(value);}
-  function update(next:Draft){draftRef.current=next;setDraft(next);revision.current++;if(result)setNotice('글이 변경되었습니다. 현재 내용을 다시 검사해 주세요.');setResult(null);setChoices({});setView('write');}
+  function update(next:Draft){draftRef.current=next;setDraft(next);revision.current++;if(result)setNotice('글이 변경되었습니다. 현재 내용을 다시 검사해 주세요.');resultRef.current=null;setResult(null);setChoices({});setView('write');}
   function resumeWriting(){
-    if(ioRef.current)return;
+    if(ioRef.current||reviewBusy)return;
     if(JSON.stringify(currentDraft)!==JSON.stringify(draft)){
       update(currentDraft);setNotice('가림·수정이 반영된 글입니다. 내용을 더 수정한 뒤 다시 검사할 수 있어요.');
     }else setView('write');
@@ -82,7 +84,7 @@ export function App() {
     finally{working(false);}
   }
   function request(intent:Intent){
-    if(ioRef.current || checking){setNotice('진행 중인 작업이 끝난 뒤 다시 시도해 주세요.');return;}
+    if(ioRef.current || checking||reviewBusy){setNotice('진행 중인 작업이 끝난 뒤 다시 시도해 주세요.');return;}
     if(dirty)setPending(intent);else void perform(intent);
   }
   function cancelSave(){if(ioRef.current)return;setSaveDialog(false);afterSave.current=null;}
@@ -100,7 +102,7 @@ export function App() {
     finally{working(false);}
   }
   function beginSave(asNew=false){
-    if(ioRef.current || !started)return;
+    if(ioRef.current || reviewBusy || !started)return;
     if(!valid){setError('제목은 300자, 본문은 30,000자까지 저장할 수 있습니다.');afterSave.current=null;return;}
     if(file && !asNew)void commit(false);
     else {setSuggestion(filenameFromTitle(currentDraft.title));setSaveDialog(true);}
@@ -108,7 +110,7 @@ export function App() {
   async function check(){
     if(checking || ioRef.current || !valid)return;
     const current=revision.current;const snapshot={...draftRef.current};
-    setChecking(true);setResult(null);setChoices({});setError('');setNotice('');
+    setChecking(true);resultRef.current=null;setResult(null);setChoices({});setError('');setNotice('');
     // Include startup, the selected local review model's budget, and cleanup.
     const controller=new AbortController();const timer=window.setTimeout(()=>controller.abort(),boot.checkTimeoutMs||90000);
     try {
@@ -132,7 +134,7 @@ export function App() {
     <header className="topbar"><a className="brand" href="#" onClick={e=>{e.preventDefault();setMode('home');}}><span className="brand-icon"><Icon name="scan" size={23}/></span><span><strong>개인정보 자가진단 도구</strong><small>게시글과 파일, 한 번 더 살펴보기</small></span></a><nav className="mode-nav" aria-label="검사 종류"><button aria-current={mode==='post'?'page':undefined} onClick={()=>setMode('post')}>게시글 검사</button><button aria-current={mode==='files'?'page':undefined} onClick={()=>setMode('files')}>파일 검사</button></nav><span className="local-badge"><span/>내 PC에서 검사</span></header>
     {mode==='home'&&<main><section className="entry-home"><span className="eyebrow">공유하기 전에, 나와 다른 사람의 정보를 지켜요.</span><h1>무엇을 검사할까요?</h1><p>게시글도, 첨부할 문서도.<br/>내 컴퓨터에서 살펴보고 필요한 부분만 가려 보세요.</p><div className="entry-options"><button onClick={()=>setMode('post')}><Icon name="file" size={30}/><span className="eyebrow">POST REVIEW</span><strong>게시글 검사</strong><p>글을 작성하거나 붙여 넣고<br/>개인정보를 확인하세요.</p><span>작성한 글 이어서 보기 <Icon name="arrow"/></span></button><button onClick={()=>setMode('files')}><Icon name="folder" size={30}/><span className="eyebrow">FILE REVIEW</span><strong>파일 검사</strong><p>문서와 이미지를 확인하고<br/>가림을 적용한 사본을 만드세요.</p><span>파일 선택하고 검토하기 <Icon name="arrow"/></span></button></div><div className="entry-note"><span>문서를 외부 AI 서비스로 보내지 않습니다.</span><span>파일 검사는 원본을 보존하고 새 사본으로 제공합니다.</span></div></section></main>}
     <main hidden={mode!=='post'}>
-      <nav className="steps" aria-label="작업 단계"><button disabled={io} aria-current={view==='write'?'step':undefined} onClick={resumeWriting}><b>1</b>게시글 작성</button><span className="step-line"/><button disabled={!result||io} aria-current={view==='results'?'step':undefined} onClick={()=>setView('results')}><b>2</b>검사 결과</button></nav>
+      <nav className="steps" aria-label="작업 단계"><button disabled={io||reviewBusy} aria-current={view==='write'?'step':undefined} onClick={resumeWriting}><b>1</b>게시글 작성</button><span className="step-line"/><button disabled={!result||io||reviewBusy} aria-current={view==='results'?'step':undefined} onClick={()=>setView('results')}><b>2</b>검사 결과</button></nav>
       {started && <section className="filebar" aria-label="파일 도구 모음"><div className="file-status"><Icon name="file"/><div><strong title={file?.name}>{file?.name || '아직 저장하지 않은 글'}</strong><small className={dirty?'unsaved':''}>{io?'파일 작업 중…':dirty?'저장하지 않은 변경사항':file?`마지막 저장 ${savedTime}`:'새 글'}</small></div></div><div className="file-actions"><button disabled={busy} onClick={()=>request('new')}><Icon name="plus"/>새 글</button><button disabled={busy} onClick={()=>request('open')}><Icon name="folder"/>불러오기</button><button disabled={busy} className="save-button" onClick={()=>beginSave()}><Icon name="save"/>저장</button><details className="file-menu"><summary aria-label="파일 메뉴">•••</summary><div><button disabled={busy} onClick={e=>{e.currentTarget.closest('details')?.removeAttribute('open');beginSave(true);}}>다른 이름으로 저장</button>{boot.desktop&&<button disabled={busy} onClick={()=>request('close')}>프로그램 종료</button>}</div></details></div></section>}
       {notice&&<div className="notice" role="status"><Icon name="check"/><span>{notice}</span><button aria-label="안내 닫기" onClick={()=>setNotice('')}><Icon name="close" size={15}/></button></div>}
       {checking&&<div className="notice" role="status"><Icon name="info"/><span>내 PC에서 검사하고 있어요. 프로그램을 켠 뒤 첫 검사는 준비에 시간이 조금 더 걸릴 수 있어요.</span></div>}
@@ -144,7 +146,7 @@ export function App() {
         {!valid&&<p className="limit-error" role="alert">제목은 300자, 본문은 30,000자까지 사용할 수 있어요. 내용을 줄여 주세요.</p>}
         <div className="write-footer"><p className="review-notice"><Icon name="info"/><span>{NOTICE}</span></p><button className="primary inspect" disabled={busy||!valid||!(draft.title.trim()||draft.body.trim())} onClick={()=>void check()}>{checking?<span className="spinner"/>:<Icon name="scan"/>}{checking?'검사 중…':'개인정보 검사'}{!checking&&<Icon name="arrow"/>}</button></div>
       </> : null}
-      {started&&result&&<div hidden={view!=='results'}><PrivacyReview draft={draft} result={result} choices={choices} disabled={io} onChange={setChoices} onWrite={resumeWriting}/></div>}
+      {started&&result&&<div hidden={view!=='results'}><PrivacyReview draft={draft} result={result} choices={choices} disabled={io} onChange={setChoices} onBusyChange={setReviewBusy} onReviewChange={(candidates,nextChoices)=>{if(resultRef.current!==result||revision.current!==result.revision)return false;validateCandidates(draft,candidates);const next={...result,candidates};resultRef.current=next;setResult(next);setChoices(nextChoices);return true;}} onWrite={resumeWriting}/></div>}
       <footer className="app-footer"><span>개인정보 자가진단 도구</span><span>직접 저장한 글만 파일로 보관합니다.</span></footer>
     </main>
     <FileReview active={mode==='files'} onWorkChange={setFileWork}/>

@@ -58,6 +58,7 @@ class KeywordRequest(DocumentRef):
 
 class AddKeywordRequest(KeywordRequest):
     matches: list[StrictStr]
+    label: StrictStr = 'USER_DEFINED'
 
 
 class SourceRangeRequest(DocumentRef):
@@ -66,6 +67,27 @@ class SourceRangeRequest(DocumentRef):
     start: StrictInt
     end: StrictInt
     replaceId: StrictStr | None = None
+    label: StrictStr = 'USER_DEFINED'
+
+
+class ManualAlias(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    label: StrictStr
+    text: StrictStr
+    alias: StrictStr
+
+
+class ManualTypeRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    label: StrictStr
+    text: StrictStr
+    aliases: list[ManualAlias] = []
+
+
+class SetTypeRequest(DocumentRef):
+    revision: StrictStr
+    candidates: list[StrictStr]
+    label: StrictStr
 
 
 class ExcludeCandidatesRequest(DocumentRef):
@@ -140,10 +162,11 @@ def create_app(port: int, *, desktop: Any = None, dist: Path | None = None) -> F
     @app.get('/')
     async def index():
         from backend.qwen_runtime import selected_secondary
+        from backend.manual_types import manual_types
         qwen = selected_secondary() == 'qwen3.5-0.8b'
         boot = json.dumps({'token': token, 'desktop': desktop is not None, 'maxTitle': MAX_TITLE, 'maxBody': MAX_BODY, 'model': MODEL_REPO,
                            'secondaryModel': 'Qwen3.5-0.8B' if qwen else 'KoELECTRA',
-                           'checkTimeoutMs': 370000 if qwen else 90000}, ensure_ascii=True)
+                           'checkTimeoutMs': 370000 if qwen else 90000,'manualTypes':manual_types()}, ensure_ascii=True)
         html = (dist/'index.html').read_text(encoding='utf-8')
         # JSON is inert text in a meta attribute. No raw draft text is interpolated.
         import html as html_module
@@ -170,7 +193,9 @@ def create_app(port: int, *, desktop: Any = None, dist: Path | None = None) -> F
     @app.post('/api/check')
     async def check(payload: CheckRequest):
         result = await run_in_threadpool(detector.check, payload.title, payload.body)
-        return {**result, 'revision': payload.revision}
+        from backend.auto_mask import proposals
+        automatic = proposals(result['candidates'], scope='post')
+        return {**result, 'candidates': [{**candidate, 'autoMask': automatic[candidate['id']]} for candidate in result['candidates']], 'revision': payload.revision}
 
     @app.post('/api/files/save')
     async def save(payload: SaveRequest):
@@ -185,6 +210,11 @@ def create_app(port: int, *, desktop: Any = None, dist: Path | None = None) -> F
             if chosen is None:
                 return {'cancelled': True}
         return await run_in_threadpool(store.save, payload.title, payload.body, file_id=payload.fileId, chosen_path=chosen)
+
+    @app.post('/api/manual-type')
+    async def propose_manual_type(payload: ManualTypeRequest):
+        from backend.manual_types import manual_proposal
+        return manual_proposal(payload.label,payload.text,[seed.model_dump() for seed in payload.aliases])
 
     @app.post('/api/files/open')
     async def open_file():
@@ -229,11 +259,15 @@ def create_app(port: int, *, desktop: Any = None, dist: Path | None = None) -> F
 
     @app.post('/api/documents/add-keywords')
     async def add_document_keywords(payload: AddKeywordRequest):
-        return await run_in_threadpool(documents.add_keywords, payload.id, payload.revision, payload.query, payload.matches)
+        return await run_in_threadpool(documents.add_keywords, payload.id, payload.revision, payload.query, payload.matches,payload.label)
 
     @app.post('/api/documents/add-range')
     async def add_document_range(payload: SourceRangeRequest):
-        return await run_in_threadpool(documents.add_range, payload.id, payload.revision, payload.part, payload.start, payload.end, payload.replaceId)
+        return await run_in_threadpool(documents.add_range, payload.id, payload.revision, payload.part, payload.start, payload.end, payload.replaceId,payload.label)
+
+    @app.post('/api/documents/set-type')
+    async def set_document_type(payload: SetTypeRequest):
+        return await run_in_threadpool(documents.set_manual_type,payload.id,payload.revision,payload.candidates,payload.label)
 
     @app.post('/api/documents/exclude')
     async def exclude_document_candidates(payload: ExcludeCandidatesRequest):

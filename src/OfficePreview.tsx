@@ -5,6 +5,8 @@ import {RISKS} from './masking';
 import {MODE_NAMES} from './masking';
 import {draftStatus,fileReplacement} from './documentDraft';
 import {PageNavigation} from './PageNavigation';
+import {PageTextSelection} from './PageTextSelection';
+import type {SourceRange} from './sourceSelection';
 
 export function CandidateOverlay({asset,candidates,selection,boxes,onSelect}:{asset:FileAsset;candidates:FileCandidate[];selection:FileSelection;boxes:(c:FileCandidate)=>{boxes:Box[];ambiguous?:boolean};onSelect:(c:FileCandidate)=>void}){
   const search=selection.search.trim().toLocaleLowerCase('ko');
@@ -27,7 +29,7 @@ function DraftPageLayer({asset,page,preview,candidates,selection}:{asset:FileAss
   })}</div>;
 }
 
-export function OfficePreview({job,output,selection,candidates,onState,onSelect,onReady,onText}:{job:DocumentJob;output:boolean;selection:FileSelection;candidates:FileCandidate[];onState:(p:Partial<FileSelection>)=>void;onSelect:(c:FileCandidate)=>void;onReady:(p:DocumentPreview)=>void;onText:()=>void}){
+export function OfficePreview({job,output,selection,candidates,onState,onSelect,onReady,onText,onRange,locked}:{job:DocumentJob;output:boolean;selection:FileSelection;candidates:FileCandidate[];onState:(p:Partial<FileSelection>)=>void;onSelect:(c:FileCandidate)=>void;onReady:(p:DocumentPreview)=>void;onText:()=>void;onRange:(range:SourceRange)=>void;locked:boolean}){
   const [preview,setPreview]=useState<DocumentPreview|null>(null),[error,setError]=useState(''),[retry,setRetry]=useState(0),[url,setUrl]=useState('');
   const viewportRef=useRef<HTMLDivElement>(null);
   const onReadyRef=useRef(onReady);onReadyRef.current=onReady;
@@ -64,7 +66,8 @@ export function OfficePreview({job,output,selection,candidates,onState,onSelect,
     <div className="office-preview-toolbar"><strong>{output?'실제 수정 사본':applied?'적용 미리보기 · 저장 전':'원본 문서 화면'}</strong>{preview?.state==='ready'&&<PageNavigation page={page} labels={preview.pages.map(p=>p.location)} onChange={previewPage=>onState({previewPage})}/>}</div>
     {(!enabled||!preview||preview.state==='queued'||preview.state==='rendering')&&!error&&<div className="office-preview-state" role="status"><span className="spinner"/>{enabled?'문서 화면을 준비하고 있습니다. 처음에는 잠시 걸릴 수 있어요.':'작업이 끝나면 문서 화면을 표시합니다.'}</div>}
     {(error||preview?.state==='error')&&<div className="office-preview-state" role="alert"><p>{error||preview?.message}</p><button className="secondary" onClick={onText}>텍스트로 계속 검토</button><button className="secondary" disabled={!enabled} onClick={()=>setRetry(n=>n+1)}>다시 만들기</button></div>}
-    {asset&&preview?.state==='ready'&&<>{!!preview.notices?.length&&<div className="office-preview-notices" role="status"><strong>문서 화면 안내</strong>{preview.notices.map(v=><p key={v}>{v}</p>)}</div>}<div className="office-page-viewport" ref={viewportRef}><div className="office-page" style={{aspectRatio:`${asset.width}/${asset.height}`}}>{url?<img src={url} alt={`${job.name} ${asset.location} ${output?'실제 수정 사본':'원본 미리보기'}`}/>:<p role="status">페이지를 읽는 중…</p>}
+    {asset&&preview?.state==='ready'&&<>{!!preview.notices?.length&&<div className="office-preview-notices" role="status"><strong>문서 화면 안내</strong>{preview.notices.map(v=><p key={v}>{v}</p>)}</div>}<div className="office-page-viewport" ref={viewportRef}><div className="office-page" style={{aspectRatio:`${asset.width}/${asset.height}`}}>{url?<img src={url} draggable={false} alt={`${job.name} ${asset.location} ${output?'실제 수정 사본':'원본 미리보기'}`}/>:<p role="status">페이지를 읽는 중…</p>}
+      <PageTextSelection asset={asset} page={page} parts={(job.manifest?.parts||[]).filter(p=>!(p.id in selection.textEdits))} ranges={preview.textRanges||[]} enabled={!!url&&!output&&!applied&&!locked} onRange={onRange} resetKey={`${job.id}:${job.revision}`}/>
       {url&&applied&&<DraftPageLayer asset={asset} page={page} preview={preview} candidates={candidates} selection={selection}/>}
       {url&&<CandidateOverlay asset={asset} candidates={candidates} selection={selection} boxes={c=>{const link=preview.links[c.id];return {boxes:link?.hits.filter(h=>h.page===page).flatMap(h=>h.boxes)||[],ambiguous:link?.state==='ambiguous'};}} onSelect={onSelect}/>}</div></div>
       <p className="office-preview-note">{output?'저장할 수정 사본을 다시 열어 만든 화면입니다.':applied?'선택한 가림·수정을 원본 위치에 겹쳐 보여주는 간이 미리보기입니다. 긴 문구는 잘려 보이며 줄바꿈·배경·서식은 실제 사본과 다를 수 있습니다. 최종 결과는 사본 생성 후 확인하세요.':'원본 내용입니다. 체크 표시는 처리 방법을 지정한 항목입니다. 적용 미리보기로 전환해 변경 모습을 비교하세요.'} {applied&&outside>0&&<strong>페이지에 표시하지 못한 변경 {outside}개는 텍스트 · 위치에서 확인하세요. </strong>}{focus?.state==='ambiguous'&&<strong>같은 문구가 반복되거나 문단 연결이 불확실합니다. 원문 위치를 함께 확인하세요. </strong>}<button onClick={onText}>화면 밖 정보·원문 위치 확인</button></p>

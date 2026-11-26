@@ -1,4 +1,5 @@
 .file-review .document-layout{display:block}
+.page-text-selectable,.image-canvas.readonly.page-text-selectable{cursor:text;touch-action:pan-y}.page-text-selection{position:absolute;inset:0;pointer-events:none;z-index:8}.page-text-selection>span{position:absolute;background:#4d99df55;outline:1px solid #3789ca66;pointer-events:none}
 .file-review .document-rail{position:static;display:flex;gap:10px;align-items:stretch;overflow:auto;margin-bottom:18px;padding-bottom:5px}
 .file-review .document-rail>h2{min-width:65px;align-self:center;padding:0}.file-review .document-rail>p{display:none}
 .file-review .document-tab{flex:0 0 225px;margin:0;background:#fff;border-color:#e1e8e6}.file-review .document-tab>button:first-child{padding:10px 27px 10px 12px}.file-review .document-tab strong{font-size:11px}

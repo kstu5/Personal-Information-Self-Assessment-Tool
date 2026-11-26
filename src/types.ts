@@ -5,6 +5,8 @@ export type Candidate = {
   text: string; label: string; labelName: string; risk: Risk;
   credential?: { provider: string; basis: 'format'|'context'; reason: string };
   contextReview?: { state: 'supported' | 'uncertain'; reason: string; secondary?: boolean; decision?: 'retain' };
+  addedByUser?: boolean;
+  autoMask?: {choice: import('./masking').MaskChoice|null;rule:string};
 };
 export type CheckResult = { candidates: Candidate[]; revision: number; engine: string; elapsedMs: number };
 export type PostDocument = Draft & { format: 'before-post-document'; version: 1; savedAt: string };

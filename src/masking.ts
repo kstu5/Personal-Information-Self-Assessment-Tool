@@ -90,6 +90,6 @@ export function maskedDraft(draft:Draft, candidates:Candidate[], choices:MaskCho
   return next;
 }
 
-export function locationOf(draft:Draft, c:Candidate):string {
+export function locationOf(draft:Draft, c:Pick<Candidate,'source'|'start'>):string {
   return c.source==='title'?'제목':`본문 ${draft.body.slice(0,c.start).split(/\n[ \t]*\n+/).length}번 문단`;
 }

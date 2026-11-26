@@ -486,17 +486,28 @@ class Document:
         bundled = TOOLS/'jre'/'bin'/'java.exe'
         choices = sorted(Path('C:/Program Files/Java').glob('jdk*/bin/java.exe'),reverse=True)
         java = str(bundled) if bundled.is_file() else str(choices[0]) if choices else shutil.which('java')
-        jar = TOOLS/'hwplib-1.1.11.jar'; out = self.work/'hwp.txt'
+        jar = TOOLS/'hwplib-1.1.11.jar'
         if not java or not jar.exists(): raise FormatError('HWP 읽기 도구(Java·hwplib)가 준비되지 않았습니다. HWPX로 저장한 사본으로 검사해 주세요.')
         compiled = ROOT/'backend'/'HwpText.class'
         # JRE만 있는 설치판은 소스 실행(JDK 필요)을 못 하므로 미리 컴파일한 클래스를 우선 사용한다.
-        entry = ['--class-path',os.pathsep.join([str(jar),str(compiled.parent)]),'HwpText'] if compiled.is_file() else ['--class-path',str(jar),str(ROOT/'backend'/'HwpText.java')]
-        subprocess.run([java,'-Xmx256m',*entry,str(self.path),str(out)], timeout=45, check=True, stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
-        for i,line in enumerate(out.read_text(encoding='utf-8').splitlines()): self.add(line,f'추출 본문 {i+1}행',{'kind':'readonly'},flow={'line':i+1})
-        self.blockers = ['HWP는 추출 본문 검사만 지원합니다. 메모·변경 기록·이미지 전체 검토와 수정 저장은 보장하지 않습니다. 한글에서 HWPX 사본으로 저장해 다시 검사해 주세요.']
-        self.coverage = ['hwplib가 읽은 본문·표 텍스트 (추출 순서)']
+        source=ROOT/'backend'/'HwpText.java'
+        entry = ['--class-path',os.pathsep.join([str(jar),str(compiled.parent)]),'HwpText'] if compiled.is_file() and compiled.stat().st_mtime>=source.stat().st_mtime else ['--class-path',str(jar),str(source)]
+        from backend.hwp_native import HwpNative
+        self.hwp=HwpNative(self.path,self.work,[java,'-Xmx256m',*entry]).load()
+        for i,field in enumerate(self.hwp.fields.values()):
+            part=self.add(field['text'],field['location'],field['target'],flow={'order':i})
+            if part is not None:
+                part['editable']=field['editable']
+                if not field['editable']:part['readOnlyReason']=field['readOnlyReason']
+        for item in self.hwp.images:self.image(item['raw'],'HWP 내장 이미지 · '+Path(item['name']).name,{'kind':'hwpbin','name':item['name']},use_ocr=not self.verify)
+        self.blockers.extend(self.hwp.blockers)
+        self.coverage = ['HWP 5 원본 문단·표·머리말·꼬리말·각주·도형 안의 지원 텍스트','지원 내장 이미지 OCR·직접 지정 영역','원본 글자·문단 서식과 표·개체 기록 보존','저장 후 원문 위치·서식 기록·이미지 픽셀·독립 HWP 읽기 검증']
+        self.warnings.extend(['본문은 원본 문단 순서로 재구성한 화면이며 원래 쪽·표 배치를 재현하지 않습니다.',
+            'HWP 사본에서 미리보기·요약 속성·저장 이력·스크립트·외부 연결 설정을 제거합니다. 전자서명은 유지하지 않습니다.',
+            '수정 문단의 줄 배치는 한글 프로그램에서 다시 계산합니다. 긴 문구는 줄바꿈·쪽수가 달라질 수 있으므로 저장 사본을 한글에서 확인하세요.',
+            '필드 결과 등 수정할 수 없는 글자 구간은 별도로 표시합니다. 변경 추적 기록·내장 첨부·OLE·외부 그림·미지원 그림 형식은 저장이 제한될 수 있습니다.'])
         if not self.parts:
-            self.blockers.insert(0,'이 HWP에서 읽을 수 있는 본문을 찾지 못했습니다. 개인정보가 없다는 뜻이 아닙니다. 메모만 있는 문서 등은 HWPX로 변환해 검사해 주세요.')
+            if not self.assets:self.blockers.insert(0,'이 HWP에서 읽을 수 있는 본문·이미지를 찾지 못했습니다. 개인정보가 없다는 뜻은 아닙니다.')
 
     def xml_target_value(self, target):
         """Read a saved XML field by its container, not its nonempty run indices.
@@ -524,7 +535,8 @@ class Document:
 
     def edit_part(self, part, new):
         t=part['target']; kind=t['kind']
-        if kind=='line': self.lines[t['index']]=new
+        if kind=='hwp':self.hwp.edit(t,new)
+        elif kind=='line': self.lines[t['index']]=new
         elif kind=='csv': self.rows[t['row']][t['col']]=new
         elif kind in {'xml','attr'}:
             nodes=list(self.trees[t['name']].iter())
@@ -596,6 +608,7 @@ class Document:
             target=a['target']
             im.save(raw,format='PNG')
             if target['kind']=='image': Path(output).write_bytes(raw.getvalue())
+            elif target['kind']=='hwpbin':self.hwp.image_edit(target['name'],raw.getvalue())
             else:
                 old=target['name'];new=old if old.lower().endswith('.png') else old+'.privacy.png'
                 if new!=old:
@@ -654,7 +667,7 @@ class Document:
             with open(output,'w',encoding='utf-8-sig',newline='') as f:
                 csv.writer(f,delimiter=self.delimiter).writerows([[("'"+v if v.lstrip().startswith(('=','+','-','@')) else v) for v in row] for row in self.rows])
         elif self.kind=='.txt': Path(output).write_bytes(''.join(self.lines).encode('utf-8'))
-        elif self.kind=='.hwp': raise FormatError('HWP 수정 저장은 지원하지 않습니다.')
+        elif self.kind=='.hwp': self.hwp.export(output)
 
 
 def verify_text_edits(source, saved, edits):
@@ -665,7 +678,9 @@ def verify_text_edits(source, saved, edits):
             continue
         want = edits[part['id']]
         target = part['target']
-        if target['kind'] in {'xml','attr'}:
+        if target['kind']=='hwp':
+            got=saved.hwp.value(target);valid=got is not None and got==want
+        elif target['kind'] in {'xml','attr'}:
             # Run contents may be empty after a cross-run replacement. Resolve
             # the original paragraph/attribute even if it is absent from parts.
             got = saved.xml_target_value(target)
